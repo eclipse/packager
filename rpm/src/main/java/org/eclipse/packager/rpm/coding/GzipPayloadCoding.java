@@ -11,46 +11,62 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package org.eclipse.packager.rpm.build;
+package org.eclipse.packager.rpm.coding;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.zip.Deflater;
 
-import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
-import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
+import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
+import org.apache.commons.compress.compressors.gzip.GzipParameters;
 import org.eclipse.packager.rpm.deps.Dependency;
-import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 
-public class LZMAPayloadCoding implements PayloadCoding
+public class GzipPayloadCoding implements PayloadCoding
 {
-    protected LZMAPayloadCoding ()
+    protected GzipPayloadCoding ()
     {
     }
 
     @Override
     public String getCoding ()
     {
-        return "lzma";
+        return "gzip";
     }
 
     @Override
     public void fillRequirements ( final Consumer<Dependency> requirementsConsumer )
     {
-        requirementsConsumer.accept ( new Dependency ( "PayloadIsLzma", "4.4.6-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB ) );
     }
 
     @Override
     public InputStream createInputStream ( final InputStream in ) throws IOException
     {
-        return new LZMACompressorInputStream ( in );
+        return new GzipCompressorInputStream ( in );
     }
 
     @Override
     public OutputStream createOutputStream ( final OutputStream out, final Optional<String> optionalFlags ) throws IOException
     {
-        return new LZMACompressorOutputStream ( out );
+        final String flags;
+        final int compressionLevel;
+
+        if ( optionalFlags.isPresent () && ( flags = optionalFlags.get () ).length () > 0 )
+        {
+            compressionLevel = Integer.parseInt ( flags.substring ( 0, 1 ) );
+        }
+        else
+        {
+            compressionLevel = Deflater.BEST_COMPRESSION;
+        }
+
+        final GzipParameters parameters = new GzipParameters ();
+
+        parameters.setCompressionLevel ( compressionLevel );
+
+        return new GzipCompressorOutputStream ( out, parameters );
     }
 }

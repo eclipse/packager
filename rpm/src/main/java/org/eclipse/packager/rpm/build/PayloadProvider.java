@@ -17,6 +17,8 @@ import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Optional;
 
+import org.eclipse.packager.rpm.coding.PayloadCoding;
+
 public interface PayloadProvider
 {
     /**

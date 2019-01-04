@@ -27,8 +27,8 @@ import org.eclipse.packager.rpm.RpmLead;
 import org.eclipse.packager.rpm.RpmSignatureTag;
 import org.eclipse.packager.rpm.RpmTag;
 import org.eclipse.packager.rpm.Rpms;
-import org.eclipse.packager.rpm.build.PayloadCoding;
-import org.eclipse.packager.rpm.build.PayloadCodingRegistry;
+import org.eclipse.packager.rpm.coding.PayloadCoding;
+import org.eclipse.packager.rpm.coding.PayloadCodingRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

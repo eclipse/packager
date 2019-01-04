@@ -11,7 +11,7 @@
  * SPDX-License-Identifier: EPL-2.0
  */
 
-package org.eclipse.packager.rpm.build;
+package org.eclipse.packager.rpm.coding;
 
 import java.io.IOException;
 import java.util.Map;
