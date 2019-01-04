@@ -24,7 +24,7 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 
-public class BZip2PayloadCoding implements PayloadCoding
+public class BZip2PayloadCoding implements PayloadCodingProvider
 {
     protected BZip2PayloadCoding ()
     {

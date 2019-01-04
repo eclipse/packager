@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 
 import org.eclipse.packager.rpm.deps.Dependency;
 
-public class NullPayloadCoding implements PayloadCoding
+public class NullPayloadCoding implements PayloadCodingProvider
 {
     protected NullPayloadCoding ()
     {

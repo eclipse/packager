@@ -791,7 +791,7 @@ public class RpmBuilder implements AutoCloseable
         }
 
         this.requirements.add ( new Dependency ( "rpmlib(PayloadFilesHavePrefix)", "4.0-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB ) );
-        this.options.getPayloadCoding ().fillRequirements ( this.requirements::add );
+        this.options.getPayloadCoding ().createProvider ().fillRequirements ( this.requirements::add );
     }
 
     private void fillProvides ()
@@ -805,7 +805,7 @@ public class RpmBuilder implements AutoCloseable
 
         if ( this.recorder.getPayloadCoding () != null )
         {
-            this.header.putString ( RpmTag.PAYLOAD_CODING, this.recorder.getPayloadCoding ().getCoding () );
+            this.header.putString ( RpmTag.PAYLOAD_CODING, this.recorder.getPayloadCoding ().getValue () );
         }
 
         if ( this.recorder.getPayloadFlags ().isPresent () )

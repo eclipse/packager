@@ -25,7 +25,7 @@ import org.apache.commons.compress.compressors.zstandard.ZstdUtils;
 import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 
-public class ZstdPayloadCoding implements PayloadCoding
+public class ZstdPayloadCoding implements PayloadCodingProvider
 {
     protected ZstdPayloadCoding ()
     {

@@ -24,7 +24,7 @@ import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 
-public class LZMAPayloadCoding implements PayloadCoding
+public class LZMAPayloadCoding implements PayloadCodingProvider
 {
     protected LZMAPayloadCoding ()
     {

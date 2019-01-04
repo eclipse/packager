@@ -25,7 +25,7 @@ import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 import org.tukaani.xz.LZMA2Options;
 
-public class XZPayloadCoding implements PayloadCoding
+public class XZPayloadCoding implements PayloadCodingProvider
 {
     protected XZPayloadCoding ()
     {

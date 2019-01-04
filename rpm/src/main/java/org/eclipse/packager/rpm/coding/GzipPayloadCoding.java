@@ -25,7 +25,7 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipParameters;
 import org.eclipse.packager.rpm.deps.Dependency;
 
-public class GzipPayloadCoding implements PayloadCoding
+public class GzipPayloadCoding implements PayloadCodingProvider
 {
     protected GzipPayloadCoding ()
     {
