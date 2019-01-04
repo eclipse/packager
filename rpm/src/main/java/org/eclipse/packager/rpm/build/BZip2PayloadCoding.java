@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream;
@@ -27,7 +28,6 @@ public class BZip2PayloadCoding implements PayloadCoding
 {
     protected BZip2PayloadCoding ()
     {
-
     }
 
     @Override
@@ -37,9 +37,9 @@ public class BZip2PayloadCoding implements PayloadCoding
     }
 
     @Override
-    public Optional<Dependency> getDependency ()
+    public void fillRequirements ( final Consumer<Dependency> requirementsConsumer )
     {
-        return Optional.of ( new Dependency ( "PayloadIsBzip2", "3.0.5-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB ) );
+        requirementsConsumer.accept ( new Dependency ( "PayloadIsBzip2", "3.0.5-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB ) );
     }
 
     @Override
@@ -55,7 +55,7 @@ public class BZip2PayloadCoding implements PayloadCoding
 
         final int blockSize;
 
-        if ( optionalFlags.isPresent () && ( flags = optionalFlags.get () ).length() > 0 )
+        if ( optionalFlags.isPresent () && ( flags = optionalFlags.get () ).length () > 0 )
         {
             blockSize = Integer.parseInt ( flags.substring ( 0, 1 ) );
         }

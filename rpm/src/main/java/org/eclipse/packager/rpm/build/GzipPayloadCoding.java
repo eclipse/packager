@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.zip.Deflater;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
@@ -28,7 +29,6 @@ public class GzipPayloadCoding implements PayloadCoding
 {
     protected GzipPayloadCoding ()
     {
-
     }
 
     @Override
@@ -38,9 +38,8 @@ public class GzipPayloadCoding implements PayloadCoding
     }
 
     @Override
-    public Optional<Dependency> getDependency ()
+    public void fillRequirements ( final Consumer<Dependency> requirementsConsumer )
     {
-        return Optional.empty ();
     }
 
     @Override
@@ -55,7 +54,7 @@ public class GzipPayloadCoding implements PayloadCoding
         final String flags;
         final int compressionLevel;
 
-        if ( optionalFlags.isPresent () && ( flags = optionalFlags.get () ).length() > 0 )
+        if ( optionalFlags.isPresent () && ( flags = optionalFlags.get () ).length () > 0 )
         {
             compressionLevel = Integer.parseInt ( flags.substring ( 0, 1 ) );
         }

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream;
 import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStream;
@@ -28,7 +29,6 @@ public class ZstdPayloadCoding implements PayloadCoding
 {
     protected ZstdPayloadCoding ()
     {
-
     }
 
     @Override
@@ -38,9 +38,9 @@ public class ZstdPayloadCoding implements PayloadCoding
     }
 
     @Override
-    public Optional<Dependency> getDependency ()
+    public void fillRequirements ( final Consumer<Dependency> requirementsConsumer )
     {
-        return Optional.of ( new Dependency ( "PayloadIsZstd", "5.4.18-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB ) );
+        requirementsConsumer.accept ( new Dependency ( "PayloadIsZstd", "5.4.18-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB ) );
     }
 
     @Override
@@ -48,7 +48,7 @@ public class ZstdPayloadCoding implements PayloadCoding
     {
         if ( !ZstdUtils.isZstdCompressionAvailable () )
         {
-            throw new IOException( "Zstandard compression is not available" );
+            throw new IOException ( "Zstandard compression is not available" );
         }
 
         return new ZstdCompressorInputStream ( in );
@@ -59,14 +59,14 @@ public class ZstdPayloadCoding implements PayloadCoding
     {
         if ( !ZstdUtils.isZstdCompressionAvailable () )
         {
-            throw new IOException( "Zstandard compression is not available" );
+            throw new IOException ( "Zstandard compression is not available" );
         }
 
         final String flags;
 
         final int level;
 
-        if ( optionalFlags.isPresent () && ( flags = optionalFlags.get () ).length() > 0 )
+        if ( optionalFlags.isPresent () && ( flags = optionalFlags.get () ).length () > 0 )
         {
             level = Integer.parseInt ( flags.substring ( 0, 1 ) );
         }

@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import org.apache.commons.compress.compressors.xz.XZCompressorInputStream;
 import org.apache.commons.compress.compressors.xz.XZCompressorOutputStream;
@@ -28,7 +29,6 @@ public class XZPayloadCoding implements PayloadCoding
 {
     protected XZPayloadCoding ()
     {
-
     }
 
     @Override
@@ -38,9 +38,9 @@ public class XZPayloadCoding implements PayloadCoding
     }
 
     @Override
-    public Optional<Dependency> getDependency ()
+    public void fillRequirements ( final Consumer<Dependency> requirementsConsumer )
     {
-        return Optional.of ( new Dependency ( "PayloadIsXz", "5.2-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB ) );
+        requirementsConsumer.accept ( new Dependency ( "PayloadIsXz", "5.2-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB ) );
     }
 
     @Override
@@ -55,7 +55,7 @@ public class XZPayloadCoding implements PayloadCoding
         final String flags;
         final int preset;
 
-        if ( optionalFlags.isPresent () && ( flags = optionalFlags.get () ).length() > 0 )
+        if ( optionalFlags.isPresent () && ( flags = optionalFlags.get () ).length () > 0 )
         {
             preset = Integer.parseInt ( flags.substring ( 0, 1 ) );
         }
