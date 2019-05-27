@@ -1,14 +1,16 @@
-/*******************************************************************************
- * Copyright (c) 2016 IBH SYSTEMS GmbH and others.
- * All rights reserved. This program and the accompanying materials
- * are made available under the terms of the Eclipse Public License v1.0
- * which accompanies this distribution, and is available at
- * http://www.eclipse.org/legal/epl-v10.html
+/**
+ * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
- * Contributors:
- *     IBH SYSTEMS GmbH - initial API and implementation
- *     Red Hat Inc - allow the use of the target name
- *******************************************************************************/
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
+
 package org.eclipse.packager.rpm.build;
 
 import java.io.IOException;
