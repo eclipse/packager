@@ -6,7 +6,7 @@ podTemplate(
     containers: [
         containerTemplate(
             name: 'maven',
-            image: 'maven:3-jdk-11',
+            image: 'quay.io/ctron/packager-rpm-maven:latest',
             ttyEnabled: true,
             command: 'cat',
             resourceRequestMemory: '1Gi',
