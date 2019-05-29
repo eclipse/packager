@@ -475,6 +475,8 @@ public class RpmBuilder implements AutoCloseable
 
         private String sourcePackage;
 
+        private List<String> prefixes;
+
         public void setDistribution ( final String distribution )
         {
             this.distribution = distribution;
@@ -583,6 +585,16 @@ public class RpmBuilder implements AutoCloseable
         public String getSourcePackage ()
         {
             return this.sourcePackage;
+        }
+
+        public void setPrefixes ( final List<String> prefixes )
+        {
+            this.prefixes = prefixes;
+        }
+
+        public List<String> getPrefixes ()
+        {
+            return this.prefixes;
         }
     }
 
@@ -843,6 +855,13 @@ public class RpmBuilder implements AutoCloseable
         this.header.putString ( RpmTag.OS, this.information.getOperatingSystem () );
         this.header.putStringOptional ( RpmTag.SOURCE_PACKAGE, this.information.getSourcePackage () );
 
+        final List<String> prefixes = this.information.getPrefixes ();
+
+        if ( prefixes != null && !prefixes.isEmpty () )
+        {
+            this.header.putStringArray( RpmTag.PREFIXES, prefixes.toArray ( new String[0] ) );
+        }
+
         Dependencies.putProvides ( this.header, this.provides );
         Dependencies.putRequirements ( this.header, this.requirements );
         Dependencies.putConflicts ( this.header, this.conflicts );
@@ -915,7 +934,7 @@ public class RpmBuilder implements AutoCloseable
                     i++;
                 }
                 this.header.putInt ( RpmTag.DIR_INDEXES, dirIndexes );
-                this.header.putStringArray ( RpmTag.DIRNAMES, dirnames.toArray ( new String[dirnames.size ()] ) );
+                this.header.putStringArray ( RpmTag.DIRNAMES, dirnames.toArray ( new String[0] ) );
             }
         }
         else
