@@ -1,0 +1,37 @@
+
+def label = "packager-${UUID.randomUUID().toString()}"
+
+podTemplate(
+    label: label,
+    containers: [
+        containerTemplate(
+            name: 'maven',
+            image: 'quay.io/ctron/packager-rpm-maven:latest',
+            ttyEnabled: true,
+            command: 'cat',
+            resourceRequestMemory: '1Gi',
+            resourceLimitMemory: '2Gi',
+        )
+    ],
+    volumes: [
+        configMapVolume(mountPath: '/home/jenkins/.ssh', configMapName: 'known-hosts', readOnly: true)
+    ]
+) {
+
+    node(label) {
+
+        container('maven') {
+            stage('Checkout') {
+                checkout scm
+            }
+            stage('Build') {
+                sh 'mvn -B package'
+            }
+            stage('Test') {
+                sh 'mvn -B test'
+            }
+        }
+
+    }
+
+}

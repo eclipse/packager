@@ -1,6 +1,13 @@
 
 def label = "packager-${UUID.randomUUID().toString()}"
 
+properties([
+    buildDiscarder(logRotator(numToKeepStr: '10')),
+    pipelineTriggers([
+        [$class:"SCMTrigger", scmpoll_spec:"H/10 * * * *"],
+    ])
+])
+
 podTemplate(
     label: label,
     containers: [
@@ -22,7 +29,7 @@ podTemplate(
 
         container('maven') {
             stage('Checkout') {
-                git 'https://github.com/eclipse/packager.git'
+                checkout scm
             }
             stage('Build') {
                 sh 'mvn -B package'
