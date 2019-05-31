@@ -24,14 +24,14 @@ import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.build.RpmBuilder;
 import org.eclipse.packager.rpm.build.RpmBuilder.PackageInformation;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class EmptyWriterTest
 {
     private static final Path OUT_BASE = Paths.get ( "target", "data", "out.empty" );
 
-    @BeforeClass
+    @BeforeAll
     public static void setup () throws IOException
     {
         Files.createDirectories ( OUT_BASE );

@@ -16,8 +16,8 @@ package org.eclipse.packager.rpm;
 import java.util.Optional;
 
 import org.eclipse.packager.rpm.RpmVersion;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class VersionTest
 {
@@ -54,8 +54,8 @@ public class VersionTest
     private void testVersion ( final String version, final Integer expectedEpoch, final String expectedVersion, final String expectedRelease )
     {
         final RpmVersion v = RpmVersion.valueOf ( version );
-        Assert.assertEquals ( "Epoch", Optional.ofNullable ( expectedEpoch ), v.getEpoch () );
-        Assert.assertEquals ( "Version", expectedVersion, v.getVersion () );
-        Assert.assertEquals ( "Release", Optional.ofNullable ( expectedRelease ), v.getRelease () );
+        Assertions.assertEquals ( Optional.ofNullable ( expectedEpoch ), v.getEpoch (), "Epoch" );
+        Assertions.assertEquals ( expectedVersion, v.getVersion (), "Version" );
+        Assertions.assertEquals ( Optional.ofNullable ( expectedRelease ), v.getRelease (), "Release" );
     }
 }

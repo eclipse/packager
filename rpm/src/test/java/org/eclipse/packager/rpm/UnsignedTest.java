@@ -20,8 +20,8 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class UnsignedTest
 {
@@ -34,10 +34,10 @@ public class UnsignedTest
 
         dos.writeInt ( (int)value );
 
-        Assert.assertEquals ( 4, bos.size () );
+        Assertions.assertEquals ( 4, bos.size () );
 
         final DataInputStream dis = new DataInputStream ( new ByteArrayInputStream ( bos.toByteArray () ) );
 
-        Assert.assertEquals ( value, dis.readInt () & 0xFFFFFFFFL );
+        Assertions.assertEquals ( value, dis.readInt () & 0xFFFFFFFFL );
     }
 }

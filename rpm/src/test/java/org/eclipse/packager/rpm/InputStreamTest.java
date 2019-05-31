@@ -21,8 +21,8 @@ import java.io.IOException;
 import org.eclipse.packager.rpm.RpmTag;
 import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class InputStreamTest
 {
@@ -34,21 +34,21 @@ public class InputStreamTest
         {
             Dumper.dumpAll ( in );
 
-            Assert.assertEquals ( 280, in.getPayloadHeader ().getStart () );
-            Assert.assertEquals ( 3501, in.getPayloadHeader ().getLength () );
+            Assertions.assertEquals ( 280, in.getPayloadHeader ().getStart () );
+            Assertions.assertEquals ( 3501, in.getPayloadHeader ().getLength () );
 
-            Assert.assertEquals ( "cpio", in.getPayloadHeader ().getTag ( RpmTag.PAYLOAD_FORMAT ) );
-            Assert.assertEquals ( "lzma", in.getPayloadHeader ().getTag ( RpmTag.PAYLOAD_CODING ) );
+            Assertions.assertEquals ( "cpio", in.getPayloadHeader ().getTag ( RpmTag.PAYLOAD_FORMAT ) );
+            Assertions.assertEquals ( "lzma", in.getPayloadHeader ().getTag ( RpmTag.PAYLOAD_CODING ) );
 
-            Assert.assertEquals ( "org.eclipse.scada", in.getPayloadHeader ().getTag ( RpmTag.NAME ) );
-            Assert.assertEquals ( "0.2.1", in.getPayloadHeader ().getTag ( RpmTag.VERSION ) );
-            Assert.assertEquals ( "1", in.getPayloadHeader ().getTag ( RpmTag.RELEASE ) );
+            Assertions.assertEquals ( "org.eclipse.scada", in.getPayloadHeader ().getTag ( RpmTag.NAME ) );
+            Assertions.assertEquals ( "0.2.1", in.getPayloadHeader ().getTag ( RpmTag.VERSION ) );
+            Assertions.assertEquals ( "1", in.getPayloadHeader ().getTag ( RpmTag.RELEASE ) );
 
-            Assert.assertEquals ( "noarch", in.getPayloadHeader ().getTag ( RpmTag.ARCH ) );
-            Assert.assertEquals ( "linux", in.getPayloadHeader ().getTag ( RpmTag.OS ) );
-            Assert.assertEquals ( "EPL", in.getPayloadHeader ().getTag ( RpmTag.LICENSE ) );
+            Assertions.assertEquals ( "noarch", in.getPayloadHeader ().getTag ( RpmTag.ARCH ) );
+            Assertions.assertEquals ( "linux", in.getPayloadHeader ().getTag ( RpmTag.OS ) );
+            Assertions.assertEquals ( "EPL", in.getPayloadHeader ().getTag ( RpmTag.LICENSE ) );
 
-            Assert.assertArrayEquals ( new String[] { //
+            Assertions.assertArrayEquals ( new String[] { //
                     "/etc/", //
                     "/etc/eclipsescada/", //
                     "/etc/profile.d/", //

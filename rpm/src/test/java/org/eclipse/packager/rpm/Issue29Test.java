@@ -19,7 +19,7 @@ import java.net.URL;
 
 import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class Issue29Test
 {

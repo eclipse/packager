@@ -14,8 +14,8 @@
 package org.eclipse.packager.rpm;
 
 import org.eclipse.packager.rpm.PathName;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class PathNameTest
 {
@@ -64,7 +64,7 @@ public class PathNameTest
     private void assertPath ( final String pathName, final String dirname, final String basename )
     {
         final PathName result = PathName.parse ( pathName );
-        Assert.assertEquals ( dirname, result.getDirname () );
-        Assert.assertEquals ( basename, result.getBasename () );
+        Assertions.assertEquals ( dirname, result.getDirname () );
+        Assertions.assertEquals ( basename, result.getBasename () );
     }
 }

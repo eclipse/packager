@@ -25,6 +25,7 @@ import java.nio.file.OpenOption;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.text.Normalizer;
+import java.text.Normalizer.Form;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -145,11 +146,15 @@ public class RpmWriter implements AutoCloseable
         // write package name
 
         {
-            final String name = this.lead.getName ();
-            final byte[] nameEncoded = ( !Normalizer.isNormalized( name, Normalizer.Form.NFC ) ? Normalizer.normalize( name, Normalizer.Form.NFC ) : name ).getBytes( StandardCharsets.UTF_8 );
+            String name = this.lead.getName ();
+            if ( !Normalizer.isNormalized ( name, Form.NFC ) )
+            {
+                name = Normalizer.normalize ( name, Form.NFC );
+            }
+            final byte[] nameEncoded = name.getBytes ( StandardCharsets.UTF_8 );
             final byte[] nameData = new byte[66];
-            System.arraycopy( nameEncoded, 0, nameData, 0, nameEncoded.length < nameData.length ? nameEncoded.length : nameData.length - 1 );
-            lead.put( nameData );
+            System.arraycopy ( nameEncoded, 0, nameData, 0, nameEncoded.length < nameData.length ? nameEncoded.length : nameData.length - 1 );
+            lead.put ( nameData );
         }
 
         // 2 bytes OS

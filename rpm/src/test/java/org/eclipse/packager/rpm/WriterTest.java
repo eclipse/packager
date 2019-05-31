@@ -47,8 +47,8 @@ import org.eclipse.packager.rpm.header.Header;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 import org.eclipse.packager.rpm.signature.RsaHeaderSignatureProcessor;
 import org.eclipse.packager.security.pgp.PgpHelper;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class WriterTest
 {
@@ -56,7 +56,7 @@ public class WriterTest
 
     private static final Path IN_BASE = Paths.get ( "src", "test", "resources", "data", "in" );
 
-    @BeforeClass
+    @BeforeAll
     public static void setup () throws IOException
     {
         Files.createDirectories ( OUT_BASE );

@@ -22,8 +22,8 @@ import org.eclipse.packager.rpm.OperatingSystem;
 import org.eclipse.packager.rpm.RpmTag;
 import org.eclipse.packager.rpm.build.LeadBuilder;
 import org.eclipse.packager.rpm.header.Header;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 public class LeadTest
 {
@@ -40,11 +40,11 @@ public class LeadTest
         final Optional<Architecture> arch = Architecture.fromAlias ( provided );
         if ( expected == null )
         {
-            Assert.assertFalse ( arch.isPresent () );
+            Assertions.assertFalse ( arch.isPresent () );
         }
         else
         {
-            Assert.assertEquals ( expected, arch.orElse ( null ) );
+            Assertions.assertEquals ( expected, arch.orElse ( null ) );
         }
     }
 
@@ -62,12 +62,12 @@ public class LeadTest
 
         lead.fillFlagsFromHeader ( header );
 
-        Assert.assertEquals ( Architecture.NOARCH.getValue (), lead.getArchitecture () );
-        Assert.assertEquals ( OperatingSystem.UNKNOWN.getValue (), lead.getOperatingSystem () );
+        Assertions.assertEquals ( Architecture.NOARCH.getValue (), lead.getArchitecture () );
+        Assertions.assertEquals ( OperatingSystem.UNKNOWN.getValue (), lead.getOperatingSystem () );
 
         lead.fillFlagsFromHeader ( header, s -> of ( Architecture.ARM ), s -> of ( OperatingSystem.AIX ) );
 
-        Assert.assertEquals ( Architecture.ARM.getValue (), lead.getArchitecture () );
-        Assert.assertEquals ( OperatingSystem.AIX.getValue (), lead.getOperatingSystem () );
+        Assertions.assertEquals ( Architecture.ARM.getValue (), lead.getArchitecture () );
+        Assertions.assertEquals ( OperatingSystem.AIX.getValue (), lead.getOperatingSystem () );
     }
 }
