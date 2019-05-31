@@ -13,6 +13,7 @@
 
 package org.eclipse.packager.rpm.build;
 
+import java.io.IOException;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
@@ -32,6 +33,12 @@ public class BuilderOptions
 
     private RpmFileNameProvider fileNameProvider = RpmFileNameProvider.LEGACY_FILENAME_PROVIDER;
 
+    private PayloadCoding payloadCoding;
+
+    private String payloadFlags;
+
+    private DigestAlgorithm fileDigestAlgorithm = DigestAlgorithm.MD5;
+
     public BuilderOptions ()
     {
     }
@@ -40,6 +47,9 @@ public class BuilderOptions
     {
         setLongMode ( other.longMode );
         setOpenOptions ( other.openOptions );
+        setPayloadCoding ( other.payloadCoding );
+        setPayloadFlags ( other.payloadFlags );
+        setFileDigestAlgorithm ( other.fileDigestAlgorithm );
     }
 
     public LongMode getLongMode ()
@@ -78,5 +88,40 @@ public class BuilderOptions
     public void setFileNameProvider ( final RpmFileNameProvider fileNameProvider )
     {
         this.fileNameProvider = fileNameProvider != null ? fileNameProvider : RpmFileNameProvider.LEGACY_FILENAME_PROVIDER;
+    }
+
+    public PayloadCoding getPayloadCoding () throws IOException
+    {
+        if ( this.payloadCoding == null )
+        {
+            this.payloadCoding = PayloadCodingRegistry.get ( PayloadCodingRegistry.GZIP );
+        }
+
+        return this.payloadCoding;
+    }
+
+    public void setPayloadCoding ( final PayloadCoding payloadCoding )
+    {
+        this.payloadCoding = payloadCoding;
+    }
+
+    public String getPayloadFlags ()
+    {
+        return this.payloadFlags;
+    }
+
+    public void setPayloadFlags ( final String payloadFlags )
+    {
+        this.payloadFlags = payloadFlags;
+    }
+
+    public DigestAlgorithm getFileDigestAlgorithm ()
+    {
+        return this.fileDigestAlgorithm;
+    }
+
+    public void setFileDigestAlgorithm ( final DigestAlgorithm fileDigestAlgorithm )
+    {
+        this.fileDigestAlgorithm = fileDigestAlgorithm == null ? DigestAlgorithm.MD5 : fileDigestAlgorithm;
     }
 }
