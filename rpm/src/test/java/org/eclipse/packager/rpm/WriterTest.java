@@ -269,7 +269,7 @@ public class WriterTest
             Dumper.dumpAll ( in );
         }
 
-        final ProcessBuilder pb = new ProcessBuilder ( "rpm", "-q", "--qf", "%{conflicts}\n%{requires}\n%{obsoletes}\n%{provides}\\n%{suggests}\\n%{recommends}\\n%{supplements}\\n%{enhances}", "-p", outFile.toString () );
+        final ProcessBuilder pb = new ProcessBuilder ( "rpm", "-q", "--qf", "%{conflicts}\n%{requires}\n%{obsoletes}\n%{provides}\\n%{suggests}\\n%{recommends}\\n%{supplements}\\n%{enhances}", "-p", outFile.toAbsolutePath().toString () );
         pb.inheritIO ();
         pb.start ().waitFor ();
     }
