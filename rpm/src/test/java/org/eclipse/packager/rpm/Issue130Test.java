@@ -13,6 +13,8 @@
 
 package org.eclipse.packager.rpm;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -26,9 +28,8 @@ import org.eclipse.packager.rpm.build.RpmBuilder;
 import org.eclipse.packager.rpm.build.RpmBuilder.PackageInformation;
 import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
-import org.junit.Assert;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 public class Issue130Test
 {
@@ -36,7 +37,7 @@ public class Issue130Test
 
     private static final List<String> PREFIXES = Arrays.asList( "/opt", "/var/log" );
 
-    @BeforeClass
+    @BeforeAll
     public static void setup () throws IOException
     {
         Files.createDirectories ( OUT_BASE );
@@ -65,7 +66,7 @@ public class Issue130Test
             final InputHeader<RpmTag> header = in.getPayloadHeader ();
             final List<String> prefixes = Arrays.asList ( new RpmTagValue ( header.getTag ( RpmTag.PREFIXES ) ).asStringArray ().orElse( null ) );
 
-            Assert.assertEquals ( PREFIXES, prefixes );
+            assertEquals ( PREFIXES, prefixes );
         }
     }
 
