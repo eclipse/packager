@@ -64,10 +64,20 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
     }
 
     private final Map<Integer, Object> entries = new LinkedHashMap<> ();
-    private static Charset charset = StandardCharsets.UTF_8;
+
+    private final Charset charset;
 
     public Header ( final HeaderEntry[] entries )
     {
+        this ( entries, StandardCharsets.UTF_8 );
+    }
+
+    public Header ( final HeaderEntry[] entries, final Charset charset )
+    {
+        Objects.requireNonNull(charset);
+
+        this.charset = charset;
+
         if ( entries != null )
         {
             for ( final HeaderEntry entry : entries )
@@ -82,10 +92,12 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
         Objects.requireNonNull ( other );
 
         this.entries.putAll ( other.entries );
+        this.charset = other.charset;
     }
 
     public Header ()
     {
+        this.charset = StandardCharsets.UTF_8;
     }
 
     public int size ()
@@ -312,8 +324,12 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
         {
             throw new IllegalArgumentException ( "'charset' cannot be null" );
         }
-        Header.charset = charset;
-        return this.entries.entrySet ().stream ().map ( Header::makeEntry ).toArray ( num -> new HeaderEntry[num] );
+        return this.entries.entrySet ().stream ().map ( this::makeEntry ).toArray ( num -> new HeaderEntry[num] );
+    }
+
+    private HeaderEntry makeEntry ( final Map.Entry<Integer, Object> entry )
+    {
+        return makeEntry ( entry, charset );
     }
 
     /**
@@ -330,7 +346,7 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
         return makeEntries ( StandardCharsets.UTF_8 );
     }
 
-    private static HeaderEntry makeEntry ( final Map.Entry<Integer, Object> entry )
+    private static HeaderEntry makeEntry ( final Map.Entry<Integer, Object> entry, final Charset charset )
     {
         final Object val = entry.getValue ();
         final int tag = entry.getKey ();
@@ -411,7 +427,7 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
         {
             final String value = (String)val;
 
-            return new HeaderEntry ( Type.STRING, tag, 1, makeStringData ( new ByteArrayOutputStream (), value ).toByteArray () );
+            return new HeaderEntry ( Type.STRING, tag, 1, makeStringData ( new ByteArrayOutputStream (), value, charset ).toByteArray () );
         }
 
         // BLOB
@@ -438,7 +454,7 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
         {
             final String[] value = (String[])val;
 
-            return new HeaderEntry ( Type.STRING_ARRAY, tag, value.length, makeStringsData ( new ByteArrayOutputStream (), value ).toByteArray () );
+            return new HeaderEntry ( Type.STRING_ARRAY, tag, value.length, makeStringsData ( new ByteArrayOutputStream (), value, charset ).toByteArray () );
         }
 
         // I18N_STRING
@@ -447,19 +463,19 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
         {
             final I18nString[] value = (I18nString[])val;
 
-            return new HeaderEntry ( Type.I18N_STRING, tag, value.length, makeStringsData ( new ByteArrayOutputStream (), value ).toByteArray () );
+            return new HeaderEntry ( Type.I18N_STRING, tag, value.length, makeStringsData ( new ByteArrayOutputStream (), value, charset ).toByteArray () );
         }
 
         throw new IllegalArgumentException ( String.format ( "Unable to process value type: %s", val.getClass () ) );
     }
 
-    private static <T extends OutputStream> T makeStringData ( final T out, final String string )
+    private static <T extends OutputStream> T makeStringData ( final T out, final String string, final Charset charset )
     {
         try
         {
             if ( string != null )
             {
-                out.write ( string.getBytes (charset) );
+                out.write ( string.getBytes ( charset ) );
             }
             out.write ( 0 );
         }
@@ -470,26 +486,26 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
         return out;
     }
 
-    private static <T extends OutputStream> T makeStringsData ( final T out, final String[] strings )
+    private static <T extends OutputStream> T makeStringsData ( final T out, final String[] strings, final Charset charset  )
     {
         for ( final String s : strings )
         {
-            makeStringData ( out, s );
+            makeStringData ( out, s, charset );
         }
         return out;
     }
 
-    private static <T extends OutputStream> T makeStringsData ( final T out, final I18nString[] strings )
+    private static <T extends OutputStream> T makeStringsData ( final T out, final I18nString[] strings, final Charset charset  )
     {
         for ( final I18nString s : strings )
         {
             if ( s != null )
             {
-                makeStringData ( out, s.value );
+                makeStringData ( out, s.value, charset );
             }
             else
             {
-                makeStringData ( out, null );
+                makeStringData ( out, null, charset );
             }
         }
         return out;
