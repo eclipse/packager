@@ -43,6 +43,7 @@ public interface ContentProvider
      * <em>Note:</em> The caller must close the stream
      *
      * @return a new input stream
+     * @throws IOException in case of a n I/O error.
      */
     public InputStream createInputStream () throws IOException;
 

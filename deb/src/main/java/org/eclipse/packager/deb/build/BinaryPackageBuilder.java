@@ -20,7 +20,7 @@ import java.util.function.Supplier;
  * <p>
  * Target path names are relative to the root of the system. Absolute paths will
  * stay absolute and relative ones get converted to absolute using root. So
- * <tt>usr/bin</tt> will become <tt>/usr/bin</tt>.
+ * {@code usr/bin} will become {@code /usr/bin}.
  * </p>
  */
 public interface BinaryPackageBuilder
