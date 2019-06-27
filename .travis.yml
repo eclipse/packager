@@ -7,4 +7,9 @@ jdk:
   - openjdk11
 
 install: true
-script: mvn -B install
+script: mvn -B verify
+
+addons:
+   apt:
+      packages:
+         - rpm
