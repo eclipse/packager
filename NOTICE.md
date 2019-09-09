@@ -1,4 +1,4 @@
-# Notices for Eclpse Packager™
+# Notices for Eclipse Packager™
 
 This content is produced and maintained by the Eclipse Packager project.
 
