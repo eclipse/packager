@@ -1,0 +1,36 @@
+package org.eclipse.packager.rpm;
+
+/**
+ * The name of this enum is questionable.
+ * It should rather be "VerifyFlag" (singular), but I leave it this way, cf. {@link FileFlags}.
+ * see https://github.com/ctron/rpm-builder/issues/41
+ * see http://ftp.rpm.org/api/4.14.0/group__rpmvf.html
+ */
+public enum VerifyFlags
+{
+   MD5(   1 << 0), // '5'
+   SIZE(  1 << 1), // 'S'
+   LINKTO(1 << 2), // 'L'
+   USER(  1 << 3), // 'U'
+   GROUP( 1 << 4), // 'G'
+   MTIME( 1 << 5), // 'T'
+   MODE(  1 << 6), // 'M'
+   RDEV(  1 << 7), // 'D'
+   CAPS(  1 << 8); // 'P'
+   //  VERIFY_CONTEXTS = (1 << 15),  VERIFY_FILES = (1 << 16),  VERIFY_DEPS = (1 << 17),
+   //  VERIFY_SCRIPT = (1 << 18),  VERIFY_DIGEST = (1 << 19),
+   //  VERIFY_SIGNATURE = (1 << 20), VERIFY_PATCHES = (1 << 21), VERIFY_HDRCHK = (1 << 22), VERIFY_FOR_LIST = (1 << 23),
+   //  VERIFY_FOR_STATE = (1 << 24), VERIFY_FOR_DOCS = (1 << 25), VERIFY_FOR_CONFIG = (1 << 26), VERIFY_FOR_DUMPFILES = (1 << 27)
+
+   private final int value;
+
+   VerifyFlags( final int value)
+   {
+      this.value = value;
+   }
+
+   public int getValue()
+   {
+      return value;
+   }
+}
