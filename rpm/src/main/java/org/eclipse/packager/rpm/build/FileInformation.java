@@ -18,6 +18,7 @@ import java.util.EnumSet;
 import java.util.Set;
 
 import org.eclipse.packager.rpm.FileFlags;
+import org.eclipse.packager.rpm.VerifyFlags;
 
 public class FileInformation
 {
@@ -28,6 +29,12 @@ public class FileInformation
     private String group = BuilderContext.DEFAULT_GROUP;
 
     private Set<FileFlags> fileFlags = EnumSet.noneOf ( FileFlags.class );
+
+    // https://github.com/ctron/rpm-builder/issues/41
+    /**
+     * If null (default), this will result in a bitmask with value -1.
+     */
+    private Set<VerifyFlags> verifyFlags;
 
     private short mode = 0644;
 
@@ -75,6 +82,43 @@ public class FileInformation
     public Set<FileFlags> getFileFlags ()
     {
         return this.fileFlags;
+    }
+
+    /**
+     * verify flags control the verify behaviour, i.e. <code>rpm -V ...</code>.
+     * See https://github.com/ctron/rpm-builder/issues/41
+     * <br>
+     * The value null restores the default.
+     * This will result in a bitmask with value -1, so the RPM tool will then verify everything it knows of,
+     * not only what this library knows of.
+     * Thus there is a subtle difference between passing <code>null</code> and passing <code>EnumSet.allOf(VerifyFlags.class)</code>
+     * @param verifyFlags set of VerifyFlags, maybe null.
+     * @since 0.15.2
+     */
+    public void setVerifyFlags ( final Set<VerifyFlags> verifyFlags )
+    {
+        if (verifyFlags == null)
+        {
+            this.verifyFlags = null;
+        }
+        else if ( verifyFlags.isEmpty () )
+        {
+            this.verifyFlags = EnumSet.noneOf ( VerifyFlags.class );
+        }
+        else
+        {
+            this.verifyFlags = EnumSet.copyOf ( verifyFlags );
+        }
+    }
+
+    /**
+     * If non-null, specifies the verification flags.
+     * Null (default) means: verify everything (old behaviour).
+     * @return maybe null
+     */
+    public Set<VerifyFlags> getVerifyFlags ()
+    {
+        return this.verifyFlags;
     }
 
     public void setUser ( final String user )

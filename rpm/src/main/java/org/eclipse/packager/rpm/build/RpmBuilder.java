@@ -48,6 +48,7 @@ import org.eclipse.packager.rpm.PathName;
 import org.eclipse.packager.rpm.RpmTag;
 import org.eclipse.packager.rpm.RpmVersion;
 import org.eclipse.packager.rpm.Rpms;
+import org.eclipse.packager.rpm.VerifyFlags;
 import org.eclipse.packager.rpm.build.PayloadRecorder.Result;
 import org.eclipse.packager.rpm.deps.Dependencies;
 import org.eclipse.packager.rpm.deps.Dependency;
@@ -659,6 +660,26 @@ public class RpmBuilder implements AutoCloseable
                     entry.setFlags ( entry.getFlags () | fileFlag.getValue () );
                 }
             }
+            customizeVerificationFlags(entry, information);
+        }
+
+        /**
+         * see https://github.com/ctron/rpm-builder/issues/41
+         * @since 0.15.2
+         * @author Oliver Matz
+         */
+        private void customizeVerificationFlags(FileEntry entry, FileInformation information) {
+            final Collection<VerifyFlags> informationVerifyFlags = information.getVerifyFlags();
+            if ( informationVerifyFlags == null )
+            {
+                return; // bail out - entry's verification flag bitmask will remain -1 (meaning: verify everthing)
+            }
+            int bitmask = 0;
+            for (final VerifyFlags verifyFlag : informationVerifyFlags)
+            {
+                bitmask |= verifyFlag.getValue();
+            }
+            entry.setVerifyFlags(bitmask);
         }
 
         protected void customizeSymbolicLink ( final FileEntry entry, final FileInformation information )
