@@ -16,6 +16,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,14 +26,14 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
  * see https://github.com/ctron/rpm-builder/issues/41
  * @author Oliver Matz
  */
-public class SetVerifyFlagsTest
+class SetVerifyFlagsTest
 {
     private final static Logger LOGGER = LoggerFactory.getLogger ( SetVerifyFlagsTest.class );
 
     private static final Path OUT_BASE = Paths.get ( "target", "data", "out" );
 
     @BeforeAll
-    public static void setup () throws IOException
+    static void setup () throws IOException
     {
         Files.createDirectories ( OUT_BASE );
     }
@@ -41,37 +42,41 @@ public class SetVerifyFlagsTest
     private static final String NAME_myconf   = "my.conf";
     private static final String NAME_myreadme = "readme.txt";
 
+    /**
+     * Firstly, writes a RPM file with two file entries having different type flags and different verification flags;
+     * Secondly, read that RPM file and verify the flags.
+     */
     @Test
-    public void test () throws IOException
+    void writeRpmWithVerifyFlags () throws IOException
     {
         final Path outFile;
         try ( RpmBuilder builder = new RpmBuilder ( "vflag0-test", "1.0.0", "1", "noarch", OUT_BASE ) )
         {
             final String content_myconf = "Hallo, myconf!";
             builder.newContext().addFile(DIRNAME + NAME_myconf, content_myconf.getBytes(), (targetName, object, type) -> {
-                switch (targetName) {
-                    case DIRNAME + NAME_myconf:
-                        final FileInformation ret = new FileInformation();
-                        final Set<FileFlags> fileFlags = new HashSet<>(Arrays.asList(FileFlags.CONFIGURATION, FileFlags.NOREPLACE));
-                        ret.setFileFlags(fileFlags);
-                        ret.setUser("conf_user");
-                        ret.setGroup("conf_group");
-                        final Set<VerifyFlags> verifyFlags = new HashSet<>(Arrays.asList(VerifyFlags.USER, VerifyFlags.GROUP));
-                        ret.setVerifyFlags(verifyFlags);
-                        LOGGER.info("file info for {}: {}", targetName, ret);
-                        return ret;
+                if ((DIRNAME + NAME_myconf).equals(targetName)) {
+                    final FileInformation ret = new FileInformation();
+                    final Set<FileFlags> fileFlags = new HashSet<>(
+                       Arrays.asList(FileFlags.CONFIGURATION, FileFlags.NOREPLACE));
+                    ret.setFileFlags(fileFlags);
+                    ret.setUser("conf_user");
+                    ret.setGroup("conf_group");
+                    final Set<VerifyFlags> verifyFlags = new HashSet<>(
+                       Arrays.asList(VerifyFlags.USER, VerifyFlags.GROUP));
+                    ret.setVerifyFlags(verifyFlags);
+                    LOGGER.info("file info for {}: {}", targetName, ret);
+                    return ret;
                 }
                 throw new IllegalArgumentException("unexpected target name: " + targetName);
             });
             final String content_readme = "Hallo, readme!";
             builder.newContext().addFile(DIRNAME + NAME_myreadme, content_readme.getBytes(), (targetName, object, type) -> {
-                switch (targetName) {
-                    case DIRNAME + NAME_myreadme:
-                        final FileInformation ret = new FileInformation();
-                        final Set<FileFlags> fileFlags = new HashSet<>(Arrays.asList(FileFlags.README));
-                        ret.setFileFlags(fileFlags);
-                        LOGGER.info("file info for {}: {}", targetName, ret);
-                        return ret;
+                if ((DIRNAME + NAME_myreadme).equals(targetName)) {
+                    final FileInformation ret = new FileInformation();
+                    final Set<FileFlags> fileFlags = new HashSet<>(Collections.singletonList(FileFlags.README));
+                    ret.setFileFlags(fileFlags);
+                    LOGGER.info("file info for {}: {}", targetName, ret);
+                    return ret;
                 }
                 throw new IllegalArgumentException("unexpected target name: " + targetName);
             });
