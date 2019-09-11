@@ -93,6 +93,7 @@ public class FileInformation
      * not only what this library knows of.
      * Thus there is a subtle difference between passing <code>null</code> and passing <code>EnumSet.allOf(VerifyFlags.class)</code>
      * @param verifyFlags set of VerifyFlags, maybe null.
+     * @since 0.15.2
      */
     public void setVerifyFlags ( final Set<VerifyFlags> verifyFlags )
     {
