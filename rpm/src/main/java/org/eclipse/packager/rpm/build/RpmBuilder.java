@@ -666,7 +666,6 @@ public class RpmBuilder implements AutoCloseable
         /**
          * see https://github.com/ctron/rpm-builder/issues/41
          * @since 0.15.2
-         * @author Oliver Matz
          */
         private void customizeVerificationFlags(FileEntry entry, FileInformation information) {
             final Collection<VerifyFlags> informationVerifyFlags = information.getVerifyFlags();
