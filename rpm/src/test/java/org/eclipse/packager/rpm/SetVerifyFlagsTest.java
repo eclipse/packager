@@ -1,3 +1,15 @@
+/*
+ * Copyright (c) 2019 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ */
 package org.eclipse.packager.rpm;
 
 import org.eclipse.packager.rpm.app.Dumper;
@@ -24,7 +36,6 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 /**
  * see https://github.com/ctron/rpm-builder/issues/41
- * @author Oliver Matz
  */
 class SetVerifyFlagsTest
 {
