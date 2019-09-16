@@ -25,7 +25,7 @@ public enum VerifyFlags
 
    // The purpose of the following constants is not clear to me.
    // Do they refer to the same bitmask? Oliver Matz
-   // see diskussion in https://github.com/eclipse/packager/pull/6
+   // see discussion in https://github.com/eclipse/packager/pull/6
    VERIFY_CONTEXTS      (1 << 15),
    VERIFY_FILES         (1 << 16),
    VERIFY_DEPS          (1 << 17),
