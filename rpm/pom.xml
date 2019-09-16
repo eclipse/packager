@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.eclipse.packager</groupId>
         <artifactId>packager</artifactId>
-        <version>0.15.2-SNAPSHOT</version>
+        <version>0.16.0</version>
     </parent>
 
     <artifactId>packager-rpm</artifactId>
