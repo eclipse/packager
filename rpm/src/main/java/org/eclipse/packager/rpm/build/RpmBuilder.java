@@ -787,9 +787,9 @@ public class RpmBuilder implements AutoCloseable
     public void addDefaultSignatureProcessors ()
     {
         addSignatureProcessor ( SignatureProcessors.size () );
+        addSignatureProcessor ( SignatureProcessors.md5 () );
         addSignatureProcessor ( SignatureProcessors.sha256Header () );
         addSignatureProcessor ( SignatureProcessors.sha1Header () );
-        addSignatureProcessor ( SignatureProcessors.md5 () );
         addSignatureProcessor ( SignatureProcessors.payloadSize () );
     }
 
