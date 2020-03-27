@@ -1448,6 +1448,30 @@ public class RpmBuilder implements AutoCloseable
         setVerifyScript ( DEFAULT_INTERPRETER, script );
     }
 
+    public void setPreTransactionScript ( final String interpreter, final String script )
+    {
+        addRequirement ( interpreter, null, RpmDependencyFlags.INTERPRETER );
+        addRequirement ( interpreter, null, RpmDependencyFlags.SCRIPT_PREUN, RpmDependencyFlags.INTERPRETER );
+        setScript ( RpmTag.PRETRANSACTION_SCRIPT_PROG, RpmTag.PRETRANSACTION_SCRIPT, interpreter, script );
+    }
+
+    public void setPreTransactionScript ( final String script )
+    {
+        setPreTransactionScript ( DEFAULT_INTERPRETER, script );
+    }
+
+    public void setPostTransactionScript ( final String interpreter, final String script )
+    {
+        addRequirement ( interpreter, null, RpmDependencyFlags.INTERPRETER );
+        addRequirement ( interpreter, null, RpmDependencyFlags.SCRIPT_POSTUN, RpmDependencyFlags.INTERPRETER );
+        setScript ( RpmTag.POSTTRANSACTION_SCRIPT_PROG, RpmTag.POSTTRANSACTION_SCRIPT, interpreter, script );
+    }
+
+    public void setPostTransactionScript ( final String script )
+    {
+        setPostTransactionScript ( DEFAULT_INTERPRETER, script );
+    }
+
     private void setScript ( final RpmTag interpreterTag, final RpmTag scriptTag, final String interpreter, final String script )
     {
         if ( interpreter == null || script == null )
