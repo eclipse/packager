@@ -85,7 +85,7 @@ public final class Dependencies
         // first sort
 
         final List<Dependency> deps = new ArrayList<> ( dependencies );
-        Collections.sort ( deps, comparing ( Dependency::getName ).thenComparing ( comparing ( Dependency::getVersion, nullsFirst ( naturalOrder () ) ) ) );
+        Collections.sort ( deps, comparing ( Dependency::getName ).thenComparing ( comparing ( Dependency::getVersion, nullsFirst ( naturalOrder () ) ) ).thenComparing ( comparing ( d -> RpmDependencyFlags.encode ( d.getFlags () ), naturalOrder () ) ) );
 
         // then set
 
