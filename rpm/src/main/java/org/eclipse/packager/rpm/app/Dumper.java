@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2015, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -161,7 +161,7 @@ public class Dumper
     {
         if ( !Files.exists ( path ) )
         {
-            System.err.format ( "%s: does not exist%n" );
+            System.err.format ( "%s: does not exist%n", path );
             return;
         }
 
@@ -171,7 +171,7 @@ public class Dumper
         }
         catch ( final Exception e )
         {
-            System.err.format ( "%s: failed to read file%n" );
+            System.err.format ( "%s: failed to read file%n", path );
             e.printStackTrace ( System.err );
         }
     }
