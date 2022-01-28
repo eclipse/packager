@@ -13,10 +13,6 @@
 
 package org.eclipse.packager.rpm.deps;
 
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -85,7 +81,7 @@ public final class Dependencies
         // first sort
 
         final List<Dependency> deps = new ArrayList<> ( dependencies );
-        Collections.sort ( deps, comparing ( Dependency::getName ).thenComparing ( comparing ( Dependency::getVersion, nullsFirst ( naturalOrder () ) ) ).thenComparing ( comparing ( d -> RpmDependencyFlags.encode ( d.getFlags () ), naturalOrder () ) ) );
+        Collections.sort ( deps );
 
         // then set
 

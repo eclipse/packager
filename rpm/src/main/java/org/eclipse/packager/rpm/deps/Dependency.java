@@ -14,11 +14,19 @@
 package org.eclipse.packager.rpm.deps;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Set;
 
-public class Dependency
+import static java.util.Comparator.comparing;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.nullsFirst;
+
+public class Dependency implements Comparable <Dependency>
 {
+    // compare name, version and flags. Without the flag comparison the sort is not stable, which causes unreproducible RPMs.
+    private static final Comparator <Dependency> COMPARATOR = comparing ( Dependency::getName ).thenComparing ( Dependency::getVersion, nullsFirst ( naturalOrder () ) ).thenComparing ( d -> RpmDependencyFlags.encode ( d.getFlags () ), naturalOrder () );
+
     private final String name;
 
     private final String version;
@@ -140,5 +148,10 @@ public class Dependency
     public String toString ()
     {
         return String.format ( "[%s, %s, %s]", this.name, this.version, this.flags );
+    }
+
+    @Override
+    public int compareTo ( Dependency o ) {
+        return COMPARATOR.compare ( this, o );
     }
 }
