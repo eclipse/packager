@@ -2,7 +2,7 @@
 
 Create Linux software packages in plain Java.
 
-Currently this project can:
+Currently, this project can:
 
 * Read and create Debian packages (`.deb`)
 * Read and create RPM packages (`.rpm`)
