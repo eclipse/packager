@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2015, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -12,10 +12,6 @@
  */
 
 package org.eclipse.packager.rpm.deps;
-
-import static java.util.Comparator.comparing;
-import static java.util.Comparator.naturalOrder;
-import static java.util.Comparator.nullsFirst;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -85,7 +81,7 @@ public final class Dependencies
         // first sort
 
         final List<Dependency> deps = new ArrayList<> ( dependencies );
-        Collections.sort ( deps, comparing ( Dependency::getName ).thenComparing ( comparing ( Dependency::getVersion, nullsFirst ( naturalOrder () ) ) ) );
+        Collections.sort ( deps );
 
         // then set
 
