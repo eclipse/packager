@@ -5,7 +5,7 @@
 
     <groupId>org.eclipse.packager</groupId>
     <artifactId>packager</artifactId>
-    <version>0.17.1-SNAPSHOT</version>
+    <version>0.18.0</version>
     <packaging>pom</packaging>
 
     <name>Eclipse Packager</name>
@@ -42,7 +42,7 @@
         <url>https://github.com/eclipse/packager</url>
         <connection>scm:git:git://github.com/eclipse/packager.git</connection>
         <developerConnection>scm:git:git@github.com:eclipse/packager.git</developerConnection>
-        <tag>HEAD</tag>
+        <tag>v0.18.0</tag>
     </scm>
 
     <issueManagement>
