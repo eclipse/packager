@@ -6,3 +6,8 @@ Currently, this project can:
 
 * Read and create Debian packages (`.deb`)
 * Read and create RPM packages (`.rpm`)
+
+There are three modules: core, deb and rpm. To import, depend on the modules you require:
+
+* `org.eclipse.packager:packager-deb:$version`
+* `org.eclipse.packager:packager-rpm:$version`
