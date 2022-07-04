@@ -52,6 +52,7 @@ public class BuilderOptions
     {
         setLongMode ( other.longMode );
         setOpenOptions ( other.openOptions );
+        setFileNameProvider ( other.fileNameProvider );
         setPayloadCoding ( other.payloadCoding );
         setPayloadFlags ( other.payloadFlags );
         setFileDigestAlgorithm ( other.fileDigestAlgorithm );
