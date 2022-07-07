@@ -76,7 +76,7 @@
 
         <commons-compress.version>1.21</commons-compress.version>
         <guava.version>31.1-jre</guava.version>
-        <junit.jupiter.version>5.4.0</junit.jupiter.version>
+        <junit.jupiter.version>5.8.2</junit.jupiter.version>
         <logback.version>1.2.11</logback.version>
     </properties>
 
@@ -154,16 +154,11 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-engine</artifactId>
+                <groupId>org.junit</groupId>
+                <artifactId>junit-bom</artifactId>
                 <version>${junit.jupiter.version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.junit.jupiter</groupId>
-                <artifactId>junit-jupiter-params</artifactId>
-                <version>${junit.jupiter.version}</version>
-                <scope>test</scope>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
 
         </dependencies>
