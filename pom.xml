@@ -81,6 +81,23 @@
         <logback.version>1.2.11</logback.version>
         <slf4j.version>1.7.36</slf4j.version>
         <xz.version>1.9</xz.version>
+
+        <mavenVersion>3.2.5</mavenVersion>
+        <maven-bundle-plugin.version>5.1.6</maven-bundle-plugin.version>
+        <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
+        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
+        <maven-deploy-plugin.version>3.0.0-M2</maven-deploy-plugin.version>
+        <maven-enforcer-plugin.version>3.1.0</maven-enforcer-plugin.version>
+        <maven-gpg-plugin.version>3.0.1</maven-gpg-plugin.version>
+        <maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
+        <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
+        <maven-javadoc-plugin.version>3.4.0</maven-javadoc-plugin.version>
+        <maven-project-info-reports-plugin.version>3.3.0</maven-project-info-reports-plugin.version>
+        <maven-release-plugin.version>3.0.0-M6</maven-release-plugin.version>
+        <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
+        <maven-site-plugin.version>4.0.0-M2</maven-site-plugin.version>
+        <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
+        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -175,26 +192,50 @@
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.9.0</version>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>${maven-clean-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.2.2</version>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>${maven-compiler-plugin.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>${maven-deploy-plugin.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>${maven-enforcer-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-gpg-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>${maven-gpg-plugin.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>${maven-install-plugin.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${maven-jar-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.3.2</version>
+                    <version>${maven-javadoc-plugin.version}</version>
                     <configuration>
                         <source>${java.source}</source>
                     </configuration>
@@ -203,31 +244,37 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-project-info-reports-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>${maven-project-info-reports-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0.0-M5</version>
+                    <version>${maven-release-plugin.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>${maven-resources-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.10.0</version>
+                    <version>${maven-site-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.2.1</version>
+                    <version>${maven-source-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M5</version>
+                    <version>${maven-surefire-plugin.version}</version>
                 </plugin>
 
                 <!-- others -->
@@ -235,13 +282,33 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>5.1.4</version>
+                    <version>${maven-bundle-plugin.version}</version>
                     <extensions>true</extensions>
                 </plugin>
             </plugins>
         </pluginManagement>
 
         <plugins>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>${mavenVersion}</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
