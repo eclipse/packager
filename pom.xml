@@ -74,6 +74,7 @@
         <java.release>8</java.release>
         <java.source>1.8</java.source>
 
+        <guava.version>31.1-jre</guava.version>
         <junit.jupiter.version>5.4.0</junit.jupiter.version>
         <logback.version>1.2.11</logback.version>
     </properties>
@@ -105,7 +106,7 @@
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>27.1-jre</version>
+                <version>${guava.version}</version>
                 <exclusions>
                     <exclusion>
                         <groupId>com.google.guava</groupId>
