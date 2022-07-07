@@ -16,6 +16,7 @@ package org.eclipse.packager.rpm.info;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class RpmInformation
@@ -68,6 +69,30 @@ public class RpmInformation
         {
             this.epoch = epoch;
         }
+
+        @Override
+        public boolean equals ( final Object obj )
+        {
+            if ( this == obj )
+            {
+                return true;
+            }
+
+            if ( obj == null || getClass () != obj.getClass () )
+            {
+                return false;
+            }
+
+            Version that = (Version)obj;
+            return Objects.equals ( version, that.version ) && Objects.equals ( release, that.release )
+                    && Objects.equals ( epoch, that.epoch );
+        }
+
+        @Override
+        public int hashCode ()
+        {
+            return Objects.hash ( version, release, epoch );
+        }
     }
 
     public static class Changelog
@@ -119,6 +144,28 @@ public class RpmInformation
             this.text = text;
         }
 
+        @Override
+        public boolean equals ( final Object obj )
+        {
+            if ( this == obj )
+            {
+                return true;
+            }
+
+            if ( obj == null || getClass () != obj.getClass () )
+            {
+                return false;
+            }
+
+            Changelog that = (Changelog)obj;
+            return timestamp == that.timestamp && Objects.equals ( author, that.author ) && Objects.equals ( text, that.text );
+        }
+
+        @Override
+        public int hashCode ()
+        {
+            return Objects.hash ( timestamp, author, text );
+        }
     }
 
     public static class Dependency
@@ -168,6 +215,29 @@ public class RpmInformation
         public void setFlags ( final long flags )
         {
             this.flags = flags;
+        }
+
+        @Override
+        public boolean equals ( final Object obj )
+        {
+            if ( this == obj )
+            {
+                return true;
+            }
+
+            if ( obj == null || getClass () != obj.getClass () )
+            {
+                return false;
+            }
+
+            Dependency that = (Dependency)obj;
+            return flags == that.flags && Objects.equals ( name, that.name ) && Objects.equals ( version, that.version );
+        }
+
+        @Override
+        public int hashCode ()
+        {
+            return Objects.hash ( name, version, flags );
         }
     }
 
