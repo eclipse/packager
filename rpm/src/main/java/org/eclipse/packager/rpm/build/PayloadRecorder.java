@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
+/*
+ * Copyright (c) 2016, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -15,6 +15,7 @@ package org.eclipse.packager.rpm.build;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,6 +30,9 @@ import java.nio.file.StandardOpenOption;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -36,13 +40,19 @@ import org.apache.commons.compress.archivers.cpio.CpioArchiveEntry;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveOutputStream;
 import org.apache.commons.compress.archivers.cpio.CpioConstants;
 import org.apache.commons.compress.utils.CharsetNames;
+import org.eclipse.packager.rpm.RpmTag;
 import org.eclipse.packager.rpm.coding.PayloadCoding;
+import org.eclipse.packager.rpm.header.Header;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CountingOutputStream;
 
 public class PayloadRecorder implements AutoCloseable, PayloadProvider
 {
+    private static final Logger log = LoggerFactory.getLogger ( PayloadRecorder.class );
+
     public static class Result
     {
         private final long size;
@@ -66,7 +76,35 @@ public class PayloadRecorder implements AutoCloseable, PayloadProvider
         }
     }
 
-    private final boolean autoFinish;
+    /**
+     * Run data through the list of processors.
+     */
+    private static class ProcessorStream extends FilterOutputStream
+    {
+        private final Consumer<ByteBuffer> consumer;
+
+        ProcessorStream ( final OutputStream out, final Consumer<ByteBuffer> consumer )
+        {
+            super ( out );
+            this.consumer = consumer;
+        }
+
+        @Override
+        public void write ( int b ) throws IOException
+        {
+            this.consumer.accept ( ByteBuffer.wrap ( new byte[] { (byte)b } ) );
+
+            this.out.write ( b );
+        }
+
+        @Override
+        public void write ( byte[] b, int off, int len ) throws IOException
+        {
+            this.consumer.accept ( ByteBuffer.wrap ( b, off, len ) );
+
+            this.out.write ( b, off, len );
+        }
+    }
 
     private final Path tempFile;
 
@@ -76,48 +114,45 @@ public class PayloadRecorder implements AutoCloseable, PayloadProvider
 
     private final CpioArchiveOutputStream archiveStream;
 
-    private OutputStream fileStream;
+    private final PayloadCoding payloadCoding;
+
+    private final Optional<String> payloadFlags;
+
+    private final DigestAlgorithm fileDigestAlgorithm;
+
+    private final List<PayloadProcessor> processors;
 
     private boolean finished;
 
     private boolean closed;
 
-    private PayloadCoding payloadCoding;
-
-    private Optional<String> payloadFlags;
-
-    private final DigestAlgorithm fileDigestAlgorithm;
-
     public PayloadRecorder () throws IOException
     {
-        this ( true, PayloadCoding.GZIP, null, DigestAlgorithm.MD5 );
+        this ( PayloadCoding.GZIP, null, DigestAlgorithm.MD5, null );
     }
 
-    public PayloadRecorder ( final boolean autoFinish ) throws IOException
+    public PayloadRecorder ( final PayloadCoding payloadCoding, final String payloadFlags, final DigestAlgorithm fileDigestAlgorithm, final List<PayloadProcessor> processors ) throws IOException
     {
-        this ( autoFinish, PayloadCoding.GZIP, null, DigestAlgorithm.MD5 );
-    }
-
-    public PayloadRecorder ( final boolean autoFinish, final PayloadCoding payloadCoding, final String payloadFlags, final DigestAlgorithm fileDigestAlgorithm ) throws IOException
-    {
-        this.autoFinish = autoFinish;
-
         this.fileDigestAlgorithm = fileDigestAlgorithm;
+        if (processors == null )
+        {
+            this.processors = Collections.emptyList ();
+        }
+        else
+        {
+            this.processors = new ArrayList<> ( processors );
+        }
 
         this.tempFile = Files.createTempFile ( "rpm-", null );
 
         try
         {
-            this.fileStream = new BufferedOutputStream ( Files.newOutputStream ( this.tempFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING ) );
-
-            this.payloadCounter = new CountingOutputStream ( this.fileStream );
-
+            final OutputStream fileStream = new BufferedOutputStream ( Files.newOutputStream ( this.tempFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING ) );
+            this.payloadCounter = new CountingOutputStream ( new ProcessorStream ( fileStream, this::forEachCompressedData ));
             this.payloadCoding = payloadCoding;
-
             this.payloadFlags = Optional.ofNullable ( payloadFlags );
 
-            final OutputStream payloadStream = this.payloadCoding.createProvider ().createOutputStream ( this.payloadCounter, this.payloadFlags );
-
+            final OutputStream payloadStream = new ProcessorStream ( this.payloadCoding.createProvider ().createOutputStream ( this.payloadCounter, this.payloadFlags ), this::forEachRawData );
             this.archiveCounter = new CountingOutputStream ( payloadStream );
 
             // setup archive stream
@@ -153,7 +188,7 @@ public class PayloadRecorder implements AutoCloseable, PayloadProvider
         MessageDigest digest;
         try
         {
-            digest = createDigest ();
+            digest = this.fileDigestAlgorithm.createDigest ();
         }
         catch ( final NoSuchAlgorithmException e )
         {
@@ -194,7 +229,7 @@ public class PayloadRecorder implements AutoCloseable, PayloadProvider
         MessageDigest digest;
         try
         {
-            digest = createDigest ();
+            digest = this.fileDigestAlgorithm.createDigest ();
             digest.update ( data.slice () );
         }
         catch ( final NoSuchAlgorithmException e )
@@ -215,11 +250,6 @@ public class PayloadRecorder implements AutoCloseable, PayloadProvider
         this.archiveStream.closeArchiveEntry ();
 
         return new Result ( size, digest.digest () );
-    }
-
-    private MessageDigest createDigest () throws NoSuchAlgorithmException
-    {
-        return MessageDigest.getInstance ( this.fileDigestAlgorithm.getAlgorithm () );
     }
 
     public Result addFile ( final String targetPath, final InputStream stream ) throws IOException
@@ -281,23 +311,38 @@ public class PayloadRecorder implements AutoCloseable, PayloadProvider
 
     /**
      * Stop recording payload data
+     *
      * <p>
-     * If the recorder is already finished then nothing will happen
+     * If the recorder is already finished it will throw an {@link IllegalStateException}.
      * </p>
      *
+     * @return The additional headers, as generated by the payload processors.
      * @throws IOException
      *             in case of IO errors
+     * @throws IllegalStateException
+     *              in case the finish was already called
      */
-    public void finish () throws IOException
+    public Header<RpmTag> finish () throws IOException
     {
         if ( this.finished )
         {
-            return;
+            throw new IllegalStateException("Payload recorder is already finished");
         }
 
         this.finished = true;
 
+        // close the archive stream (flushes)
+
         this.archiveStream.close ();
+
+        // finish processors
+
+        final Header<RpmTag> headers = new Header<> ();
+        forEach ( processor -> processor.finish ( headers ) );
+
+        // return additional payload headers
+
+        return headers;
     }
 
     @Override
@@ -344,14 +389,9 @@ public class PayloadRecorder implements AutoCloseable, PayloadProvider
 
     private void checkFinished ( final boolean allowAutoFinish ) throws IOException
     {
-        if ( !this.finished && this.autoFinish && allowAutoFinish )
-        {
-            finish ();
-        }
-
         if ( !this.finished )
         {
-            throw new IllegalStateException ( "Recoderd has to be finished before accessing payload information or data" );
+            throw new IllegalStateException ( "Recording has to be finished before accessing payload information or data" );
         }
         if ( this.closed )
         {
@@ -364,20 +404,39 @@ public class PayloadRecorder implements AutoCloseable, PayloadProvider
     {
         this.closed = true;
 
-        try
-        {
-            // simply close the file stream
+        Files.deleteIfExists ( this.tempFile );
+    }
 
-            if ( this.fileStream != null )
-            {
-                this.fileStream.close ();
-            }
-        }
-        finally
-        {
-            // and delete the temp file
+    /**
+     * Run code for each payload processor.
+     *
+     * @param consumer The code to run.
+     */
+    private void forEach ( final Consumer<PayloadProcessor> consumer )
+    {
+        this.processors.forEach ( consumer );
+    }
 
-            Files.deleteIfExists ( this.tempFile );
-        }
+    /**
+     * Add data to each payload processor.
+     *
+     * @param data The raw data to process.
+     */
+    private void forEachRawData ( final ByteBuffer data )
+    {
+        log.info ( "process raw data - len: {}", data.limit () );
+        forEach ( processor -> processor.feedRawPayloadData ( data.slice () ) );
+    }
+
+    /**
+     * Add data to each payload processor.
+     *
+     * @param data The compressed to process.
+     */
+    private void forEachCompressedData ( final ByteBuffer data )
+    {
+        log.info ( "process compressed data - len: {}", data.limit () );
+        forEach ( processor -> processor.feedCompressedPayloadData ( data.slice () ) );
     }
 }
+

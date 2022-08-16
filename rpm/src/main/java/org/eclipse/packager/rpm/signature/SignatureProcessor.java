@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -39,13 +39,13 @@ public interface SignatureProcessor
      * @param archiveSize
      *            the size of the uncompressed payload archive
      */
-    public default void init ( final long archiveSize )
+    default void init ( final long archiveSize )
     {
     }
 
-    public void feedHeader ( ByteBuffer header );
+    void feedHeader ( ByteBuffer header );
 
-    public void feedPayloadData ( ByteBuffer data );
+    void feedPayloadData ( ByteBuffer data );
 
-    public void finish ( Header<RpmSignatureTag> signature );
+    void finish ( Header<RpmSignatureTag> signature );
 }

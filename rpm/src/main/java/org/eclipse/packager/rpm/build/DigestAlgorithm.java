@@ -14,6 +14,8 @@
 package org.eclipse.packager.rpm.build;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 import org.bouncycastle.bcpg.HashAlgorithmTags;
 
@@ -62,5 +64,10 @@ public enum DigestAlgorithm
         }
 
         throw new IOException ( String.format ( "Unknown tag: %d", tag ) );
+    }
+
+    public MessageDigest createDigest() throws NoSuchAlgorithmException
+    {
+        return MessageDigest.getInstance ( getAlgorithm () );
     }
 }

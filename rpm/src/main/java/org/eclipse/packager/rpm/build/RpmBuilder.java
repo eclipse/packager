@@ -764,7 +764,7 @@ public class RpmBuilder implements AutoCloseable
 
         this.targetFile = makeTargetFile ( targetFile );
 
-        this.recorder = new PayloadRecorder ( true, this.options.getPayloadCoding (), this.options.getPayloadFlags (), this.options.getFileDigestAlgorithm () );
+        this.recorder = new PayloadRecorder ( this.options.getPayloadCoding (), this.options.getPayloadFlags (), this.options.getFileDigestAlgorithm (), this.options.getPayloadProcessors () );
 
         addDefaultSignatureProcessors ();
     }
@@ -810,10 +810,8 @@ public class RpmBuilder implements AutoCloseable
 
     /**
      * Fill extra requirements the RPM file itself may have
-     * 
-     * @throws IOException
      */
-    private void fillRequirements () throws IOException
+    private void fillRequirements ()
     {
         this.requirements.add ( new Dependency ( "rpmlib(CompressedFileNames)", "3.0.4-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB ) );
 
@@ -1102,7 +1100,6 @@ public class RpmBuilder implements AutoCloseable
 
         fillProvides ();
         fillRequirements ();
-
         fillHeader ();
 
         final LeadBuilder leadBuilder = new LeadBuilder ( this.name, this.version );
@@ -1113,6 +1110,9 @@ public class RpmBuilder implements AutoCloseable
         {
             this.headerCustomizer.accept ( this.header );
         }
+
+        final Header<RpmTag> additionalHeaders = this.recorder.finish ();
+        this.header.putAll ( additionalHeaders );
 
         try ( final RpmWriter writer = new RpmWriter ( this.targetFile, leadBuilder, this.header, this.options.getHeaderCharset (), this.options.getOpenOptions () ) )
         {

@@ -103,7 +103,7 @@ public class RpmWriter implements AutoCloseable
         this.signatureProcessors.addAll ( signatureProcessors );
     }
 
-    public void setPayload ( final PayloadProvider payloadProvider ) throws IOException
+    public void setPayload ( final PayloadProvider payloadProvider )
     {
         checkNotFinished ();
 
@@ -185,7 +185,7 @@ public class RpmWriter implements AutoCloseable
     {
         // render header
 
-        final ByteBuffer buffer = Headers.render ( header.makeEntries (), false, Rpms.IMMUTABLE_TAG_SIGNATURE );
+        final ByteBuffer buffer = Headers.render ( header.makeEntries (), true, Rpms.IMMUTABLE_TAG_SIGNATURE );
 
         final int payloadSize = buffer.remaining ();
 
