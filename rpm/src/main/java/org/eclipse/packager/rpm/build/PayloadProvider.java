@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -31,7 +31,7 @@ public interface PayloadProvider
      * @throws IOException
      *             if opening the channels fails
      */
-    public ReadableByteChannel openChannel () throws IOException;
+    ReadableByteChannel openChannel () throws IOException;
 
     /**
      * The number of bytes of the compressed archive file
@@ -40,7 +40,7 @@ public interface PayloadProvider
      * @throws IOException
      *             if anything goes wrong
      */
-    public long getPayloadSize () throws IOException;
+    long getPayloadSize () throws IOException;
 
     /**
      * Get the number of bytes of the uncompressed payload archive
@@ -49,7 +49,7 @@ public interface PayloadProvider
      * @throws IOException
      *             if anything goes wrong
      */
-    public long getArchiveSize () throws IOException;
+    long getArchiveSize () throws IOException;
 
     /**
      * The compression method for this compressed archive file

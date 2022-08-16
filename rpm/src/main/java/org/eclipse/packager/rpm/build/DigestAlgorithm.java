@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
+/*
+ * Copyright (c) 2015, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -31,11 +31,11 @@ public enum DigestAlgorithm
     SHA512 ( "SHA-512", HashAlgorithmTags.SHA512 ),
     SHA224 ( "SHA-224", HashAlgorithmTags.SHA224 );
 
-    private String algorithm;
+    private final String algorithm;
 
-    private int tag;
+    private final int tag;
 
-    private DigestAlgorithm ( final String algorithm, final int tag )
+    DigestAlgorithm ( final String algorithm, final int tag )
     {
         this.algorithm = algorithm;
         this.tag = tag;

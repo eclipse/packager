@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -266,12 +266,12 @@ public class RpmWriter implements AutoCloseable
             if ( payloadChannel instanceof FileChannel && !isForceCopy () )
             {
                 final long count = copyFileChannel ( (FileChannel)payloadChannel, this.file );
-                debug ( "transfered - %s", count );
+                debug ( "transferred - %s", count );
             }
             else
             {
                 final long count = ByteStreams.copy ( payloadChannel, this.file );
-                debug ( "copyied - %s", count );
+                debug ( "copied - %s", count );
             }
         }
 
