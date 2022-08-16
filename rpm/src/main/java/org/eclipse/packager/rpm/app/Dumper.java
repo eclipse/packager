@@ -177,7 +177,7 @@ public class Dumper
         }
     }
 
-    private static void dump ( final Path path ) throws IOException
+    private static void dump ( final Path path )
     {
         if ( !Files.exists ( path ) )
         {
