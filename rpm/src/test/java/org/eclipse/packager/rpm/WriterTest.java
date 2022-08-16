@@ -29,10 +29,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.bouncycastle.openpgp.PGPException;
-import org.eclipse.packager.rpm.FileFlags;
-import org.eclipse.packager.rpm.HashAlgorithm;
-import org.eclipse.packager.rpm.RpmTag;
-import org.eclipse.packager.rpm.RpmVersion;
 import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.build.BuilderContext;
 import org.eclipse.packager.rpm.build.LeadBuilder;
@@ -96,11 +92,11 @@ public class WriterTest
         requirements.add ( new Dependency ( "rpmlib(CompressedFileNames)", "3.0.4-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB ) );
         Dependencies.putRequirements ( header, requirements );
 
-        try ( PayloadRecorder recorder = new PayloadRecorder () )
+        try ( PayloadRecorder.Finished finished = new PayloadRecorder ().finish() )
         {
             try ( RpmWriter writer = new RpmWriter ( rpm1, new LeadBuilder ( "test1", new RpmVersion ( "1.0.0" ) ), header ) )
             {
-                writer.setPayload ( recorder );
+                writer.setPayload ( finished );
             }
         }
 
@@ -152,9 +148,11 @@ public class WriterTest
 
             header.putInt ( RpmTag.SIZE, installedSize );
 
-            try ( RpmWriter writer = new RpmWriter ( outFile, new LeadBuilder ( "test3", new RpmVersion ( "1.0.0", "1" ) ), header ) )
+            try ( final PayloadRecorder.Finished finished = payload.finish();
+                  final RpmWriter writer = new RpmWriter ( outFile, new LeadBuilder ( "test3", new RpmVersion ( "1.0.0", "1" ) ), header );
+                  )
             {
-                writer.setPayload ( payload );
+                writer.setPayload ( finished );
             }
         }
 

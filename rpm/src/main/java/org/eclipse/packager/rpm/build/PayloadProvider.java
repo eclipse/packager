@@ -77,4 +77,13 @@ public interface PayloadProvider
      */
     DigestAlgorithm getFileDigestAlgorithm ();
 
+    /**
+     * Get additional header tags.
+     * <p>
+     * An implementation must always return a new instance, but also every call must provide the same content.
+     */
+    default Header<RpmTag> getAdditionalHeader ()
+    {
+        return new Header<>();
+    }
 }
