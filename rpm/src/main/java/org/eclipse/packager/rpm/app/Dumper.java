@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -45,6 +45,11 @@ import org.eclipse.packager.rpm.parse.RpmInputStream;
 
 public class Dumper
 {
+    private static final Boolean SKIP_META = Boolean.getBoolean("skipMeta");
+    private static final Boolean SKIP_SIGNATURES = Boolean.getBoolean("skipSignatures");
+    private static final Boolean SKIP_HEADERS = Boolean.getBoolean("skipHeaders");
+    private static final Boolean SKIP_PAYLOAD = Boolean.getBoolean("skipPayload");
+
     public static String dumpFlag ( final int value, final IntFunction<Optional<?>> func )
     {
         final Optional<?> flag = func.apply ( value );
@@ -60,31 +65,46 @@ public class Dumper
 
     public static void dumpAll ( final RpmInputStream in ) throws IOException
     {
-        final RpmLead lead = in.getLead ();
-        System.out.format ( "Version: %s.%s%n", lead.getMajor (), lead.getMinor () );
-        System.out.format ( "Name: %s%n", lead.getName () );
-        System.out.format ( "Signature Version: %s%n", lead.getSignatureVersion () );
-        System.out.format ( "Type: %s, Arch: %s, OS: %s%n", dumpFlag ( lead.getType (), Type::fromValue ), dumpFlag ( lead.getArchitecture (), Architecture::fromValue ), dumpFlag ( lead.getOperatingSystem (), OperatingSystem::fromValue ) );
+        final RpmLead lead = in.getLead();
 
-        dumpHeader ( "Signature", in.getSignatureHeader (), tag -> RpmSignatureTag.find ( tag ), false );
-        dumpHeader ( "Payload", in.getPayloadHeader (), tag -> RpmTag.find ( tag ), false );
-
-        final CpioArchiveInputStream cpio = in.getCpioStream ();
-
-        CpioArchiveEntry entry;
-        while ( ( entry = cpio.getNextCPIOEntry () ) != null )
+        if ( !SKIP_META )
         {
-            dumpEntry ( entry );
+            System.out.format ( "Version: %s.%s%n", lead.getMajor (), lead.getMinor () );
+            System.out.format ( "Name: %s%n", lead.getName () );
+            System.out.format ( "Signature Version: %s%n", lead.getSignatureVersion () );
+            System.out.format ( "Type: %s, Arch: %s, OS: %s%n", dumpFlag ( lead.getType (), Type::fromValue ), dumpFlag ( lead.getArchitecture (), Architecture::fromValue ), dumpFlag ( lead.getOperatingSystem (), OperatingSystem::fromValue ) );
         }
 
-        dumpGroup ( in, "Require", RpmTag.REQUIRE_NAME, RpmTag.REQUIRE_VERSION, RpmTag.REQUIRE_FLAGS );
-        dumpGroup ( in, "Provide", RpmTag.PROVIDE_NAME, RpmTag.PROVIDE_VERSION, RpmTag.PROVIDE_FLAGS );
-        dumpGroup ( in, "Conflict", RpmTag.CONFLICT_NAME, RpmTag.CONFLICT_VERSION, RpmTag.CONFLICT_FLAGS );
-        dumpGroup ( in, "Obsolete", RpmTag.OBSOLETE_NAME, RpmTag.OBSOLETE_VERSION, RpmTag.OBSOLETE_FLAGS );
-        dumpGroup ( in, "Suggest", RpmTag.SUGGEST_NAME, RpmTag.SUGGEST_VERSION, RpmTag.SUGGEST_FLAGS );
-        dumpGroup ( in, "Recommend", RpmTag.RECOMMEND_NAME, RpmTag.RECOMMEND_VERSION, RpmTag.RECOMMEND_FLAGS );
-        dumpGroup ( in, "Supplement", RpmTag.SUPPLEMENT_NAME, RpmTag.SUPPLEMENT_VERSION, RpmTag.SUPPLEMENT_FLAGS );
-        dumpGroup ( in, "Enhance", RpmTag.ENHANCE_NAME, RpmTag.ENHANCE_VERSION, RpmTag.ENHANCE_FLAGS );
+        if ( !SKIP_SIGNATURES )
+        {
+            dumpHeader ( "Signature", in.getSignatureHeader (), RpmSignatureTag::find, false );
+        }
+        if ( !SKIP_HEADERS )
+        {
+            dumpHeader ( "Payload", in.getPayloadHeader (), RpmTag::find, false );
+        }
+
+        if ( !SKIP_PAYLOAD )
+        {
+            final CpioArchiveInputStream cpio = in.getCpioStream ();
+            CpioArchiveEntry entry;
+            while ( ( entry = cpio.getNextCPIOEntry () ) != null )
+            {
+                dumpEntry ( entry );
+            }
+        }
+
+        if ( !SKIP_META )
+        {
+            dumpGroup ( in, "Require", RpmTag.REQUIRE_NAME, RpmTag.REQUIRE_VERSION, RpmTag.REQUIRE_FLAGS );
+            dumpGroup ( in, "Provide", RpmTag.PROVIDE_NAME, RpmTag.PROVIDE_VERSION, RpmTag.PROVIDE_FLAGS );
+            dumpGroup ( in, "Conflict", RpmTag.CONFLICT_NAME, RpmTag.CONFLICT_VERSION, RpmTag.CONFLICT_FLAGS );
+            dumpGroup ( in, "Obsolete", RpmTag.OBSOLETE_NAME, RpmTag.OBSOLETE_VERSION, RpmTag.OBSOLETE_FLAGS );
+            dumpGroup ( in, "Suggest", RpmTag.SUGGEST_NAME, RpmTag.SUGGEST_VERSION, RpmTag.SUGGEST_FLAGS );
+            dumpGroup ( in, "Recommend", RpmTag.RECOMMEND_NAME, RpmTag.RECOMMEND_VERSION, RpmTag.RECOMMEND_FLAGS );
+            dumpGroup ( in, "Supplement", RpmTag.SUPPLEMENT_NAME, RpmTag.SUPPLEMENT_VERSION, RpmTag.SUPPLEMENT_FLAGS );
+            dumpGroup ( in, "Enhance", RpmTag.ENHANCE_NAME, RpmTag.ENHANCE_VERSION, RpmTag.ENHANCE_FLAGS );
+        }
 
     }
 
