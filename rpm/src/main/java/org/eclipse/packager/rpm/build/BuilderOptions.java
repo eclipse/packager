@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
+/*
+ * Copyright (c) 2016, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,7 +17,11 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.OpenOption;
 import java.nio.file.StandardOpenOption;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.eclipse.packager.rpm.coding.PayloadCoding;
 
@@ -44,8 +48,18 @@ public class BuilderOptions
 
     private Charset headerCharset = StandardCharsets.UTF_8;
 
+    private List<PayloadProcessor> payloadProcessors = new LinkedList<>();
+
     public BuilderOptions ()
     {
+        try
+        {
+            this.payloadProcessors.add ( PayloadProcessors.payloadDigest ( DigestAlgorithm.SHA256 ) );
+        }
+        catch ( final Exception e )
+        {
+            // We silently ignore the case that SHA1 isn't available
+        }
     }
 
     public BuilderOptions ( final BuilderOptions other )
@@ -57,6 +71,7 @@ public class BuilderOptions
         setPayloadFlags ( other.payloadFlags );
         setFileDigestAlgorithm ( other.fileDigestAlgorithm );
         setHeaderCharset ( other.headerCharset );
+        setPayloadProcessors ( other.payloadProcessors );
     }
 
     public LongMode getLongMode ()
@@ -135,5 +150,25 @@ public class BuilderOptions
     public void setHeaderCharset ( final Charset headerCharset )
     {
         this.headerCharset = headerCharset == null ? StandardCharsets.UTF_8 : headerCharset;
+    }
+
+    public List<PayloadProcessor> getPayloadProcessors ()
+    {
+        return Collections.unmodifiableList ( this.payloadProcessors );
+    }
+
+    public void setPayloadProcessors ( final List<PayloadProcessor> payloadProcessors )
+    {
+        this.payloadProcessors = new ArrayList<>(payloadProcessors);
+    }
+
+    public void addPayloadProcessor ( final PayloadProcessor processor )
+    {
+        this.payloadProcessors.add ( processor );
+    }
+
+    public void clearPayloadProcessors ()
+    {
+        this.payloadProcessors.clear ();
     }
 }

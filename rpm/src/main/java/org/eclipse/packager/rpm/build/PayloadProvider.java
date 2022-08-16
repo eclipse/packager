@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2016, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -17,7 +17,9 @@ import java.io.IOException;
 import java.nio.channels.ReadableByteChannel;
 import java.util.Optional;
 
+import org.eclipse.packager.rpm.RpmTag;
 import org.eclipse.packager.rpm.coding.PayloadCoding;
+import org.eclipse.packager.rpm.header.Header;
 
 public interface PayloadProvider
 {
@@ -74,4 +76,5 @@ public interface PayloadProvider
      *         {@link org.bouncycastle.bcpg.HashAlgorithmTags}
      */
     DigestAlgorithm getFileDigestAlgorithm ();
+
 }

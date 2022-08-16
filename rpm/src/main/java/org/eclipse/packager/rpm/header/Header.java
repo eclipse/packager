@@ -38,19 +38,19 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
     @FunctionalInterface
     public interface ArrayAllocator<T>
     {
-        public T[] allocate ( int length );
+        T[] allocate ( int length );
     }
 
     @FunctionalInterface
     public interface Putter<T extends RpmBaseTag, V>
     {
-        public void put ( Header<T> header, T tag, V[] values );
+        void put ( Header<T> header, T tag, V[] values );
     }
 
     @FunctionalInterface
     public interface ToShortFunction<T>
     {
-        public short applyAsShort ( T value );
+        short applyAsShort ( T value );
     }
 
     private static final class I18nString
@@ -279,6 +279,11 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
         {
             putInt ( intTag, (int)value );
         }
+    }
+
+    public void putAll ( final Header<T> headers )
+    {
+        this.entries.putAll ( headers.entries );
     }
 
     public void remove ( final int tag )
