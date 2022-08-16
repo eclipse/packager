@@ -721,8 +721,6 @@ public class RpmBuilder implements AutoCloseable
 
     private PackageInformation information = new PackageInformation ();
 
-    private boolean hasBuilt;
-
     private int currentInode = 1;
 
     private final List<SignatureProcessor> signatureProcessors = new LinkedList<> ();
@@ -829,18 +827,18 @@ public class RpmBuilder implements AutoCloseable
         this.provides.add ( new Dependency ( this.name, this.version.toString (), RpmDependencyFlags.EQUAL ) );
     }
 
-    private void fillHeader ()
+    private void fillHeader ( final PayloadRecorder.Finished finished )
     {
         this.header.putString ( RpmTag.PAYLOAD_FORMAT, "cpio" );
 
-        if ( this.recorder.getPayloadCoding () != null )
+        if ( finished.getPayloadCoding () != null )
         {
-            this.header.putString ( RpmTag.PAYLOAD_CODING, this.recorder.getPayloadCoding ().getValue () );
+            this.header.putString ( RpmTag.PAYLOAD_CODING, finished.getPayloadCoding ().getValue () );
         }
 
-        if ( this.recorder.getPayloadFlags ().isPresent () )
+        if ( finished.getPayloadFlags ().isPresent () )
         {
-            this.header.putString ( RpmTag.PAYLOAD_FLAGS, this.recorder.getPayloadFlags ().get () );
+            this.header.putString ( RpmTag.PAYLOAD_FLAGS, finished.getPayloadFlags ().get () );
         }
 
         this.header.putStringArray ( 100, "C" );
@@ -959,6 +957,10 @@ public class RpmBuilder implements AutoCloseable
         {
             this.header.putSize ( 0, RpmTag.SIZE, RpmTag.LONGSIZE );
         }
+
+        // add additional headers
+
+        this.header.putAll ( finished.getAdditionalHeader() );
     }
 
     private static void putNumber ( final LongMode longMode, final Header<RpmTag> header, final Collection<FileEntry> files, final RpmTag tag, final ToLongFunction<FileEntry> func )
@@ -1091,33 +1093,25 @@ public class RpmBuilder implements AutoCloseable
      */
     public void build () throws IOException
     {
-        if ( this.hasBuilt )
+        try ( final PayloadRecorder.Finished finished = this.recorder.finish () )
         {
-            throw new IllegalStateException ( "RPM file has already been built. Can only be built once." );
-        }
+            fillProvides ();
+            fillRequirements ();
+            fillHeader ( finished );
 
-        this.hasBuilt = true;
+            final LeadBuilder leadBuilder = new LeadBuilder ( this.name, this.version );
 
-        fillProvides ();
-        fillRequirements ();
-        fillHeader ();
+            leadBuilder.fillFlagsFromHeader ( this.header, createLeadArchitectureMapper (), createLeadOperatingSystemMapper () );
 
-        final LeadBuilder leadBuilder = new LeadBuilder ( this.name, this.version );
+            if ( this.headerCustomizer != null)
+            {
+                this.headerCustomizer.accept(this.header);
+            }
 
-        leadBuilder.fillFlagsFromHeader ( this.header, createLeadArchitectureMapper (), createLeadOperatingSystemMapper () );
-
-        if ( this.headerCustomizer != null )
-        {
-            this.headerCustomizer.accept ( this.header );
-        }
-
-        final Header<RpmTag> additionalHeaders = this.recorder.finish ();
-        this.header.putAll ( additionalHeaders );
-
-        try ( final RpmWriter writer = new RpmWriter ( this.targetFile, leadBuilder, this.header, this.options.getHeaderCharset (), this.options.getOpenOptions () ) )
-        {
-            writer.addAllSignatureProcessors ( this.signatureProcessors );
-            writer.setPayload ( this.recorder );
+            try ( final RpmWriter writer = new RpmWriter ( this.targetFile, leadBuilder, this.header, this.options.getHeaderCharset (), this.options.getOpenOptions() ) ) {
+                writer.addAllSignatureProcessors ( this.signatureProcessors );
+                writer.setPayload ( finished );
+            }
         }
     }
 
