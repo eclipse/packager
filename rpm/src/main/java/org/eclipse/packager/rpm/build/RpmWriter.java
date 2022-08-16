@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
+ * Copyright (c) 2015, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -292,14 +292,14 @@ public class RpmWriter implements AutoCloseable
 
     private static long copyFileChannel ( final FileChannel fileChannel, final FileChannel file ) throws IOException
     {
-        long remaning = fileChannel.size ();
+        long remaining = fileChannel.size ();
         long position = 0;
 
-        while ( remaning > 0 )
+        while ( remaining > 0 )
         {
             // transfer next chunk
 
-            final long rc = fileChannel.transferTo ( position, remaning, file );
+            final long rc = fileChannel.transferTo ( position, remaining, file );
 
             // check for negative result
 
@@ -308,7 +308,7 @@ public class RpmWriter implements AutoCloseable
                 throw new IOException ( String.format ( "Failed to transfer bytes: rc = %s", rc ) );
             }
 
-            debug ( "transferTo - position: %s, size: %s => rc: %s", position, remaning, rc );
+            debug ( "transferTo - position: %s, size: %s => rc: %s", position, remaining, rc );
 
             // we should never get zero back, but check anyway
 
@@ -320,12 +320,12 @@ public class RpmWriter implements AutoCloseable
             // update state
 
             position += rc;
-            remaning -= rc;
+            remaining -= rc;
         }
 
         // final check if we got it all
 
-        if ( remaning > 0 )
+        if ( remaining > 0 )
         {
             throw new IOException ( "Failed to transfer full content" );
         }
