@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
+/*
+ * Copyright (c) 2015, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -19,6 +19,7 @@ import java.util.Map;
 public enum RpmSignatureTag implements RpmBaseTag
 {
     PUBKEYS ( 266 ),
+    DSAHEADER ( 267 ),
     RSAHEADER ( 268 ),
     SHA1HEADER ( 269 ),
     LONGARCHIVESIZE ( 271 ),
@@ -30,9 +31,9 @@ public enum RpmSignatureTag implements RpmBaseTag
     PAYLOAD_SIZE ( 1007 ),
     LONGSIZE ( 5009 );
 
-    private Integer value;
+    private final Integer value;
 
-    private RpmSignatureTag ( final Integer value )
+    RpmSignatureTag ( final Integer value )
     {
         this.value = value;
     }
