@@ -1,5 +1,5 @@
-/**
- * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
+/*
+ * Copyright (c) 2015, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
  * information regarding copyright ownership.
@@ -25,11 +25,11 @@ public enum PayloadCoding
     ZSTD ( "zstd", ZstdPayloadCoding::new ),
     XZ ( "xz", XZPayloadCoding::new );
 
-    private String value;
+    private final String value;
 
-    private Supplier<PayloadCodingProvider> newInstanceSupplier;
+    private final Supplier<PayloadCodingProvider> newInstanceSupplier;
 
-    private PayloadCoding ( final String value, final Supplier<PayloadCodingProvider> newInstanceSupplier )
+    PayloadCoding ( final String value, final Supplier<PayloadCodingProvider> newInstanceSupplier )
     {
         this.value = value;
         this.newInstanceSupplier = newInstanceSupplier;
