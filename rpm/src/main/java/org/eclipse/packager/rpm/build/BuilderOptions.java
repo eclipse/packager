@@ -159,7 +159,8 @@ public class BuilderOptions
 
     public void setPayloadProcessors ( final List<PayloadProcessor> payloadProcessors )
     {
-        this.payloadProcessors = new ArrayList<>(payloadProcessors);
+        // we create a copy of the list to prevent external changes to our state.
+        this.payloadProcessors = new ArrayList<> ( payloadProcessors );
     }
 
     public void addPayloadProcessor ( final PayloadProcessor processor )

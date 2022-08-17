@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, 2022 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -36,18 +36,20 @@ public class RsaSignatureProcessor implements SignatureProcessor
 
     private final PGPSignatureGenerator signatureGenerator;
 
-    protected RsaSignatureProcessor(final PGPPrivateKey privateKey, final int hashAlgorithm )
+    protected RsaSignatureProcessor ( final PGPPrivateKey privateKey, final int hashAlgorithm )
     {
         Objects.requireNonNull ( privateKey );
 
-        final BcPGPContentSignerBuilder contentSignerBuilder = new BcPGPContentSignerBuilder ( privateKey.getPublicKeyPacket ().getAlgorithm (), hashAlgorithm);
+        final BcPGPContentSignerBuilder contentSignerBuilder = new BcPGPContentSignerBuilder ( privateKey.getPublicKeyPacket ().getAlgorithm (), hashAlgorithm );
         this.signatureGenerator = new PGPSignatureGenerator ( contentSignerBuilder );
 
-        try {
-            this.signatureGenerator.init ( PGPSignature.BINARY_DOCUMENT, privateKey);
+        try
+        {
+            this.signatureGenerator.init ( PGPSignature.BINARY_DOCUMENT, privateKey );
         }
-        catch ( Exception e ) {
-            throw new RuntimeException(e);
+        catch ( Exception e )
+        {
+            throw new RuntimeException ( e );
         }
     }
 
@@ -100,6 +102,5 @@ public class RsaSignatureProcessor implements SignatureProcessor
         {
             throw new RuntimeException(e);
         }
-
     }
 }

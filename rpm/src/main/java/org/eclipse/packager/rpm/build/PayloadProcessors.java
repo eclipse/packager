@@ -61,7 +61,7 @@ public class PayloadProcessors {
                 final String compressed = Hex.toHexString ( digestCompressed.digest () );
                 header.putStringArray ( RpmTag.PAYLOAD_DIGEST, compressed );
                 header.putStringArray ( RpmTag.PAYLOAD_DIGEST_ALT, raw );
-                header.putInt ( RpmTag.PAYLOAD_DIGEST_ALGO, algorithm.getTag() );
+                header.putInt ( RpmTag.PAYLOAD_DIGEST_ALGO, algorithm.getTag () );
             }
         };
     }

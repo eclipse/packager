@@ -960,7 +960,7 @@ public class RpmBuilder implements AutoCloseable
 
         // add additional headers
 
-        this.header.putAll ( finished.getAdditionalHeader() );
+        this.header.putAll ( finished.getAdditionalHeader () );
     }
 
     private static void putNumber ( final LongMode longMode, final Header<RpmTag> header, final Collection<FileEntry> files, final RpmTag tag, final ToLongFunction<FileEntry> func )
@@ -1103,12 +1103,12 @@ public class RpmBuilder implements AutoCloseable
 
             leadBuilder.fillFlagsFromHeader ( this.header, createLeadArchitectureMapper (), createLeadOperatingSystemMapper () );
 
-            if ( this.headerCustomizer != null)
+            if ( this.headerCustomizer != null )
             {
-                this.headerCustomizer.accept(this.header);
+                this.headerCustomizer.accept ( this.header );
             }
 
-            try ( final RpmWriter writer = new RpmWriter ( this.targetFile, leadBuilder, this.header, this.options.getHeaderCharset (), this.options.getOpenOptions() ) ) {
+            try ( final RpmWriter writer = new RpmWriter ( this.targetFile, leadBuilder, this.header, this.options.getHeaderCharset (), this.options.getOpenOptions () ) ) {
                 writer.addAllSignatureProcessors ( this.signatureProcessors );
                 writer.setPayload ( finished );
             }
