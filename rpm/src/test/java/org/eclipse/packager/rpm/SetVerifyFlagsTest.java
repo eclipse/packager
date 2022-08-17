@@ -49,11 +49,14 @@ class SetVerifyFlagsTest {
     }
 
     private static final String DIRNAME = "/opt/testing/";
+
     private static final String NAME_myconf = "my.conf";
+
     private static final String NAME_myreadme = "readme.txt";
 
     /**
-     * Firstly, writes a RPM file with two file entries having different type flags and different verification flags;
+     * Firstly, writes a RPM file with two file entries having different type flags
+     * and different verification flags;
      * Secondly, read that RPM file and verify the flags.
      */
     @Test
@@ -97,13 +100,13 @@ class SetVerifyFlagsTest {
             Dumper.dumpAll(in);
             final InputHeader<RpmTag> header = in.getPayloadHeader();
             final String[] dirNames = (String[]) header.getTag(RpmTag.DIRNAMES);
-            assertArrayEquals(new String[]{DIRNAME}, dirNames);
+            assertArrayEquals(new String[] { DIRNAME }, dirNames);
             final String[] baseNames = (String[]) header.getTag(RpmTag.BASENAMES);
-            assertArrayEquals(new String[]{NAME_myconf, NAME_myreadme}, baseNames);
+            assertArrayEquals(new String[] { NAME_myconf, NAME_myreadme }, baseNames);
             final Integer[] fileFlags = (Integer[]) header.getTag(RpmTag.FILE_FLAGS);
-            assertArrayEquals(new Integer[]{17, 256}, fileFlags); // 17: CONFIGURATION|NOREPLACE, 256: README
+            assertArrayEquals(new Integer[] { 17, 256 }, fileFlags); // 17: CONFIGURATION|NOREPLACE, 256: README
             final Integer[] fileVerifyFlags = (Integer[]) header.getTag(RpmTag.FILE_VERIFYFLAGS);
-            assertArrayEquals(new Integer[]{24, -1}, fileVerifyFlags); // 24: USER|GROUP, -1: <default>
+            assertArrayEquals(new Integer[] { 24, -1 }, fileVerifyFlags); // 24: USER|GROUP, -1: <default>
         }
     }
 }

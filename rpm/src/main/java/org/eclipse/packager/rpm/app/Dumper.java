@@ -45,8 +45,11 @@ import org.eclipse.packager.rpm.parse.RpmInputStream;
 
 public class Dumper {
     private static final Boolean SKIP_META = Boolean.getBoolean("skipMeta");
+
     private static final Boolean SKIP_SIGNATURES = Boolean.getBoolean("skipSignatures");
+
     private static final Boolean SKIP_HEADERS = Boolean.getBoolean("skipHeaders");
+
     private static final Boolean SKIP_PAYLOAD = Boolean.getBoolean("skipPayload");
 
     public static String dumpFlag(final int value, final IntFunction<Optional<?>> func) {

@@ -76,11 +76,11 @@ public class PackagesTest {
         formatter.appendValue(input, sb);
 
         /*
-        System.out.println ( "Expected ->" );
-        System.out.println ( expected );
-        System.out.println ( "Actual ->" );
-        System.out.println ( sb.toString () );
-        */
+         * System.out.println ( "Expected ->" );
+         * System.out.println ( expected );
+         * System.out.println ( "Actual ->" );
+         * System.out.println ( sb.toString () );
+         */
 
         assertEquals(expected, formatter.formatValue(input));
     }

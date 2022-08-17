@@ -23,9 +23,9 @@ import java.util.Arrays;
 public class Rpms {
     private final static char[] HEX = "0123456789ABCDEF".toCharArray();
 
-    public static final byte[] LEAD_MAGIC = new byte[]{(byte) 0xED, (byte) 0xAB, (byte) 0xEE, (byte) 0xDB};
+    public static final byte[] LEAD_MAGIC = new byte[] { (byte) 0xED, (byte) 0xAB, (byte) 0xEE, (byte) 0xDB };
 
-    public static final byte[] HEADER_MAGIC = new byte[]{(byte) 0x8E, (byte) 0xAD, (byte) 0xE8};
+    public static final byte[] HEADER_MAGIC = new byte[] { (byte) 0x8E, (byte) 0xAD, (byte) 0xE8 };
 
     public static final byte[] EMPTY_128;
 

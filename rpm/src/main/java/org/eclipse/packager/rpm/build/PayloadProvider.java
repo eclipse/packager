@@ -76,9 +76,11 @@ public interface PayloadProvider {
     /**
      * Get additional header tags.
      * <p>
-     * An implementation must always return a new instance, but also every call must provide the same content.
+     * An implementation must always return a new instance, but also every call must
+     * provide the same content.
      *
-     * @return A new instance with the additional header entries. Possibly empty, but never {@code null}.
+     * @return A new instance with the additional header entries. Possibly empty,
+     *         but never {@code null}.
      */
     default Header<RpmTag> getAdditionalHeader() {
         return new Header<>();

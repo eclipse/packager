@@ -51,7 +51,7 @@ public class PathName implements Comparable<PathName> {
         if (this.segments.length <= 1) {
             return "";
         } else {
-            return Arrays.stream(this.segments, 0, this.segments.length - 1 /*exclusive*/).collect(joiner());
+            return Arrays.stream(this.segments, 0, this.segments.length - 1 /* exclusive */).collect(joiner());
         }
     }
 

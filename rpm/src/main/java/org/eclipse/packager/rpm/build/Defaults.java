@@ -30,7 +30,7 @@ final class Defaults {
 
     static final FileInformationProvider<SymbolicLink> SIMPLE_SYMBOLIC_LINK = BuilderContext.simpleProvider(0644);
 
-    static final FileInformationProvider<Object> DEFAULT_MULTI_PROVIDER = BuilderContext.multiProvider(SIMPLE_FILE_PROVIDER, new ProviderRule<?>[]{ //
+    static final FileInformationProvider<Object> DEFAULT_MULTI_PROVIDER = BuilderContext.multiProvider(SIMPLE_FILE_PROVIDER, new ProviderRule<?>[] { //
             new ProviderRule<>(Directory.class, SIMPLE_DIRECTORY_PROVIDER), //
             new ProviderRule<>(SymbolicLink.class, SIMPLE_SYMBOLIC_LINK) //
     });

@@ -118,7 +118,7 @@ public final class RpmInformations {
 
         if (namesVal == null || !(namesVal instanceof String[])) {
             if (namesVal instanceof String) {
-                namesVal = new String[]{(String) namesVal};
+                namesVal = new String[] { (String) namesVal };
             } else {
                 return Collections.emptyList();
             }
@@ -126,7 +126,7 @@ public final class RpmInformations {
 
         if (versionsVal != null && !(versionsVal instanceof String[])) {
             if (versionsVal instanceof String) {
-                versionsVal = new String[]{(String) versionsVal};
+                versionsVal = new String[] { (String) versionsVal };
             } else {
                 throw new IllegalStateException(String.format("Invalid dependencies version format [%s]: %s", versionsTag, versionsVal));
             }
@@ -134,9 +134,9 @@ public final class RpmInformations {
 
         if (flagsVal != null && !(flagsVal instanceof Long[])) {
             if (flagsVal instanceof Long) {
-                flagsVal = new Long[]{(Long) flagsVal};
+                flagsVal = new Long[] { (Long) flagsVal };
             } else if (flagsVal instanceof Integer) {
-                flagsVal = new Long[]{((Integer) flagsVal).longValue()};
+                flagsVal = new Long[] { ((Integer) flagsVal).longValue() };
             } else if (flagsVal instanceof Integer[]) {
                 flagsVal = Arrays.stream((Integer[]) flagsVal).map(Integer::longValue).toArray(Long[]::new);
             } else {

@@ -56,7 +56,8 @@ public interface BinaryPackageBuilder {
      *
      * @param directory the name of the target directory
      * @param entryInformation additional entry information
-     * @throws IOException if the directory information cannot be written to the package
+     * @throws IOException if the directory information cannot be written to the
+     *             package
      */
     public default void addDirectory(final String directory, final EntryInformation entryInformation) throws IOException {
         addDirectory(directory, entryInformation, Optional.empty());
@@ -68,7 +69,8 @@ public interface BinaryPackageBuilder {
      * @param directory the name of the target directory
      * @param entryInformation additional entry information
      * @param timestampSupplier use given time stamp for modification
-     * @throws IOException if the directory information cannot be written to the package
+     * @throws IOException if the directory information cannot be written to the
+     *             package
      */
     public void addDirectory(String directory, EntryInformation entryInformation, Optional<Supplier<Instant>> timestampSupplier) throws IOException;
 }

@@ -32,7 +32,7 @@ public class RpmTagValue {
         }
 
         if (this.value instanceof String) {
-            return Optional.of(new String[]{(String) this.value});
+            return Optional.of(new String[] { (String) this.value });
         }
         if (this.value instanceof String[]) {
             return Optional.of((String[]) this.value);
@@ -68,7 +68,7 @@ public class RpmTagValue {
         }
 
         if (this.value instanceof Integer) {
-            return Optional.of(new Integer[]{(Integer) this.value});
+            return Optional.of(new Integer[] { (Integer) this.value });
         }
         if (this.value instanceof Integer[]) {
             return Optional.of((Integer[]) this.value);
@@ -104,7 +104,7 @@ public class RpmTagValue {
         }
 
         if (this.value instanceof Long) {
-            return Optional.of(new Long[]{(Long) this.value});
+            return Optional.of(new Long[] { (Long) this.value });
         }
         if (this.value instanceof Long[]) {
             return Optional.of((Long[]) this.value);

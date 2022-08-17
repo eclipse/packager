@@ -44,7 +44,7 @@ public class InputStreamTest {
             Assertions.assertEquals("linux", in.getPayloadHeader().getTag(RpmTag.OS));
             Assertions.assertEquals("EPL", in.getPayloadHeader().getTag(RpmTag.LICENSE));
 
-            Assertions.assertArrayEquals(new String[]{ //
+            Assertions.assertArrayEquals(new String[] { //
                     "/etc/", //
                     "/etc/eclipsescada/", //
                     "/etc/profile.d/", //

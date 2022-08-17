@@ -16,8 +16,10 @@ package org.eclipse.packager.rpm;
  * Constants to identify the RPM verification flags.
  * See https://github.com/ctron/rpm-builder/issues/41
  * The name of this enum is questionable.
- * It should rather be "VerifyFlag" (singular), but I leave it this way, cf. {@link FileFlags}.
- * The constants and their value are from http://ftp.rpm.org/api/4.14.0/group__rpmvf.html
+ * It should rather be "VerifyFlag" (singular), but I leave it this way, cf.
+ * {@link FileFlags}.
+ * The constants and their value are from
+ * http://ftp.rpm.org/api/4.14.0/group__rpmvf.html
  *
  * @since 0.15.2
  */

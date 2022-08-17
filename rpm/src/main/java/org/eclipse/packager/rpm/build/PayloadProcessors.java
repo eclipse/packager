@@ -27,12 +27,14 @@ public class PayloadProcessors {
     }
 
     /**
-     * Create the payload digest values for @{link {@link RpmTag#PAYLOAD_DIGEST} and @{link
+     * Create the payload digest values for @{link {@link RpmTag#PAYLOAD_DIGEST}
+     * and @{link
      * {@link RpmTag#PAYLOAD_DIGEST_ALT}}
      *
      * @param algorithm The digest algorithm to use.
      * @return The payload processor
-     * @throws NoSuchAlgorithmException In case the algorithm isn't supported by the JVM.
+     * @throws NoSuchAlgorithmException In case the algorithm isn't supported by the
+     *             JVM.
      */
     public static PayloadProcessor payloadDigest(final DigestAlgorithm algorithm) throws NoSuchAlgorithmException {
         final MessageDigest digestRaw = algorithm.createDigest();

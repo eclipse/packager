@@ -565,7 +565,8 @@ public class RpmBuilder implements AutoCloseable {
         private void customizeVerificationFlags(FileEntry entry, FileInformation information) {
             final Collection<VerifyFlags> informationVerifyFlags = information.getVerifyFlags();
             if (informationVerifyFlags == null) {
-                return; // bail out - entry's verification flag bitmask will remain -1 (meaning: verify everthing)
+                return; // bail out - entry's verification flag bitmask will remain -1 (meaning: verify
+                        // everthing)
             }
             int bitmask = 0;
             for (final VerifyFlags verifyFlag : informationVerifyFlags) {
@@ -897,7 +898,7 @@ public class RpmBuilder implements AutoCloseable {
      * Completely set the current package information
      *
      * @param information the new package information, may be {@code null}, in which
-     *         case the package information is reset to its defaults.
+     *            case the package information is reset to its defaults.
      */
     public void setInformation(final PackageInformation information) {
         this.information = information != null ? information : new PackageInformation();

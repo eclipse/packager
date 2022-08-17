@@ -48,7 +48,8 @@ public class SigningStream extends OutputStream {
      *
      * @param stream the actual output stream
      * @param privateKey the private key to sign with
-     * @param digestAlgorithm the digest algorithm to use, from {@link HashAlgorithmTags}
+     * @param digestAlgorithm the digest algorithm to use, from
+     *            {@link HashAlgorithmTags}
      * @param inline whether to sign inline or just write the signature
      * @param version the optional version which will be in the signature comment
      */
@@ -65,7 +66,8 @@ public class SigningStream extends OutputStream {
      *
      * @param stream the actual output stream
      * @param privateKey the private key to sign with
-     * @param digestAlgorithm the digest algorithm to use, from {@link HashAlgorithmTags}
+     * @param digestAlgorithm the digest algorithm to use, from
+     *            {@link HashAlgorithmTags}
      * @param inline whether to sign inline or just write the signature
      */
     public SigningStream(final OutputStream stream, final PGPPrivateKey privateKey, final int digestAlgorithm, final boolean inline) {
@@ -98,7 +100,7 @@ public class SigningStream extends OutputStream {
 
     @Override
     public void write(final int b) throws IOException {
-        write(new byte[]{(byte) b});
+        write(new byte[] { (byte) b });
     }
 
     @Override

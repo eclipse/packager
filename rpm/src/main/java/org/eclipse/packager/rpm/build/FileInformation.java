@@ -76,9 +76,11 @@ public class FileInformation {
      * See https://github.com/ctron/rpm-builder/issues/41
      * <br>
      * The value null restores the default.
-     * This will result in a bitmask with value -1, so the RPM tool will then verify everything it knows of,
+     * This will result in a bitmask with value -1, so the RPM tool will then verify
+     * everything it knows of,
      * not only what this library knows of.
-     * Thus there is a subtle difference between passing <code>null</code> and passing
+     * Thus there is a subtle difference between passing <code>null</code> and
+     * passing
      * <code>EnumSet.allOf(VerifyFlags.class)</code>
      *
      * @param verifyFlags set of VerifyFlags, maybe null.

@@ -144,7 +144,8 @@ public class DebianPackageWriter implements AutoCloseable, BinaryPackageBuilder 
 
             final TarArchiveEntry entry = new TarArchiveEntry(fileName);
             entry.setSize(contentProvider.getSize());
-            // in case the content provider supplies a modification time itself, use that one
+            // in case the content provider supplies a modification time itself, use that
+            // one
             applyInfo(entry, entryInformation);
             // if the modification time should be overridden, then do it here
             applyTimestamp(entry, timestampSupplier);
@@ -266,7 +267,7 @@ public class DebianPackageWriter implements AutoCloseable, BinaryPackageBuilder 
         final File controlFile = File.createTempFile("control", null);
         try {
             try (GZIPOutputStream gout = new GZIPOutputStream(new FileOutputStream(controlFile));
-                 TarArchiveOutputStream tout = new TarArchiveOutputStream(gout)) {
+                    TarArchiveOutputStream tout = new TarArchiveOutputStream(gout)) {
                 tout.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
 
                 addControlContent(tout, "control", createControlContent(), -1, timestampSupplier);

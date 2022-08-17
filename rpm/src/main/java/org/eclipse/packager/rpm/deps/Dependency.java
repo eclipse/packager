@@ -23,7 +23,8 @@ import java.util.EnumSet;
 import java.util.Set;
 
 public class Dependency implements Comparable<Dependency> {
-    // compare name, version and flags. Without the flag comparison the sort is not stable, which causes unreproducible RPMs.
+    // compare name, version and flags. Without the flag comparison the sort is not
+    // stable, which causes unreproducible RPMs.
     private static final Comparator<Dependency> COMPARATOR = comparing(Dependency::getName).thenComparing(Dependency::getVersion, nullsFirst(naturalOrder())).thenComparing(d -> RpmDependencyFlags.encode(d.getFlags()), naturalOrder());
 
     private final String name;

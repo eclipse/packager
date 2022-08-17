@@ -69,47 +69,47 @@ public class HeaderValue {
 
     void fillFromStore(final ByteBuffer storeData) throws IOException {
         switch (this.type) {
-            case 0: // null value
-                break;
-            case 1: // character
-                this.value = getFromStore(storeData, true, buf -> (char) storeData.get(), size -> new Character[size]);
-                break;
-            case 2: // byte
-                this.value = getFromStore(storeData, true, buf -> buf.get(), size -> new Byte[size]);
-                break;
-            case 3: // 16bit integer
-                this.value = getFromStore(storeData, true, buf -> buf.getShort(), size -> new Short[size]);
-                break;
-            case 4: // 32bit integer
-                this.value = getFromStore(storeData, true, buf -> buf.getInt(), size -> new Integer[size]);
-                break;
-            case 5: // 64bit integer
-                this.value = getFromStore(storeData, true, buf -> buf.getLong(), size -> new Long[size]);
-                break;
-            case 6: // one string
-            {
-                // only one allowed
-                storeData.position(this.index);
-                this.value = makeString(storeData);
-            }
+        case 0: // null value
             break;
-            case 7: // blob
-            {
-                final byte[] data = new byte[this.count];
-                storeData.position(this.index);
-                storeData.get(data);
-                this.value = data;
-            }
+        case 1: // character
+            this.value = getFromStore(storeData, true, buf -> (char) storeData.get(), size -> new Character[size]);
             break;
-            case 8: // string array
-                this.value = getFromStore(storeData, false, buf -> makeString(buf), size -> new String[size]);
-                break;
-            case 9: // i18n string array
-                this.value = getFromStore(storeData, false, buf -> makeString(buf), size -> new String[size]);
-                break;
-            default:
-                this.value = UNKNOWN;
-                break;
+        case 2: // byte
+            this.value = getFromStore(storeData, true, buf -> buf.get(), size -> new Byte[size]);
+            break;
+        case 3: // 16bit integer
+            this.value = getFromStore(storeData, true, buf -> buf.getShort(), size -> new Short[size]);
+            break;
+        case 4: // 32bit integer
+            this.value = getFromStore(storeData, true, buf -> buf.getInt(), size -> new Integer[size]);
+            break;
+        case 5: // 64bit integer
+            this.value = getFromStore(storeData, true, buf -> buf.getLong(), size -> new Long[size]);
+            break;
+        case 6: // one string
+        {
+            // only one allowed
+            storeData.position(this.index);
+            this.value = makeString(storeData);
+        }
+            break;
+        case 7: // blob
+        {
+            final byte[] data = new byte[this.count];
+            storeData.position(this.index);
+            storeData.get(data);
+            this.value = data;
+        }
+            break;
+        case 8: // string array
+            this.value = getFromStore(storeData, false, buf -> makeString(buf), size -> new String[size]);
+            break;
+        case 9: // i18n string array
+            this.value = getFromStore(storeData, false, buf -> makeString(buf), size -> new String[size]);
+            break;
+        default:
+            this.value = UNKNOWN;
+            break;
         }
     }
 

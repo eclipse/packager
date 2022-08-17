@@ -51,7 +51,7 @@ public final class Strings {
 
     public static String bytes(final long amount) {
         if (amount < 1024L) {
-            return bytesPattern.format(new Object[]{amount});
+            return bytesPattern.format(new Object[] { amount });
         }
         if (amount < 1024L * 1024L) {
             return numberPattern1.format(amount / 1024.0) + " KiB";

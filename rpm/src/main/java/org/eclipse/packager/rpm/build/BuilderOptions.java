@@ -83,7 +83,7 @@ public class BuilderOptions {
     public void setOpenOptions(final OpenOption[] openOptions) {
         // always create a new array so that the result is independent of the old array
         if (openOptions == null) {
-            this.openOptions = new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING};
+            this.openOptions = new OpenOption[] { StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING };
         } else {
             this.openOptions = Arrays.copyOf(openOptions, openOptions.length);
         }

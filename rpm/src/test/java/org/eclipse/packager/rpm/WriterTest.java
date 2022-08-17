@@ -141,8 +141,7 @@ public class WriterTest {
             header.putInt(RpmTag.SIZE, installedSize);
 
             try (final PayloadRecorder.Finished finished = payload.finish();
-                 final RpmWriter writer = new RpmWriter(outFile, new LeadBuilder("test3", new RpmVersion("1.0.0", "1")), header);
-            ) {
+                    final RpmWriter writer = new RpmWriter(outFile, new LeadBuilder("test3", new RpmVersion("1.0.0", "1")), header);) {
                 writer.setPayload(finished);
             }
         }

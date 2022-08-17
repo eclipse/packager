@@ -53,7 +53,7 @@ import com.google.common.io.ByteStreams;
  * @author Jens Reimann
  */
 public class RpmWriter implements AutoCloseable {
-    private static final OpenOption[] DEFAULT_OPEN_OPTIONS = new OpenOption[]{StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING};
+    private static final OpenOption[] DEFAULT_OPEN_OPTIONS = new OpenOption[] { StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING };
 
     private final static Logger logger = LoggerFactory.getLogger(RpmWriter.class);
 
