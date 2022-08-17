@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -15,14 +15,12 @@ package org.eclipse.packager.rpm;
 
 import java.util.Optional;
 
-public interface ReadableHeader<T extends RpmBaseTag>
-{
+public interface ReadableHeader<T extends RpmBaseTag> {
     /**
      * Get the value from a header structure
      *
-     * @param tag
-     *            the tag
+     * @param tag the tag
      * @return the optional value
      */
-    public Optional<Object> getValue ( T tag );
+    public Optional<Object> getValue(T tag);
 }

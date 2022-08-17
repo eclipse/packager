@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -24,46 +24,37 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorOutputStream
 import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 
-public class BZip2PayloadCoding implements PayloadCodingProvider
-{
-    protected BZip2PayloadCoding ()
-    {
+public class BZip2PayloadCoding implements PayloadCodingProvider {
+    protected BZip2PayloadCoding() {
     }
 
     @Override
-    public String getCoding ()
-    {
+    public String getCoding() {
         return "bzip2";
     }
 
     @Override
-    public void fillRequirements ( final Consumer<Dependency> requirementsConsumer )
-    {
-        requirementsConsumer.accept ( new Dependency ( "PayloadIsBzip2", "3.0.5-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB ) );
+    public void fillRequirements(final Consumer<Dependency> requirementsConsumer) {
+        requirementsConsumer.accept(new Dependency("PayloadIsBzip2", "3.0.5-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB));
     }
 
     @Override
-    public InputStream createInputStream ( final InputStream in ) throws IOException
-    {
-        return new BZip2CompressorInputStream ( in );
+    public InputStream createInputStream(final InputStream in) throws IOException {
+        return new BZip2CompressorInputStream(in);
     }
 
     @Override
-    public OutputStream createOutputStream ( final OutputStream out, final Optional<String> optionalFlags ) throws IOException
-    {
+    public OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException {
         final String flags;
 
         final int blockSize;
 
-        if ( optionalFlags.isPresent () && ( flags = optionalFlags.get () ).length () > 0 )
-        {
-            blockSize = Integer.parseInt ( flags.substring ( 0, 1 ) );
-        }
-        else
-        {
+        if (optionalFlags.isPresent() && (flags = optionalFlags.get()).length() > 0) {
+            blockSize = Integer.parseInt(flags.substring(0, 1));
+        } else {
             blockSize = BZip2CompressorOutputStream.MAX_BLOCKSIZE;
         }
 
-        return new BZip2CompressorOutputStream ( out, blockSize );
+        return new BZip2CompressorOutputStream(out, blockSize);
     }
 }

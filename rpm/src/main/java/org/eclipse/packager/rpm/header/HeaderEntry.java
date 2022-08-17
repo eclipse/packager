@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -13,8 +13,7 @@
 
 package org.eclipse.packager.rpm.header;
 
-public class HeaderEntry
-{
+public class HeaderEntry {
     private final Type type;
 
     private final int tag;
@@ -23,31 +22,26 @@ public class HeaderEntry
 
     private final byte[] data;
 
-    public HeaderEntry ( final Type type, final int tag, final int count, final byte[] data )
-    {
+    public HeaderEntry(final Type type, final int tag, final int count, final byte[] data) {
         this.type = type;
         this.tag = tag;
         this.count = count;
         this.data = data;
     }
 
-    public Type getType ()
-    {
+    public Type getType() {
         return this.type;
     }
 
-    public int getTag ()
-    {
+    public int getTag() {
         return this.tag;
     }
 
-    public int getCount ()
-    {
+    public int getCount() {
         return this.count;
     }
 
-    public byte[] getData ()
-    {
+    public byte[] getData() {
         return this.data;
     }
 }

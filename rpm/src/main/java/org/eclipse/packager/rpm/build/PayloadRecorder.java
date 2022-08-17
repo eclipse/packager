@@ -47,27 +47,22 @@ import org.eclipse.packager.rpm.header.Header;
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CountingOutputStream;
 
-public class PayloadRecorder implements AutoCloseable
-{
-    public static class Result
-    {
+public class PayloadRecorder implements AutoCloseable {
+    public static class Result {
         private final long size;
 
         private final byte[] digest;
 
-        private Result ( final long size, final byte[] digest )
-        {
+        private Result(final long size, final byte[] digest) {
             this.size = size;
             this.digest = digest;
         }
 
-        public long getSize ()
-        {
+        public long getSize() {
             return this.size;
         }
 
-        public byte[] getDigest ()
-        {
+        public byte[] getDigest() {
             return this.digest;
         }
     }
@@ -75,30 +70,26 @@ public class PayloadRecorder implements AutoCloseable
     /**
      * Run data through the list of processors.
      */
-    private static class ProcessorStream extends FilterOutputStream
-    {
+    private static class ProcessorStream extends FilterOutputStream {
         private final Consumer<ByteBuffer> consumer;
 
-        ProcessorStream ( final OutputStream out, final Consumer<ByteBuffer> consumer )
-        {
-            super ( out );
+        ProcessorStream(final OutputStream out, final Consumer<ByteBuffer> consumer) {
+            super(out);
             this.consumer = consumer;
         }
 
         @Override
-        public void write ( int b ) throws IOException
-        {
-            this.consumer.accept ( ByteBuffer.wrap ( new byte[] { (byte)b } ) );
+        public void write(int b) throws IOException {
+            this.consumer.accept(ByteBuffer.wrap(new byte[] { (byte) b }));
 
-            this.out.write ( b );
+            this.out.write(b);
         }
 
         @Override
-        public void write ( byte[] b, int off, int len ) throws IOException
-        {
-            this.consumer.accept ( ByteBuffer.wrap ( b, off, len ) );
+        public void write(byte[] b, int off, int len) throws IOException {
+            this.consumer.accept(ByteBuffer.wrap(b, off, len));
 
-            this.out.write ( b, off, len );
+            this.out.write(b, off, len);
         }
     }
 
@@ -108,216 +99,183 @@ public class PayloadRecorder implements AutoCloseable
 
     private Finished finished;
 
-    public PayloadRecorder () throws IOException
-    {
-        this ( PayloadCoding.GZIP, null, DigestAlgorithm.MD5, null );
+    public PayloadRecorder() throws IOException {
+        this(PayloadCoding.GZIP, null, DigestAlgorithm.MD5, null);
     }
 
-    public PayloadRecorder ( final PayloadCoding payloadCoding, final String payloadFlags, final DigestAlgorithm fileDigestAlgorithm, final List<PayloadProcessor> processors ) throws IOException
-    {
+    public PayloadRecorder(final PayloadCoding payloadCoding, final String payloadFlags, final DigestAlgorithm fileDigestAlgorithm, final List<PayloadProcessor> processors) throws IOException {
         this.fileDigestAlgorithm = fileDigestAlgorithm;
-        if (processors == null )
-        {
-            this.processors = Collections.emptyList ();
-        }
-        else
-        {
-            this.processors = new ArrayList<> ( processors );
+        if (processors == null) {
+            this.processors = Collections.emptyList();
+        } else {
+            this.processors = new ArrayList<>(processors);
         }
 
-        this.finished = new Finished ( payloadCoding, payloadFlags );
+        this.finished = new Finished(payloadCoding, payloadFlags);
 
     }
 
-    private void checkFinished () throws IOException
-    {
-        if ( this.finished == null )
-        {
-            throw new IOException ( "Payload recorder is already finished processing" );
+    private void checkFinished() throws IOException {
+        if (this.finished == null) {
+            throw new IOException("Payload recorder is already finished processing");
         }
     }
 
-    public Result addFile ( final String targetPath, final Path path ) throws IOException
-    {
-        return addFile ( targetPath, path, null );
+    public Result addFile(final String targetPath, final Path path) throws IOException {
+        return addFile(targetPath, path, null);
     }
 
-    public Result addFile ( final String targetPath, final Path path, final Consumer<CpioArchiveEntry> customizer ) throws IOException
-    {
-        checkFinished ();
+    public Result addFile(final String targetPath, final Path path, final Consumer<CpioArchiveEntry> customizer) throws IOException {
+        checkFinished();
 
-        final long size = Files.size ( path );
+        final long size = Files.size(path);
 
-        final CpioArchiveEntry entry = new CpioArchiveEntry ( CpioConstants.FORMAT_NEW, targetPath );
-        entry.setSize ( size );
+        final CpioArchiveEntry entry = new CpioArchiveEntry(CpioConstants.FORMAT_NEW, targetPath);
+        entry.setSize(size);
 
-        if ( customizer != null )
-        {
-            customizer.accept ( entry );
+        if (customizer != null) {
+            customizer.accept(entry);
         }
 
-        this.finished.archiveStream.putArchiveEntry ( entry );
+        this.finished.archiveStream.putArchiveEntry(entry);
 
         MessageDigest digest;
-        try
-        {
-            digest = this.fileDigestAlgorithm.createDigest ();
-        }
-        catch ( final NoSuchAlgorithmException e )
-        {
-            throw new IOException ( e );
+        try {
+            digest = this.fileDigestAlgorithm.createDigest();
+        } catch (final NoSuchAlgorithmException e) {
+            throw new IOException(e);
         }
 
-        try ( InputStream in = new BufferedInputStream ( Files.newInputStream ( path ) ) )
-        {
-            ByteStreams.copy ( new DigestInputStream ( in, digest ), this.finished.archiveStream );
+        try (InputStream in = new BufferedInputStream(Files.newInputStream(path))) {
+            ByteStreams.copy(new DigestInputStream(in, digest), this.finished.archiveStream);
         }
 
-        this.finished.archiveStream.closeArchiveEntry ();
+        this.finished.archiveStream.closeArchiveEntry();
 
-        return new Result ( size, digest.digest () );
+        return new Result(size, digest.digest());
     }
 
-    public Result addFile ( final String targetPath, final ByteBuffer data ) throws IOException
-    {
-        return addFile ( targetPath, data, null );
+    public Result addFile(final String targetPath, final ByteBuffer data) throws IOException {
+        return addFile(targetPath, data, null);
     }
 
-    public Result addFile ( final String targetPath, final ByteBuffer data, final Consumer<CpioArchiveEntry> customizer ) throws IOException
-    {
-        checkFinished ();
+    public Result addFile(final String targetPath, final ByteBuffer data, final Consumer<CpioArchiveEntry> customizer) throws IOException {
+        checkFinished();
 
-        final long size = data.remaining ();
+        final long size = data.remaining();
 
-        final CpioArchiveEntry entry = new CpioArchiveEntry ( CpioConstants.FORMAT_NEW, targetPath );
-        entry.setSize ( size );
+        final CpioArchiveEntry entry = new CpioArchiveEntry(CpioConstants.FORMAT_NEW, targetPath);
+        entry.setSize(size);
 
-        if ( customizer != null )
-        {
-            customizer.accept ( entry );
+        if (customizer != null) {
+            customizer.accept(entry);
         }
 
-        this.finished.archiveStream.putArchiveEntry ( entry );
+        this.finished.archiveStream.putArchiveEntry(entry);
 
         // record digest
 
         MessageDigest digest;
-        try
-        {
-            digest = this.fileDigestAlgorithm.createDigest ();
-            digest.update ( data.slice () );
-        }
-        catch ( final NoSuchAlgorithmException e )
-        {
-            throw new IOException ( e );
+        try {
+            digest = this.fileDigestAlgorithm.createDigest();
+            digest.update(data.slice());
+        } catch (final NoSuchAlgorithmException e) {
+            throw new IOException(e);
         }
 
         // write data
 
-        final WritableByteChannel channel = Channels.newChannel ( this.finished.archiveStream );
-        while ( data.hasRemaining () )
-        {
-            channel.write ( data );
+        final WritableByteChannel channel = Channels.newChannel(this.finished.archiveStream);
+        while (data.hasRemaining()) {
+            channel.write(data);
         }
 
         // close archive entry
 
-        this.finished.archiveStream.closeArchiveEntry ();
+        this.finished.archiveStream.closeArchiveEntry();
 
-        return new Result ( size, digest.digest () );
+        return new Result(size, digest.digest());
     }
 
-    public Result addFile ( final String targetPath, final InputStream stream ) throws IOException
-    {
-        return addFile ( targetPath, stream, null );
+    public Result addFile(final String targetPath, final InputStream stream) throws IOException {
+        return addFile(targetPath, stream, null);
     }
 
-    public Result addFile ( final String targetPath, final InputStream stream, final Consumer<CpioArchiveEntry> customizer ) throws IOException
-    {
-        checkFinished ();
+    public Result addFile(final String targetPath, final InputStream stream, final Consumer<CpioArchiveEntry> customizer) throws IOException {
+        checkFinished();
 
-        final Path tmpFile = Files.createTempFile ( "rpm-payload-", null );
-        try
-        {
-            try ( OutputStream os = Files.newOutputStream ( tmpFile ) )
-            {
-                ByteStreams.copy ( stream, os );
+        final Path tmpFile = Files.createTempFile("rpm-payload-", null);
+        try {
+            try (OutputStream os = Files.newOutputStream(tmpFile)) {
+                ByteStreams.copy(stream, os);
             }
 
-            return addFile ( targetPath, tmpFile, customizer );
-        }
-        finally
-        {
-            Files.deleteIfExists ( tmpFile );
+            return addFile(targetPath, tmpFile, customizer);
+        } finally {
+            Files.deleteIfExists(tmpFile);
         }
     }
 
-    public Result addDirectory ( final String targetPath, final Consumer<CpioArchiveEntry> customizer ) throws IOException
-    {
-        checkFinished ();
+    public Result addDirectory(final String targetPath, final Consumer<CpioArchiveEntry> customizer) throws IOException {
+        checkFinished();
 
-        final CpioArchiveEntry entry = new CpioArchiveEntry ( CpioConstants.FORMAT_NEW, targetPath );
+        final CpioArchiveEntry entry = new CpioArchiveEntry(CpioConstants.FORMAT_NEW, targetPath);
 
-        if ( customizer != null )
-        {
-            customizer.accept ( entry );
+        if (customizer != null) {
+            customizer.accept(entry);
         }
 
-        this.finished.archiveStream.putArchiveEntry ( entry );
-        this.finished.archiveStream.closeArchiveEntry ();
+        this.finished.archiveStream.putArchiveEntry(entry);
+        this.finished.archiveStream.closeArchiveEntry();
 
-        return new Result ( 4096, null );
+        return new Result(4096, null);
     }
 
-    public Result addSymbolicLink ( final String targetPath, final String linkTo, final Consumer<CpioArchiveEntry> customizer ) throws IOException
-    {
-        checkFinished ();
+    public Result addSymbolicLink(final String targetPath, final String linkTo, final Consumer<CpioArchiveEntry> customizer) throws IOException {
+        checkFinished();
 
-        final byte[] bytes = linkTo.getBytes ( StandardCharsets.UTF_8 );
+        final byte[] bytes = linkTo.getBytes(StandardCharsets.UTF_8);
 
-        final CpioArchiveEntry entry = new CpioArchiveEntry ( CpioConstants.FORMAT_NEW, targetPath );
-        entry.setSize ( bytes.length );
+        final CpioArchiveEntry entry = new CpioArchiveEntry(CpioConstants.FORMAT_NEW, targetPath);
+        entry.setSize(bytes.length);
 
-        if ( customizer != null )
-        {
-            customizer.accept ( entry );
+        if (customizer != null) {
+            customizer.accept(entry);
         }
 
-        this.finished.archiveStream.putArchiveEntry ( entry );
-        this.finished.archiveStream.write ( bytes );
-        this.finished.archiveStream.closeArchiveEntry ();
+        this.finished.archiveStream.putArchiveEntry(entry);
+        this.finished.archiveStream.write(bytes);
+        this.finished.archiveStream.closeArchiveEntry();
 
-        return new Result ( bytes.length, null );
+        return new Result(bytes.length, null);
     }
 
     /**
      * Stop recording payload data
      *
      * <p>
-     * If the recorder is already finished it will throw an {@link IllegalStateException}.
+     * If the recorder is already finished it will throw an
+     * {@link IllegalStateException}.
      * </p>
      *
      * @return The additional headers, as generated by the payload processors.
-     * @throws IOException
-     *             in case of IO errors
-     * @throws IllegalStateException
-     *              in case the finish was already called
+     * @throws IOException in case of IO errors
+     * @throws IllegalStateException in case the finish was already called
      */
-    public Finished finish () throws IOException
-    {
-        checkFinished ();
+    public Finished finish() throws IOException {
+        checkFinished();
 
         Finished finished = this.finished;
         this.finished = null;
 
         // close the archive stream (flushes)
 
-        finished.archiveStream.close ();
+        finished.archiveStream.close();
 
         // finish processors
 
-        final Header<RpmTag> headers = new Header<> ();
-        forEach ( processor -> processor.finish ( headers ) );
+        final Header<RpmTag> headers = new Header<>();
+        forEach(processor -> processor.finish(headers));
         finished.additionalHeader = headers;
 
         // return additional payload headers
@@ -326,11 +284,9 @@ public class PayloadRecorder implements AutoCloseable
     }
 
     @Override
-    public void close () throws IOException
-    {
-        if ( this.finished != null )
-        {
-            this.finished.close ();
+    public void close() throws IOException {
+        if (this.finished != null) {
+            this.finished.close();
             this.finished = null;
         }
     }
@@ -340,9 +296,8 @@ public class PayloadRecorder implements AutoCloseable
      *
      * @param consumer The code to run.
      */
-    private void forEach ( final Consumer<PayloadProcessor> consumer )
-    {
-        this.processors.forEach ( consumer );
+    private void forEach(final Consumer<PayloadProcessor> consumer) {
+        this.processors.forEach(consumer);
     }
 
     /**
@@ -350,9 +305,8 @@ public class PayloadRecorder implements AutoCloseable
      *
      * @param data The raw data to process.
      */
-    private void forEachRawData ( final ByteBuffer data )
-    {
-        forEach ( processor -> processor.feedRawPayloadData ( data.slice () ) );
+    private void forEachRawData(final ByteBuffer data) {
+        forEach(processor -> processor.feedRawPayloadData(data.slice()));
     }
 
     /**
@@ -360,95 +314,85 @@ public class PayloadRecorder implements AutoCloseable
      *
      * @param data The compressed to process.
      */
-    private void forEachCompressedData ( final ByteBuffer data )
-    {
-        forEach ( processor -> processor.feedCompressedPayloadData ( data.slice () ) );
+    private void forEachCompressedData(final ByteBuffer data) {
+        forEach(processor -> processor.feedCompressedPayloadData(data.slice()));
     }
 
-    public class Finished implements AutoCloseable, PayloadProvider
-    {
+    public class Finished implements AutoCloseable, PayloadProvider {
         private final Path tempFile;
+
         private final CountingOutputStream payloadCounter;
+
         private final CountingOutputStream archiveCounter;
+
         private final CpioArchiveOutputStream archiveStream;
+
         private final PayloadCoding payloadCoding;
+
         private final Optional<String> payloadFlags;
+
         private Header<RpmTag> additionalHeader = new Header<>();
 
-        private Finished(final PayloadCoding payloadCoding, final String payloadFlags) throws IOException
-        {
-            this.tempFile = Files.createTempFile ( "rpm-", null );
+        private Finished(final PayloadCoding payloadCoding, final String payloadFlags) throws IOException {
+            this.tempFile = Files.createTempFile("rpm-", null);
 
-            try
-            {
-                final OutputStream fileStream = new BufferedOutputStream ( Files.newOutputStream ( this.tempFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING ) );
-                this.payloadCounter = new CountingOutputStream ( new ProcessorStream ( fileStream, PayloadRecorder.this::forEachCompressedData ));
+            try {
+                final OutputStream fileStream = new BufferedOutputStream(Files.newOutputStream(this.tempFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING));
+                this.payloadCounter = new CountingOutputStream(new ProcessorStream(fileStream, PayloadRecorder.this::forEachCompressedData));
                 this.payloadCoding = payloadCoding;
-                this.payloadFlags = Optional.ofNullable ( payloadFlags );
+                this.payloadFlags = Optional.ofNullable(payloadFlags);
 
-                final OutputStream payloadStream = new ProcessorStream ( this.payloadCoding.createProvider ().createOutputStream ( this.payloadCounter, this.payloadFlags ), PayloadRecorder.this::forEachRawData );
-                this.archiveCounter = new CountingOutputStream ( payloadStream );
+                final OutputStream payloadStream = new ProcessorStream(this.payloadCoding.createProvider().createOutputStream(this.payloadCounter, this.payloadFlags), PayloadRecorder.this::forEachRawData);
+                this.archiveCounter = new CountingOutputStream(payloadStream);
 
                 // setup archive stream
 
-                this.archiveStream = new CpioArchiveOutputStream ( this.archiveCounter, CpioConstants.FORMAT_NEW, 4, CharsetNames.UTF_8 );
-            }
-            catch ( final IOException e )
-            {
-                Files.deleteIfExists ( this.tempFile );
+                this.archiveStream = new CpioArchiveOutputStream(this.archiveCounter, CpioConstants.FORMAT_NEW, 4, CharsetNames.UTF_8);
+            } catch (final IOException e) {
+                Files.deleteIfExists(this.tempFile);
                 throw e;
             }
         }
 
         @Override
-        public void close() throws IOException
-        {
-            this.archiveStream.close ();
-            Files.deleteIfExists ( this.tempFile );
-        }
-
-
-        @Override
-        public long getArchiveSize ()
-        {
-            return this.archiveCounter.getCount ();
+        public void close() throws IOException {
+            this.archiveStream.close();
+            Files.deleteIfExists(this.tempFile);
         }
 
         @Override
-        public long getPayloadSize ()
-        {
-            return this.payloadCounter.getCount ();
+        public long getArchiveSize() {
+            return this.archiveCounter.getCount();
         }
 
         @Override
-        public PayloadCoding getPayloadCoding ()
-        {
+        public long getPayloadSize() {
+            return this.payloadCounter.getCount();
+        }
+
+        @Override
+        public PayloadCoding getPayloadCoding() {
             return this.payloadCoding;
         }
 
         @Override
-        public Optional<String> getPayloadFlags ()
-        {
+        public Optional<String> getPayloadFlags() {
             return this.payloadFlags;
         }
 
         @Override
-        public DigestAlgorithm getFileDigestAlgorithm ()
-        {
+        public DigestAlgorithm getFileDigestAlgorithm() {
             return PayloadRecorder.this.fileDigestAlgorithm;
         }
 
         @Override
-        public FileChannel openChannel () throws IOException
-        {
-            return FileChannel.open ( this.tempFile, StandardOpenOption.READ );
+        public FileChannel openChannel() throws IOException {
+            return FileChannel.open(this.tempFile, StandardOpenOption.READ);
         }
 
         @Override
-        public Header<RpmTag> getAdditionalHeader()
-        {
-            return new Header<> ( this.additionalHeader );
+        public Header<RpmTag> getAdditionalHeader() {
+            return new Header<>(this.additionalHeader);
         }
     }
 }
-

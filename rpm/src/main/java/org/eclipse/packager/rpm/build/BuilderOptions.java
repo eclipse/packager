@@ -32,8 +32,7 @@ import org.eclipse.packager.rpm.coding.PayloadCoding;
  * reasonable default can be given.
  * </p>
  */
-public class BuilderOptions
-{
+public class BuilderOptions {
     private LongMode longMode = LongMode.DEFAULT;
 
     private OpenOption[] openOptions;
@@ -50,126 +49,100 @@ public class BuilderOptions
 
     private List<PayloadProcessor> payloadProcessors = new LinkedList<>();
 
-    public BuilderOptions ()
-    {
-        try
-        {
-            this.payloadProcessors.add ( PayloadProcessors.payloadDigest ( DigestAlgorithm.SHA256 ) );
-        }
-        catch ( final Exception e )
-        {
+    public BuilderOptions() {
+        try {
+            this.payloadProcessors.add(PayloadProcessors.payloadDigest(DigestAlgorithm.SHA256));
+        } catch (final Exception e) {
             // We silently ignore the case that SHA1 isn't available
         }
     }
 
-    public BuilderOptions ( final BuilderOptions other )
-    {
-        setLongMode ( other.longMode );
-        setOpenOptions ( other.openOptions );
-        setFileNameProvider ( other.fileNameProvider );
-        setPayloadCoding ( other.payloadCoding );
-        setPayloadFlags ( other.payloadFlags );
-        setFileDigestAlgorithm ( other.fileDigestAlgorithm );
-        setHeaderCharset ( other.headerCharset );
-        setPayloadProcessors ( other.payloadProcessors );
+    public BuilderOptions(final BuilderOptions other) {
+        setLongMode(other.longMode);
+        setOpenOptions(other.openOptions);
+        setFileNameProvider(other.fileNameProvider);
+        setPayloadCoding(other.payloadCoding);
+        setPayloadFlags(other.payloadFlags);
+        setFileDigestAlgorithm(other.fileDigestAlgorithm);
+        setHeaderCharset(other.headerCharset);
+        setPayloadProcessors(other.payloadProcessors);
     }
 
-    public LongMode getLongMode ()
-    {
+    public LongMode getLongMode() {
         return this.longMode;
     }
 
-    public void setLongMode ( final LongMode longMode )
-    {
+    public void setLongMode(final LongMode longMode) {
         this.longMode = longMode == null ? LongMode.DEFAULT : longMode;
     }
 
-    public OpenOption[] getOpenOptions ()
-    {
+    public OpenOption[] getOpenOptions() {
         return this.openOptions;
     }
 
-    public void setOpenOptions ( final OpenOption[] openOptions )
-    {
+    public void setOpenOptions(final OpenOption[] openOptions) {
         // always create a new array so that the result is independent of the old array
-        if ( openOptions == null )
-        {
+        if (openOptions == null) {
             this.openOptions = new OpenOption[] { StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING };
-        }
-        else
-        {
-            this.openOptions = Arrays.copyOf ( openOptions, openOptions.length );
+        } else {
+            this.openOptions = Arrays.copyOf(openOptions, openOptions.length);
         }
     }
 
-    public RpmFileNameProvider getFileNameProvider ()
-    {
+    public RpmFileNameProvider getFileNameProvider() {
         return this.fileNameProvider;
     }
 
-    public void setFileNameProvider ( final RpmFileNameProvider fileNameProvider )
-    {
+    public void setFileNameProvider(final RpmFileNameProvider fileNameProvider) {
         this.fileNameProvider = fileNameProvider != null ? fileNameProvider : RpmFileNameProvider.LEGACY_FILENAME_PROVIDER;
     }
 
-    public PayloadCoding getPayloadCoding ()
-    {
+    public PayloadCoding getPayloadCoding() {
         return this.payloadCoding != null ? this.payloadCoding : PayloadCoding.GZIP;
     }
 
-    public void setPayloadCoding ( final PayloadCoding payloadCoding )
-    {
+    public void setPayloadCoding(final PayloadCoding payloadCoding) {
         this.payloadCoding = payloadCoding;
     }
 
-    public String getPayloadFlags ()
-    {
+    public String getPayloadFlags() {
         return this.payloadFlags;
     }
 
-    public void setPayloadFlags ( final String payloadFlags )
-    {
+    public void setPayloadFlags(final String payloadFlags) {
         this.payloadFlags = payloadFlags;
     }
 
-    public DigestAlgorithm getFileDigestAlgorithm ()
-    {
+    public DigestAlgorithm getFileDigestAlgorithm() {
         return this.fileDigestAlgorithm;
     }
 
-    public void setFileDigestAlgorithm ( final DigestAlgorithm fileDigestAlgorithm )
-    {
+    public void setFileDigestAlgorithm(final DigestAlgorithm fileDigestAlgorithm) {
         this.fileDigestAlgorithm = fileDigestAlgorithm == null ? DigestAlgorithm.MD5 : fileDigestAlgorithm;
     }
 
-    public Charset getHeaderCharset ()
-    {
+    public Charset getHeaderCharset() {
         return this.headerCharset;
     }
 
-    public void setHeaderCharset ( final Charset headerCharset )
-    {
+    public void setHeaderCharset(final Charset headerCharset) {
         this.headerCharset = headerCharset == null ? StandardCharsets.UTF_8 : headerCharset;
     }
 
-    public List<PayloadProcessor> getPayloadProcessors ()
-    {
-        return Collections.unmodifiableList ( this.payloadProcessors );
+    public List<PayloadProcessor> getPayloadProcessors() {
+        return Collections.unmodifiableList(this.payloadProcessors);
     }
 
-    public void setPayloadProcessors ( final List<PayloadProcessor> payloadProcessors )
-    {
+    public void setPayloadProcessors(final List<PayloadProcessor> payloadProcessors) {
         // we create a copy of the list to prevent external changes to our state.
-        this.payloadProcessors = new ArrayList<> ( payloadProcessors );
+        this.payloadProcessors = new ArrayList<>(payloadProcessors);
     }
 
-    public void addPayloadProcessor ( final PayloadProcessor processor )
-    {
-        this.payloadProcessors.add ( processor );
+    public void addPayloadProcessor(final PayloadProcessor processor) {
+        this.payloadProcessors.add(processor);
     }
 
-    public void clearPayloadProcessors ()
-    {
-        this.payloadProcessors.clear ();
+    public void clearPayloadProcessors() {
+        this.payloadProcessors.clear();
     }
 }

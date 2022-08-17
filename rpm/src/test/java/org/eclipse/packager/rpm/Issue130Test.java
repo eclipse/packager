@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -31,42 +31,37 @@ import org.eclipse.packager.rpm.parse.RpmInputStream;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class Issue130Test
-{
-    private static final Path OUT_BASE = Paths.get ( "target", "data", "out" );
+public class Issue130Test {
+    private static final Path OUT_BASE = Paths.get("target", "data", "out");
 
-    private static final List<String> PREFIXES = Arrays.asList( "/opt", "/var/log" );
+    private static final List<String> PREFIXES = Arrays.asList("/opt", "/var/log");
 
     @BeforeAll
-    public static void setup () throws IOException
-    {
-        Files.createDirectories ( OUT_BASE );
+    public static void setup() throws IOException {
+        Files.createDirectories(OUT_BASE);
     }
 
     @Test
-    public void test () throws IOException
-    {
+    public void test() throws IOException {
         Path outFile;
 
-        try ( RpmBuilder builder = new RpmBuilder ( "prefixes-test", "1.0.0", "1", "noarch", OUT_BASE ) )
-        {
-            final PackageInformation pinfo = builder.getInformation ();
+        try (RpmBuilder builder = new RpmBuilder("prefixes-test", "1.0.0", "1", "noarch", OUT_BASE)) {
+            final PackageInformation pinfo = builder.getInformation();
 
-            pinfo.setPrefixes( PREFIXES );
+            pinfo.setPrefixes(PREFIXES);
 
-            outFile = builder.getTargetFile ();
+            outFile = builder.getTargetFile();
 
-            builder.build ();
+            builder.build();
         }
 
-        try ( final RpmInputStream in = new RpmInputStream ( new BufferedInputStream ( Files.newInputStream ( outFile ) ) ) )
-        {
-            Dumper.dumpAll ( in );
+        try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(outFile)))) {
+            Dumper.dumpAll(in);
 
-            final InputHeader<RpmTag> header = in.getPayloadHeader ();
-            final List<String> prefixes = Arrays.asList ( new RpmTagValue ( header.getTag ( RpmTag.PREFIXES ) ).asStringArray ().orElse( null ) );
+            final InputHeader<RpmTag> header = in.getPayloadHeader();
+            final List<String> prefixes = Arrays.asList(new RpmTagValue(header.getTag(RpmTag.PREFIXES)).asStringArray().orElse(null));
 
-            assertEquals ( PREFIXES, prefixes );
+            assertEquals(PREFIXES, prefixes);
         }
     }
 

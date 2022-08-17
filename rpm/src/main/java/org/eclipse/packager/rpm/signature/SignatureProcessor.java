@@ -31,21 +31,18 @@ import org.eclipse.packager.rpm.header.Header;
  * <li>one call to {@link #finish(Header)}</li>
  * </ul>
  */
-public interface SignatureProcessor
-{
+public interface SignatureProcessor {
     /**
      * initialize the processor
      *
-     * @param archiveSize
-     *            the size of the uncompressed payload archive
+     * @param archiveSize the size of the uncompressed payload archive
      */
-    default void init ( final long archiveSize )
-    {
+    default void init(final long archiveSize) {
     }
 
-    void feedHeader ( ByteBuffer header );
+    void feedHeader(ByteBuffer header);
 
-    void feedPayloadData ( ByteBuffer data );
+    void feedPayloadData(ByteBuffer data);
 
-    void finish ( Header<RpmSignatureTag> signature );
+    void finish(Header<RpmSignatureTag> signature);
 }

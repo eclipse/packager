@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 @FunctionalInterface
-public interface SpoolOutTarget
-{
-    public void spoolOut ( final String fileName, final String mimeType, final IOConsumer<OutputStream> stream ) throws IOException;
+public interface SpoolOutTarget {
+    public void spoolOut(final String fileName, final String mimeType, final IOConsumer<OutputStream> stream) throws IOException;
 }

@@ -98,6 +98,7 @@
         <maven-site-plugin.version>4.0.0-M2</maven-site-plugin.version>
         <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
+        <spotless-maven-plugin.version>2.4.1</spotless-maven-plugin.version>
     </properties>
 
     <dependencyManagement>
@@ -187,6 +188,12 @@
     <build>
         <pluginManagement>
             <plugins>
+
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>${spotless-maven-plugin.version}</version>
+                </plugin>
 
                 <!-- core maven -->
 
@@ -289,6 +296,38 @@
         </pluginManagement>
 
         <plugins>
+
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <configuration>
+                    <formats>
+                        <format>
+                            <endWithNewline/>
+                            <includes>
+                                <include>**/*.java</include>
+                            </includes>
+                            <indent>
+                                <spaces>true</spaces>
+                                <spacesPerTab>4</spacesPerTab>
+                            </indent>
+                            <trimTrailingWhitespace/>
+                        </format>
+                    </formats>
+                    <java>
+                        <eclipse>
+                            <file>eclipse-formatter.xml</file>
+                        </eclipse>
+                        <importOrder>
+                            <file>eclipse.importorder</file>
+                        </importOrder>
+                        <includes>
+                            <include>**/*.java</include>
+                        </includes>
+                        <removeUnusedImports/>
+                    </java>
+                </configuration>
+            </plugin>
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

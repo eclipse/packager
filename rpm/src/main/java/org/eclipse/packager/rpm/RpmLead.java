@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -15,8 +15,7 @@ package org.eclipse.packager.rpm;
 
 import java.util.Objects;
 
-public class RpmLead
-{
+public class RpmLead {
     private final byte major;
 
     private final byte minor;
@@ -31,9 +30,8 @@ public class RpmLead
 
     private final short operatingSystem;
 
-    public RpmLead ( final byte major, final byte minor, final String name, final int signatureVersion, final short type, final short architecture, final short operatingSystem )
-    {
-        Objects.requireNonNull ( name );
+    public RpmLead(final byte major, final byte minor, final String name, final int signatureVersion, final short type, final short architecture, final short operatingSystem) {
+        Objects.requireNonNull(name);
 
         this.major = major;
         this.minor = minor;
@@ -44,58 +42,49 @@ public class RpmLead
         this.operatingSystem = operatingSystem;
     }
 
-    public byte getMajor ()
-    {
+    public byte getMajor() {
         return this.major;
     }
 
-    public byte getMinor ()
-    {
+    public byte getMinor() {
         return this.minor;
     }
 
-    public String getName ()
-    {
+    public String getName() {
         return this.name;
     }
 
-    public int getSignatureVersion ()
-    {
+    public int getSignatureVersion() {
         return this.signatureVersion;
     }
 
-    public short getType ()
-    {
+    public short getType() {
         return this.type;
     }
 
-    public short getArchitecture ()
-    {
+    public short getArchitecture() {
         return this.architecture;
     }
 
-    public short getOperatingSystem ()
-    {
+    public short getOperatingSystem() {
         return this.operatingSystem;
     }
 
-    public static String toLeadName ( final String packageName, final RpmVersion version )
-    {
-        Objects.requireNonNull ( packageName );
-        Objects.requireNonNull ( version );
+    public static String toLeadName(final String packageName, final RpmVersion version) {
+        Objects.requireNonNull(packageName);
+        Objects.requireNonNull(version);
 
-        final StringBuilder builder = new StringBuilder ();
+        final StringBuilder builder = new StringBuilder();
 
-        builder.append ( packageName );
+        builder.append(packageName);
 
-        builder.append ( '-' ).append ( version.getVersion () );
+        builder.append('-').append(version.getVersion());
 
-        if ( version.getRelease ().isPresent () )
-        {
-            builder.append ( '-' ).append ( version.getRelease ().get () );
+        if (version.getRelease().isPresent()) {
+            builder.append('-').append(version.getRelease().get());
         }
 
-        return builder.toString ();
+        return builder.toString();
 
     }
 }

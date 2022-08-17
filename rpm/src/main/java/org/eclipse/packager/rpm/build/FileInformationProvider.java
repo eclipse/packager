@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -16,34 +16,29 @@ package org.eclipse.packager.rpm.build;
 import java.io.IOException;
 
 @FunctionalInterface
-public interface FileInformationProvider<T>
-{
-    public FileInformation provide ( String targetName, T object, PayloadEntryType type ) throws IOException;
+public interface FileInformationProvider<T> {
+    public FileInformation provide(String targetName, T object, PayloadEntryType type) throws IOException;
 
-    public default FileInformationProvider<T> customize ( final FileInformationCustomizer<T> customizer )
-    {
-        if ( customizer == null )
-        {
+    public default FileInformationProvider<T> customize(final FileInformationCustomizer<T> customizer) {
+        if (customizer == null) {
             return this;
         }
 
-        return ( targetName, object, type ) -> {
-            final FileInformation information = provide ( targetName, object, type );
-            customizer.perform ( object, information );
+        return (targetName, object, type) -> {
+            final FileInformation information = provide(targetName, object, type);
+            customizer.perform(object, information);
             return information;
         };
     }
 
-    public default FileInformationProvider<T> customize ( final SimpleFileInformationCustomizer customizer )
-    {
-        if ( customizer == null )
-        {
+    public default FileInformationProvider<T> customize(final SimpleFileInformationCustomizer customizer) {
+        if (customizer == null) {
             return this;
         }
 
-        return ( targetName, object, type ) -> {
-            final FileInformation information = provide ( targetName, object, type );
-            customizer.perform ( information );
+        return (targetName, object, type) -> {
+            final FileInformation information = provide(targetName, object, type);
+            customizer.perform(information);
             return information;
         };
     }

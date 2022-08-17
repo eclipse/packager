@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -23,21 +23,19 @@ import java.util.function.Consumer;
 
 import org.eclipse.packager.rpm.deps.Dependency;
 
-public interface PayloadCodingProvider
-{
-    String getCoding ();
+public interface PayloadCodingProvider {
+    String getCoding();
 
-    void fillRequirements ( final Consumer<Dependency> requirementsConsumer );
+    void fillRequirements(final Consumer<Dependency> requirementsConsumer);
 
-    default List<Dependency> getRequirements ()
-    {
-        final List<Dependency> result = new LinkedList<> ();
-        fillRequirements ( result::add );
+    default List<Dependency> getRequirements() {
+        final List<Dependency> result = new LinkedList<>();
+        fillRequirements(result::add);
         return result;
     }
 
-    InputStream createInputStream ( final InputStream in ) throws IOException;
+    InputStream createInputStream(final InputStream in) throws IOException;
 
-    OutputStream createOutputStream ( final OutputStream out, final Optional<String> optionalFlags ) throws IOException;
+    OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException;
 
 }

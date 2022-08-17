@@ -30,76 +30,59 @@ import org.slf4j.LoggerFactory;
 /**
  * An RSA signature processor for both header and payload.
  */
-public class RsaSignatureProcessor implements SignatureProcessor
-{
-    private final static Logger logger = LoggerFactory.getLogger ( RsaSignatureProcessor.class );
+public class RsaSignatureProcessor implements SignatureProcessor {
+    private final static Logger logger = LoggerFactory.getLogger(RsaSignatureProcessor.class);
 
     private final PGPSignatureGenerator signatureGenerator;
 
-    protected RsaSignatureProcessor ( final PGPPrivateKey privateKey, final int hashAlgorithm )
-    {
-        Objects.requireNonNull ( privateKey );
+    protected RsaSignatureProcessor(final PGPPrivateKey privateKey, final int hashAlgorithm) {
+        Objects.requireNonNull(privateKey);
 
-        final BcPGPContentSignerBuilder contentSignerBuilder = new BcPGPContentSignerBuilder ( privateKey.getPublicKeyPacket ().getAlgorithm (), hashAlgorithm );
-        this.signatureGenerator = new PGPSignatureGenerator ( contentSignerBuilder );
+        final BcPGPContentSignerBuilder contentSignerBuilder = new BcPGPContentSignerBuilder(privateKey.getPublicKeyPacket().getAlgorithm(), hashAlgorithm);
+        this.signatureGenerator = new PGPSignatureGenerator(contentSignerBuilder);
 
-        try
-        {
-            this.signatureGenerator.init ( PGPSignature.BINARY_DOCUMENT, privateKey );
-        }
-        catch ( Exception e )
-        {
-            throw new RuntimeException ( e );
+        try {
+            this.signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, privateKey);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public RsaSignatureProcessor(final PGPPrivateKey privateKey, final HashAlgorithm hashAlgorithm )
-    {
-        this ( privateKey, Objects.requireNonNull ( hashAlgorithm ).getValue () );
+    public RsaSignatureProcessor(final PGPPrivateKey privateKey, final HashAlgorithm hashAlgorithm) {
+        this(privateKey, Objects.requireNonNull(hashAlgorithm).getValue());
     }
 
-    public RsaSignatureProcessor(final PGPPrivateKey privateKey )
-    {
-        this ( privateKey, HashAlgorithmTags.SHA1 );
+    public RsaSignatureProcessor(final PGPPrivateKey privateKey) {
+        this(privateKey, HashAlgorithmTags.SHA1);
     }
 
     @Override
-    public void feedHeader ( final ByteBuffer header )
-    {
-        feedData ( header );
+    public void feedHeader(final ByteBuffer header) {
+        feedData(header);
     }
 
     @Override
-    public void feedPayloadData ( final ByteBuffer data )
-    {
-        feedData ( data );
+    public void feedPayloadData(final ByteBuffer data) {
+        feedData(data);
     }
 
-    private void feedData( final ByteBuffer data )
-    {
-        if ( data.hasArray () )
-        {
-            this.signatureGenerator.update ( data.array (), data.position (), data.remaining () );
-        }
-        else
-        {
-            final byte[] buffer = new byte[data.remaining ()];
-            data.get ( buffer );
-            this.signatureGenerator.update ( buffer );
+    private void feedData(final ByteBuffer data) {
+        if (data.hasArray()) {
+            this.signatureGenerator.update(data.array(), data.position(), data.remaining());
+        } else {
+            final byte[] buffer = new byte[data.remaining()];
+            data.get(buffer);
+            this.signatureGenerator.update(buffer);
         }
     }
 
     @Override
-    public void finish ( final Header<RpmSignatureTag> signature )
-    {
-        try
-        {
-            byte [] value = this.signatureGenerator.generate ().getEncoded ();
-            logger.info ( "RSA: {}", value );
-            signature.putBlob ( RpmSignatureTag.PGP, value );
-        }
-        catch ( Exception e )
-        {
+    public void finish(final Header<RpmSignatureTag> signature) {
+        try {
+            byte[] value = this.signatureGenerator.generate().getEncoded();
+            logger.info("RSA: {}", value);
+            signature.putBlob(RpmSignatureTag.PGP, value);
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

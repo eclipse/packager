@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -30,9 +30,8 @@ import org.slf4j.LoggerFactory;
 /**
  * An RSA signature processor for the header section only.
  */
-public class RsaHeaderSignatureProcessor implements SignatureProcessor
-{
-    private final static Logger logger = LoggerFactory.getLogger ( RsaHeaderSignatureProcessor.class );
+public class RsaHeaderSignatureProcessor implements SignatureProcessor {
+    private final static Logger logger = LoggerFactory.getLogger(RsaHeaderSignatureProcessor.class);
 
     private final PGPPrivateKey privateKey;
 
@@ -40,62 +39,50 @@ public class RsaHeaderSignatureProcessor implements SignatureProcessor
 
     private byte[] value;
 
-    protected RsaHeaderSignatureProcessor ( final PGPPrivateKey privateKey, final int hashAlgorithm )
-    {
-        Objects.requireNonNull ( privateKey );
+    protected RsaHeaderSignatureProcessor(final PGPPrivateKey privateKey, final int hashAlgorithm) {
+        Objects.requireNonNull(privateKey);
         this.privateKey = privateKey;
         this.hashAlgorithm = hashAlgorithm;
     }
 
-    public RsaHeaderSignatureProcessor ( final PGPPrivateKey privateKey, final HashAlgorithm hashAlgorithm )
-    {
-        this ( privateKey, Objects.requireNonNull ( hashAlgorithm ).getValue () );
+    public RsaHeaderSignatureProcessor(final PGPPrivateKey privateKey, final HashAlgorithm hashAlgorithm) {
+        this(privateKey, Objects.requireNonNull(hashAlgorithm).getValue());
     }
 
-    public RsaHeaderSignatureProcessor ( final PGPPrivateKey privateKey )
-    {
-        this ( privateKey, HashAlgorithmTags.SHA1 );
+    public RsaHeaderSignatureProcessor(final PGPPrivateKey privateKey) {
+        this(privateKey, HashAlgorithmTags.SHA1);
     }
 
     @Override
-    public void feedHeader ( final ByteBuffer header )
-    {
-        try
-        {
-            final BcPGPContentSignerBuilder contentSignerBuilder = new BcPGPContentSignerBuilder ( this.privateKey.getPublicKeyPacket ().getAlgorithm (), this.hashAlgorithm );
-            final PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator ( contentSignerBuilder );
+    public void feedHeader(final ByteBuffer header) {
+        try {
+            final BcPGPContentSignerBuilder contentSignerBuilder = new BcPGPContentSignerBuilder(this.privateKey.getPublicKeyPacket().getAlgorithm(), this.hashAlgorithm);
+            final PGPSignatureGenerator signatureGenerator = new PGPSignatureGenerator(contentSignerBuilder);
 
-            signatureGenerator.init ( PGPSignature.BINARY_DOCUMENT, this.privateKey );
+            signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, this.privateKey);
 
-            if ( header.hasArray () )
-            {
-                signatureGenerator.update ( header.array (), header.position (), header.remaining () );
-            }
-            else
-            {
-                final byte[] buffer = new byte[header.remaining ()];
-                header.get ( buffer );
-                signatureGenerator.update ( buffer );
+            if (header.hasArray()) {
+                signatureGenerator.update(header.array(), header.position(), header.remaining());
+            } else {
+                final byte[] buffer = new byte[header.remaining()];
+                header.get(buffer);
+                signatureGenerator.update(buffer);
             }
 
-            this.value = signatureGenerator.generate ().getEncoded ();
-            logger.info ( "RSA HEADER: {}", this.value );
-        }
-        catch ( final Exception e )
-        {
-            throw new RuntimeException ( e );
+            this.value = signatureGenerator.generate().getEncoded();
+            logger.info("RSA HEADER: {}", this.value);
+        } catch (final Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
     @Override
-    public void feedPayloadData ( final ByteBuffer data )
-    {
+    public void feedPayloadData(final ByteBuffer data) {
         // we only work on the header data
     }
 
     @Override
-    public void finish ( final Header<RpmSignatureTag> signature )
-    {
-        signature.putBlob ( RpmSignatureTag.RSAHEADER, this.value );
+    public void finish(final Header<RpmSignatureTag> signature) {
+        signature.putBlob(RpmSignatureTag.RSAHEADER, this.value);
     }
 }

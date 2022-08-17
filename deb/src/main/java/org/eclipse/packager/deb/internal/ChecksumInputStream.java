@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, 2016 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -23,29 +23,24 @@ import java.util.Map;
  * <br>
  * Only the bytes actually read are processed.
  */
-public class ChecksumInputStream extends FilterInputStream
-{
+public class ChecksumInputStream extends FilterInputStream {
     private final MessageDigest[] digests;
 
     private final Map<String, byte[]> results;
 
-    public ChecksumInputStream ( final InputStream stream, final Map<String, byte[]> results, final MessageDigest... digests )
-    {
-        super ( stream );
+    public ChecksumInputStream(final InputStream stream, final Map<String, byte[]> results, final MessageDigest... digests) {
+        super(stream);
         this.digests = digests;
         this.results = results;
     }
 
     @Override
-    public int read ( final byte[] b, final int off, final int len ) throws IOException
-    {
-        final int result = super.read ( b, off, len );
+    public int read(final byte[] b, final int off, final int len) throws IOException {
+        final int result = super.read(b, off, len);
 
-        if ( result > 0 )
-        {
-            for ( final MessageDigest d : this.digests )
-            {
-                d.update ( b, off, result );
+        if (result > 0) {
+            for (final MessageDigest d : this.digests) {
+                d.update(b, off, result);
             }
         }
 
@@ -53,32 +48,26 @@ public class ChecksumInputStream extends FilterInputStream
     }
 
     @Override
-    public int read () throws IOException
-    {
-        final int result = super.read ();
-        if ( result > 0 )
-        {
-            for ( final MessageDigest d : this.digests )
-            {
-                d.update ( (byte)result );
+    public int read() throws IOException {
+        final int result = super.read();
+        if (result > 0) {
+            for (final MessageDigest d : this.digests) {
+                d.update((byte) result);
             }
         }
         return result;
     }
 
     @Override
-    public void close () throws IOException
-    {
-        super.close ();
-        for ( final MessageDigest d : this.digests )
-        {
-            final byte[] result = d.digest ();
-            this.results.put ( d.getAlgorithm (), result );
+    public void close() throws IOException {
+        super.close();
+        for (final MessageDigest d : this.digests) {
+            final byte[] result = d.digest();
+            this.results.put(d.getAlgorithm(), result);
         }
     }
 
-    public Map<String, byte[]> getResults ()
-    {
+    public Map<String, byte[]> getResults() {
         return this.results;
     }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -17,8 +17,7 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.TreeMap;
 
-public class DefaultPayloadCodingRegistry
-{
+public class DefaultPayloadCodingRegistry {
     private static final String GZIP = "gzip";
 
     private static final String BZIP2 = "bzip2";
@@ -29,31 +28,27 @@ public class DefaultPayloadCodingRegistry
 
     private static final String ZSTD = "zstd";
 
-    private static final PayloadCodingProvider NULL_PAYLOAD_CODING = new NullPayloadCoding ();
+    private static final PayloadCodingProvider NULL_PAYLOAD_CODING = new NullPayloadCoding();
 
-    private static final Map<String, PayloadCodingProvider> REGISTRY = new TreeMap<> ();
+    private static final Map<String, PayloadCodingProvider> REGISTRY = new TreeMap<>();
 
-    static
-    {
-        REGISTRY.put ( GZIP, new GzipPayloadCoding () );
-        REGISTRY.put ( BZIP2, new BZip2PayloadCoding () );
-        REGISTRY.put ( LZMA, new LZMAPayloadCoding () );
-        REGISTRY.put ( XZ, new XZPayloadCoding () );
-        REGISTRY.put ( ZSTD, new ZstdPayloadCoding () );
+    static {
+        REGISTRY.put(GZIP, new GzipPayloadCoding());
+        REGISTRY.put(BZIP2, new BZip2PayloadCoding());
+        REGISTRY.put(LZMA, new LZMAPayloadCoding());
+        REGISTRY.put(XZ, new XZPayloadCoding());
+        REGISTRY.put(ZSTD, new ZstdPayloadCoding());
     }
 
-    public static PayloadCodingProvider get ( final String coding ) throws IOException
-    {
-        if ( coding == null )
-        {
+    public static PayloadCodingProvider get(final String coding) throws IOException {
+        if (coding == null) {
             return NULL_PAYLOAD_CODING;
         }
 
-        final PayloadCodingProvider payloadCoding = REGISTRY.get ( coding );
+        final PayloadCodingProvider payloadCoding = REGISTRY.get(coding);
 
-        if ( payloadCoding == null )
-        {
-            throw new IOException ( String.format ( "Unknown payload coding '%s'", coding ) );
+        if (payloadCoding == null) {
+            throw new IOException(String.format("Unknown payload coding '%s'", coding));
         }
 
         return payloadCoding;

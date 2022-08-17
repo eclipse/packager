@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -17,9 +17,8 @@ import org.eclipse.packager.rpm.RpmLead;
 import org.eclipse.packager.rpm.RpmVersion;
 
 @FunctionalInterface
-public interface RpmFileNameProvider
-{
-    public String getRpmFileName ( String name, RpmVersion version, String architecture );
+public interface RpmFileNameProvider {
+    public String getRpmFileName(String name, RpmVersion version, String architecture);
 
     /**
      * Legacy filename provider.
@@ -28,10 +27,10 @@ public interface RpmFileNameProvider
      * "arch.rpm" it is here, and set as the default for backwards compatibility
      * </p>
      */
-    public static final RpmFileNameProvider LEGACY_FILENAME_PROVIDER = ( name, version, architecture ) -> {
-        final StringBuilder sb = new StringBuilder ( RpmLead.toLeadName ( name, version ) );
-        sb.append ( '-' ).append ( architecture ).append ( ".rpm" );
-        return sb.toString ();
+    public static final RpmFileNameProvider LEGACY_FILENAME_PROVIDER = (name, version, architecture) -> {
+        final StringBuilder sb = new StringBuilder(RpmLead.toLeadName(name, version));
+        sb.append('-').append(architecture).append(".rpm");
+        return sb.toString();
     };
 
     /**
@@ -41,10 +40,10 @@ public interface RpmFileNameProvider
      * {@code <name>-<version>-<release>.<architecture>.rpm}
      * </p>
      */
-    public static final RpmFileNameProvider DEFAULT_FILENAME_PROVIDER = ( name, version, architecture ) -> {
-        final StringBuilder sb = new StringBuilder ( RpmLead.toLeadName ( name, version ) );
-        sb.append ( '.' ).append ( architecture ).append ( ".rpm" );
-        return sb.toString ();
+    public static final RpmFileNameProvider DEFAULT_FILENAME_PROVIDER = (name, version, architecture) -> {
+        final StringBuilder sb = new StringBuilder(RpmLead.toLeadName(name, version));
+        sb.append('.').append(architecture).append(".rpm");
+        return sb.toString();
     };
 
 }

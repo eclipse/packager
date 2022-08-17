@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -13,8 +13,7 @@
 
 package org.eclipse.packager.rpm.build;
 
-public enum PayloadEntryType
-{
+public enum PayloadEntryType {
     FILE,
     DIRECTORY,
     SYMBOLIC_LINK;

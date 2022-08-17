@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, 2016 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -15,15 +15,14 @@ package org.eclipse.packager.deb.build;
 /**
  * Additional information for content entries
  */
-public class EntryInformation
-{
-    public static final EntryInformation DEFAULT_DIRECTORY = new EntryInformation ( 0755 );
+public class EntryInformation {
+    public static final EntryInformation DEFAULT_DIRECTORY = new EntryInformation(0755);
 
-    public static final EntryInformation DEFAULT_FILE = new EntryInformation ( 0644 );
+    public static final EntryInformation DEFAULT_FILE = new EntryInformation(0644);
 
-    public static final EntryInformation DEFAULT_FILE_EXEC = new EntryInformation ( 0755 );
+    public static final EntryInformation DEFAULT_FILE_EXEC = new EntryInformation(0755);
 
-    public static final EntryInformation DEFAULT_FILE_CONF = new EntryInformation ( "root", "root", 0644, true );
+    public static final EntryInformation DEFAULT_FILE_CONF = new EntryInformation("root", "root", 0644, true);
 
     private final String user;
 
@@ -33,36 +32,30 @@ public class EntryInformation
 
     private final boolean configurationFile;
 
-    public EntryInformation ( final String user, final String group, final int mode, final boolean configurationFile )
-    {
+    public EntryInformation(final String user, final String group, final int mode, final boolean configurationFile) {
         this.user = user;
         this.group = group;
         this.mode = mode;
         this.configurationFile = configurationFile;
     }
 
-    public EntryInformation ( final int mode )
-    {
-        this ( "root", "root", mode, false );
+    public EntryInformation(final int mode) {
+        this("root", "root", mode, false);
     }
 
-    public boolean isConfigurationFile ()
-    {
+    public boolean isConfigurationFile() {
         return this.configurationFile;
     }
 
-    public String getGroup ()
-    {
+    public String getGroup() {
         return this.group;
     }
 
-    public int getMode ()
-    {
+    public int getMode() {
         return this.mode;
     }
 
-    public String getUser ()
-    {
+    public String getUser() {
         return this.user;
     }
 }

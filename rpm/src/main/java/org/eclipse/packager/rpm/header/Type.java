@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -13,37 +13,33 @@
 
 package org.eclipse.packager.rpm.header;
 
-public enum Type
-{
-    NULL ( 0, 1 ), //
-    CHAR ( 1, 1 ), //
-    BYTE ( 2, 1 ), //
-    SHORT ( 3, 2 ), //
-    INT ( 4, 4 ), //
-    LONG ( 5, 8 ), //
-    STRING ( 6, 1 ), //
-    BLOB ( 7, 1 ), //
-    STRING_ARRAY ( 8, 1 ), //
-    I18N_STRING ( 9, 1 ), //
+public enum Type {
+    NULL(0, 1), //
+    CHAR(1, 1), //
+    BYTE(2, 1), //
+    SHORT(3, 2), //
+    INT(4, 4), //
+    LONG(5, 8), //
+    STRING(6, 1), //
+    BLOB(7, 1), //
+    STRING_ARRAY(8, 1), //
+    I18N_STRING(9, 1), //
     ;
 
-    private int type;
+    private final int type;
 
-    private int align;
+    private final int align;
 
-    private Type ( final int type, final int align )
-    {
+    Type(final int type, final int align) {
         this.type = type;
         this.align = align;
     }
 
-    public int type ()
-    {
+    public int type() {
         return this.type;
     }
 
-    public int align ()
-    {
+    public int align() {
         return this.align;
     }
 }

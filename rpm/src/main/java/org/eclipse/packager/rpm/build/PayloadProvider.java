@@ -21,8 +21,7 @@ import org.eclipse.packager.rpm.RpmTag;
 import org.eclipse.packager.rpm.coding.PayloadCoding;
 import org.eclipse.packager.rpm.header.Header;
 
-public interface PayloadProvider
-{
+public interface PayloadProvider {
     /**
      * Open a new channel to the payload data
      * <p>
@@ -30,42 +29,39 @@ public interface PayloadProvider
      * </p>
      *
      * @return the newly created channel
-     * @throws IOException
-     *             if opening the channels fails
+     * @throws IOException if opening the channels fails
      */
-    ReadableByteChannel openChannel () throws IOException;
+    ReadableByteChannel openChannel() throws IOException;
 
     /**
      * The number of bytes of the compressed archive file
      *
      * @return the number of bytes of the compressed archive file
-     * @throws IOException
-     *             if anything goes wrong
+     * @throws IOException if anything goes wrong
      */
-    long getPayloadSize () throws IOException;
+    long getPayloadSize() throws IOException;
 
     /**
      * Get the number of bytes of the uncompressed payload archive
      *
      * @return the number of bytes of the uncompressed payload archive
-     * @throws IOException
-     *             if anything goes wrong
+     * @throws IOException if anything goes wrong
      */
-    long getArchiveSize () throws IOException;
+    long getArchiveSize() throws IOException;
 
     /**
      * The compression method for this compressed archive file
      *
      * @return the compression method for this compressed archive file
      */
-    PayloadCoding getPayloadCoding ();
+    PayloadCoding getPayloadCoding();
 
     /**
      * The compression flags for this compressed archive file, if any
      *
      * @return the compression flags for this compressed archive file, if any
      */
-    Optional<String> getPayloadFlags ();
+    Optional<String> getPayloadFlags();
 
     /**
      * The algorithm used for generating file checksum digests whose ordinal is
@@ -75,17 +71,18 @@ public interface PayloadProvider
      *         ordinal is defined in
      *         {@link org.bouncycastle.bcpg.HashAlgorithmTags}
      */
-    DigestAlgorithm getFileDigestAlgorithm ();
+    DigestAlgorithm getFileDigestAlgorithm();
 
     /**
      * Get additional header tags.
      * <p>
-     * An implementation must always return a new instance, but also every call must provide the same content.
+     * An implementation must always return a new instance, but also every call must
+     * provide the same content.
      *
-     * @return A new instance with the additional header entries. Possibly empty, but never {@code null}.
+     * @return A new instance with the additional header entries. Possibly empty,
+     *         but never {@code null}.
      */
-    default Header<RpmTag> getAdditionalHeader ()
-    {
+    default Header<RpmTag> getAdditionalHeader() {
         return new Header<>();
     }
 }

@@ -16,46 +16,40 @@ package org.eclipse.packager.rpm;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum RpmSignatureTag implements RpmBaseTag
-{
-    PUBKEYS ( 266 ),
-    DSAHEADER ( 267 ),
-    RSAHEADER ( 268 ),
-    SHA1HEADER ( 269 ),
-    LONGARCHIVESIZE ( 271 ),
-    SHA256HEADER ( 273 ),
+public enum RpmSignatureTag implements RpmBaseTag {
+    PUBKEYS(266),
+    DSAHEADER(267),
+    RSAHEADER(268),
+    SHA1HEADER(269),
+    LONGARCHIVESIZE(271),
+    SHA256HEADER(273),
 
-    SIZE ( 1000 ),
-    PGP ( 1002 ),
-    MD5 ( 1004 ),
-    PAYLOAD_SIZE ( 1007 ),
-    LONGSIZE ( 5009 );
+    SIZE(1000),
+    PGP(1002),
+    MD5(1004),
+    PAYLOAD_SIZE(1007),
+    LONGSIZE(5009);
 
     private final Integer value;
 
-    RpmSignatureTag ( final Integer value )
-    {
+    RpmSignatureTag(final Integer value) {
         this.value = value;
     }
 
     @Override
-    public Integer getValue ()
-    {
+    public Integer getValue() {
         return this.value;
     }
 
-    private final static Map<Integer, RpmSignatureTag> all = new HashMap<> ( RpmSignatureTag.values ().length );
+    private final static Map<Integer, RpmSignatureTag> all = new HashMap<>(RpmSignatureTag.values().length);
 
-    static
-    {
-        for ( final RpmSignatureTag tag : values () )
-        {
-            all.put ( tag.getValue (), tag );
+    static {
+        for (final RpmSignatureTag tag : values()) {
+            all.put(tag.getValue(), tag);
         }
     }
 
-    public static RpmSignatureTag find ( final Integer value )
-    {
-        return all.get ( value );
+    public static RpmSignatureTag find(final Integer value) {
+        return all.get(value);
     }
 }

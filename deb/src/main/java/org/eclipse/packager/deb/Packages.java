@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -32,38 +32,28 @@ import org.eclipse.packager.deb.internal.BinarySectionPackagesFile;
 
 import com.google.common.io.BaseEncoding;
 
-public final class Packages
-{
-    private Packages ()
-    {
+public final class Packages {
+    private Packages() {
     }
 
-    public static Map<String, String> parseControlFile ( final File packageFile ) throws IOException, ParserException
-    {
-        try ( final ArArchiveInputStream in = new ArArchiveInputStream ( new FileInputStream ( packageFile ) ) )
-        {
+    public static Map<String, String> parseControlFile(final File packageFile) throws IOException, ParserException {
+        try (final ArArchiveInputStream in = new ArArchiveInputStream(new FileInputStream(packageFile))) {
             ArchiveEntry ar;
-            while ( ( ar = in.getNextEntry () ) != null )
-            {
-                if ( !ar.getName ().equals ( "control.tar.gz" ) )
-                {
+            while ((ar = in.getNextEntry()) != null) {
+                if (!ar.getName().equals("control.tar.gz")) {
                     continue;
                 }
-                try ( final TarArchiveInputStream inputStream = new TarArchiveInputStream ( new GZIPInputStream ( in ) ) )
-                {
+                try (final TarArchiveInputStream inputStream = new TarArchiveInputStream(new GZIPInputStream(in))) {
                     TarArchiveEntry te;
-                    while ( ( te = inputStream.getNextTarEntry () ) != null )
-                    {
-                        String name = te.getName ();
-                        if ( name.startsWith ( "./" ) )
-                        {
-                            name = name.substring ( 2 );
+                    while ((te = inputStream.getNextTarEntry()) != null) {
+                        String name = te.getName();
+                        if (name.startsWith("./")) {
+                            name = name.substring(2);
                         }
-                        if ( !name.equals ( "control" ) )
-                        {
+                        if (!name.equals("control")) {
                             continue;
                         }
-                        return parseControlFile ( inputStream );
+                        return parseControlFile(inputStream);
                     }
                 }
             }
@@ -71,55 +61,43 @@ public final class Packages
         return null;
     }
 
-    public static Map<String, String> parseControlFile ( final InputStream inputStream ) throws IOException, ParserException
-    {
-        return ControlFileParser.parse ( inputStream );
+    public static Map<String, String> parseControlFile(final InputStream inputStream) throws IOException, ParserException {
+        return ControlFileParser.parse(inputStream);
     }
 
-    public static List<Map<String, String>> parseStatusFile ( final InputStream inputStream ) throws IOException, ParserException
-    {
-        return ControlFileParser.parseMulti ( inputStream );
+    public static List<Map<String, String>> parseStatusFile(final InputStream inputStream) throws IOException, ParserException {
+        return ControlFileParser.parseMulti(inputStream);
     }
 
-    public static void writeBinaryPackageValues ( final PrintWriter writer, final Map<String, String> values ) throws IOException
-    {
-        new ControlFileWriter ( writer, BinarySectionPackagesFile.FORMATTERS ).writeEntries ( values );
+    public static void writeBinaryPackageValues(final PrintWriter writer, final Map<String, String> values) throws IOException {
+        new ControlFileWriter(writer, BinarySectionPackagesFile.FORMATTERS).writeEntries(values);
     }
 
     private static final MessageDigest MD5;
 
-    static
-    {
-        try
-        {
-            MD5 = MessageDigest.getInstance ( "MD5" );
-        }
-        catch ( final NoSuchAlgorithmException e )
-        {
-            throw new RuntimeException ( e );
+    static {
+        try {
+            MD5 = MessageDigest.getInstance("MD5");
+        } catch (final NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    public static String makeDescriptionMd5 ( final String string )
-    {
-        if ( string == null )
-        {
+    public static String makeDescriptionMd5(final String string) {
+        if (string == null) {
             return null;
         }
 
-        final StringBuilder sb = new StringBuilder ();
-        try
-        {
-            FieldFormatter.MULTI.appendValue ( string, sb );
-            sb.append ( '\n' );
-        }
-        catch ( final IOException e )
-        {
+        final StringBuilder sb = new StringBuilder();
+        try {
+            FieldFormatter.MULTI.appendValue(string, sb);
+            sb.append('\n');
+        } catch (final IOException e) {
             // this will never ever happen
         }
-        final String result = sb.toString ();
+        final String result = sb.toString();
 
-        final byte[] data = MD5.digest ( result.getBytes ( StandardCharsets.UTF_8 ) );
-        return BaseEncoding.base16().encode( data ).toLowerCase();
+        final byte[] data = MD5.digest(result.getBytes(StandardCharsets.UTF_8));
+        return BaseEncoding.base16().encode(data).toLowerCase();
     }
 }

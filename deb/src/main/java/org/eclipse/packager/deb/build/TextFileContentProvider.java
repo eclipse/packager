@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -21,59 +21,45 @@ import java.nio.charset.StandardCharsets;
 
 import com.google.common.io.Files;
 
-public class TextFileContentProvider implements ContentProvider
-{
+public class TextFileContentProvider implements ContentProvider {
     private final byte[] data;
 
-    public TextFileContentProvider ( final File file ) throws FileNotFoundException, IOException
-    {
-        if ( file != null )
-        {
+    public TextFileContentProvider(final File file) throws FileNotFoundException, IOException {
+        if (file != null) {
             String data = Files.asCharSource(file, StandardCharsets.UTF_8).read();
-            if ( needFix () )
-            {
-                data = fix ( data );
+            if (needFix()) {
+                data = fix(data);
             }
-            this.data = data.getBytes ( StandardCharsets.UTF_8 );
-        }
-        else
-        {
+            this.data = data.getBytes(StandardCharsets.UTF_8);
+        } else {
             this.data = null;
         }
     }
 
-    private static boolean needFix ()
-    {
-        return !"\n".equals ( System.lineSeparator () );
+    private static boolean needFix() {
+        return !"\n".equals(System.lineSeparator());
     }
 
-    private static String fix ( final String data )
-    {
-        return data.replace ( "\r\n", "\n" );
+    private static String fix(final String data) {
+        return data.replace("\r\n", "\n");
     }
 
     @Override
-    public long getSize ()
-    {
+    public long getSize() {
         return this.data == null ? 0 : this.data.length;
     }
 
     @Override
-    public InputStream createInputStream () throws IOException
-    {
-        if ( this.data != null )
-        {
-            return new ByteArrayInputStream ( this.data );
-        }
-        else
-        {
+    public InputStream createInputStream() throws IOException {
+        if (this.data != null) {
+            return new ByteArrayInputStream(this.data);
+        } else {
             return null;
         }
     }
 
     @Override
-    public boolean hasContent ()
-    {
+    public boolean hasContent() {
         return this.data != null;
     }
 

@@ -26,13 +26,12 @@ public interface PayloadProcessor {
     /**
      * Initialize the processor.
      */
-    default void init ()
-    {
+    default void init() {
     }
 
-    void feedRawPayloadData ( ByteBuffer data );
+    void feedRawPayloadData(ByteBuffer data);
 
-    void feedCompressedPayloadData ( ByteBuffer data );
+    void feedCompressedPayloadData(ByteBuffer data);
 
-    void finish ( Header<RpmTag> header );
+    void finish(Header<RpmTag> header);
 }

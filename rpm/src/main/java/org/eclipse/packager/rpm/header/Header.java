@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -33,285 +33,236 @@ import org.eclipse.packager.rpm.ReadableHeader;
 import org.eclipse.packager.rpm.RpmBaseTag;
 import org.eclipse.packager.rpm.RpmTag;
 
-public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
-{
+public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
     @FunctionalInterface
-    public interface ArrayAllocator<T>
-    {
-        T[] allocate ( int length );
+    public interface ArrayAllocator<T> {
+        T[] allocate(int length);
     }
 
     @FunctionalInterface
-    public interface Putter<T extends RpmBaseTag, V>
-    {
-        void put ( Header<T> header, T tag, V[] values );
+    public interface Putter<T extends RpmBaseTag, V> {
+        void put(Header<T> header, T tag, V[] values);
     }
 
     @FunctionalInterface
-    public interface ToShortFunction<T>
-    {
-        short applyAsShort ( T value );
+    public interface ToShortFunction<T> {
+        short applyAsShort(T value);
     }
 
-    private static final class I18nString
-    {
+    private static final class I18nString {
         private final String value;
 
-        public I18nString ( final String value )
-        {
+        public I18nString(final String value) {
             this.value = value;
         }
     }
 
-    private final Map<Integer, Object> entries = new LinkedHashMap<> ();
+    private final Map<Integer, Object> entries = new LinkedHashMap<>();
 
     private final Charset charset;
 
-    public Header ( final HeaderEntry[] entries )
-    {
-        this ( entries, StandardCharsets.UTF_8 );
+    public Header(final HeaderEntry[] entries) {
+        this(entries, StandardCharsets.UTF_8);
     }
 
-    public Header ( final HeaderEntry[] entries, final Charset charset )
-    {
+    public Header(final HeaderEntry[] entries, final Charset charset) {
         Objects.requireNonNull(charset);
 
         this.charset = charset;
 
-        if ( entries != null )
-        {
-            for ( final HeaderEntry entry : entries )
-            {
-                this.entries.put ( entry.getTag (), entry );
+        if (entries != null) {
+            for (final HeaderEntry entry : entries) {
+                this.entries.put(entry.getTag(), entry);
             }
         }
     }
 
-    public Header ( final Header<T> other )
-    {
-        Objects.requireNonNull ( other );
+    public Header(final Header<T> other) {
+        Objects.requireNonNull(other);
 
-        this.entries.putAll ( other.entries );
+        this.entries.putAll(other.entries);
         this.charset = other.charset;
     }
 
-    public Header ()
-    {
+    public Header() {
         this.charset = StandardCharsets.UTF_8;
     }
 
-    public int size ()
-    {
-        return this.entries.size ();
+    public int size() {
+        return this.entries.size();
     }
 
-    public void putNull ( final int tag )
-    {
-        this.entries.put ( tag, null );
+    public void putNull(final int tag) {
+        this.entries.put(tag, null);
     }
 
-    public void putNull ( final T tag )
-    {
-        this.entries.put ( tag.getValue (), null );
+    public void putNull(final T tag) {
+        this.entries.put(tag.getValue(), null);
     }
 
-    public void putByte ( final int tag, final byte... value )
-    {
-        Objects.requireNonNull ( value );
+    public void putByte(final int tag, final byte... value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag, value );
+        this.entries.put(tag, value);
     }
 
-    public void putByte ( final T tag, final byte... value )
-    {
-        Objects.requireNonNull ( value );
+    public void putByte(final T tag, final byte... value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag.getValue (), value );
+        this.entries.put(tag.getValue(), value);
     }
 
-    public void putShort ( final int tag, final short... value )
-    {
-        Objects.requireNonNull ( value );
+    public void putShort(final int tag, final short... value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag, value );
+        this.entries.put(tag, value);
     }
 
-    public void putShort ( final T tag, final short... value )
-    {
-        Objects.requireNonNull ( value );
+    public void putShort(final T tag, final short... value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag.getValue (), value );
+        this.entries.put(tag.getValue(), value);
     }
 
-    public void putInt ( final int tag, final int... value )
-    {
-        Objects.requireNonNull ( value );
+    public void putInt(final int tag, final int... value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag, value );
+        this.entries.put(tag, value);
     }
 
-    public void putInt ( final T tag, final int... value )
-    {
-        Objects.requireNonNull ( value );
+    public void putInt(final T tag, final int... value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag.getValue (), value );
+        this.entries.put(tag.getValue(), value);
     }
 
-    public void putLong ( final int tag, final long... value )
-    {
-        Objects.requireNonNull ( value );
+    public void putLong(final int tag, final long... value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag, value );
+        this.entries.put(tag, value);
     }
 
-    public void putLong ( final T tag, final long... value )
-    {
-        Objects.requireNonNull ( value );
+    public void putLong(final T tag, final long... value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag.getValue (), value );
+        this.entries.put(tag.getValue(), value);
     }
 
-    public void putString ( final int tag, final String value )
-    {
-        Objects.requireNonNull ( value );
+    public void putString(final int tag, final String value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag, value );
+        this.entries.put(tag, value);
     }
 
-    public void putString ( final T tag, final String value )
-    {
-        Objects.requireNonNull ( value );
+    public void putString(final T tag, final String value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag.getValue (), value );
+        this.entries.put(tag.getValue(), value);
     }
 
-    public void putStringOptional ( final int tag, final String value )
-    {
-        if ( value == null )
-        {
+    public void putStringOptional(final int tag, final String value) {
+        if (value == null) {
             return;
         }
 
-        this.entries.put ( tag, value );
+        this.entries.put(tag, value);
     }
 
-    public void putStringOptional ( final T tag, final String value )
-    {
-        if ( value == null )
-        {
+    public void putStringOptional(final T tag, final String value) {
+        if (value == null) {
             return;
         }
 
-        this.entries.put ( tag.getValue (), value );
+        this.entries.put(tag.getValue(), value);
     }
 
-    public void putStringArray ( final int tag, final String... value )
-    {
-        Objects.requireNonNull ( value );
+    public void putStringArray(final int tag, final String... value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag, value );
+        this.entries.put(tag, value);
     }
 
-    public void putStringArray ( final T tag, final String... value )
-    {
-        Objects.requireNonNull ( value );
+    public void putStringArray(final T tag, final String... value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag.getValue (), value );
+        this.entries.put(tag.getValue(), value);
     }
 
-    public void putI18nString ( final int tag, final String... value )
-    {
-        Objects.requireNonNull ( value );
+    public void putI18nString(final int tag, final String... value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag, Arrays.stream ( value ).map ( v -> new I18nString ( v ) ).toArray ( I18nString[]::new ) );
+        this.entries.put(tag, Arrays.stream(value).map(v -> new I18nString(v)).toArray(I18nString[]::new));
     }
 
-    public void putI18nString ( final T tag, final String... value )
-    {
-        Objects.requireNonNull ( value );
+    public void putI18nString(final T tag, final String... value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag.getValue (), Arrays.stream ( value ).map ( v -> new I18nString ( v ) ).toArray ( I18nString[]::new ) );
+        this.entries.put(tag.getValue(), Arrays.stream(value).map(v -> new I18nString(v)).toArray(I18nString[]::new));
     }
 
-    public void putBlob ( final int tag, final byte[] value )
-    {
-        Objects.requireNonNull ( value );
+    public void putBlob(final int tag, final byte[] value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag, ByteBuffer.wrap ( value ) );
+        this.entries.put(tag, ByteBuffer.wrap(value));
     }
 
-    public void putBlob ( final int tag, final ByteBuffer value )
-    {
-        Objects.requireNonNull ( value );
+    public void putBlob(final int tag, final ByteBuffer value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag, value );
+        this.entries.put(tag, value);
     }
 
-    public void putBlob ( final T tag, final byte[] value )
-    {
-        Objects.requireNonNull ( value );
+    public void putBlob(final T tag, final byte[] value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag.getValue (), ByteBuffer.wrap ( value ) );
+        this.entries.put(tag.getValue(), ByteBuffer.wrap(value));
     }
 
-    public void putBlob ( final T tag, final ByteBuffer value )
-    {
-        Objects.requireNonNull ( value );
+    public void putBlob(final T tag, final ByteBuffer value) {
+        Objects.requireNonNull(value);
 
-        this.entries.put ( tag.getValue (), value );
+        this.entries.put(tag.getValue(), value);
     }
 
-    public void putSize ( long value, final T intTag, final T longTag )
-    {
-        Objects.requireNonNull ( intTag );
-        Objects.requireNonNull ( longTag );
+    public void putSize(long value, final T intTag, final T longTag) {
+        Objects.requireNonNull(intTag);
+        Objects.requireNonNull(longTag);
 
-        if ( value <= 0 )
-        {
+        if (value <= 0) {
             value = 0;
         }
 
-        if ( value > Integer.MAX_VALUE )
-        {
-            putLong ( longTag, value );
-        }
-        else
-        {
-            putInt ( intTag, (int)value );
+        if (value > Integer.MAX_VALUE) {
+            putLong(longTag, value);
+        } else {
+            putInt(intTag, (int) value);
         }
     }
 
-    public void putAll ( final Header<T> headers )
-    {
-        this.entries.putAll ( headers.entries );
+    public void putAll(final Header<T> headers) {
+        this.entries.putAll(headers.entries);
     }
 
-    public void remove ( final int tag )
-    {
-        this.entries.remove ( tag );
+    public void remove(final int tag) {
+        this.entries.remove(tag);
     }
 
-    public void remove ( final RpmTag tag )
-    {
-        this.entries.remove ( tag.getValue () );
+    public void remove(final RpmTag tag) {
+        this.entries.remove(tag.getValue());
     }
 
-    public Object get ( final int tag )
-    {
-        return this.entries.get ( tag );
+    public Object get(final int tag) {
+        return this.entries.get(tag);
     }
 
-    public Object get ( final T tag )
-    {
-        return this.entries.get ( tag.getValue () );
+    public Object get(final T tag) {
+        return this.entries.get(tag.getValue());
     }
 
     @Override
-    public Optional<Object> getValue ( final T tag )
-    {
-        return Optional.ofNullable ( get ( tag ) );
+    public Optional<Object> getValue(final T tag) {
+        return Optional.ofNullable(get(tag));
     }
-
 
     /**
      * Make an array of header entries with given charset
@@ -323,18 +274,15 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
      * @param charset the charset of choice
      * @return a new array of all header entries, unsorted
      */
-    public HeaderEntry[] makeEntries ( Charset charset )
-    {
-        if ( charset == null )
-        {
-            throw new IllegalArgumentException ( "'charset' cannot be null" );
+    public HeaderEntry[] makeEntries(Charset charset) {
+        if (charset == null) {
+            throw new IllegalArgumentException("'charset' cannot be null");
         }
-        return this.entries.entrySet ().stream ().map ( this::makeEntry ).toArray ( num -> new HeaderEntry[num] );
+        return this.entries.entrySet().stream().map(this::makeEntry).toArray(num -> new HeaderEntry[num]);
     }
 
-    private HeaderEntry makeEntry ( final Map.Entry<Integer, Object> entry )
-    {
-        return makeEntry ( entry, charset );
+    private HeaderEntry makeEntry(final Map.Entry<Integer, Object> entry) {
+        return makeEntry(entry, charset);
     }
 
     /**
@@ -346,246 +294,204 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T>
      *
      * @return a new array of all header entries, unsorted
      */
-    public HeaderEntry[] makeEntries ()
-    {
-        return makeEntries ( StandardCharsets.UTF_8 );
+    public HeaderEntry[] makeEntries() {
+        return makeEntries(StandardCharsets.UTF_8);
     }
 
-    private static HeaderEntry makeEntry ( final Map.Entry<Integer, Object> entry, final Charset charset )
-    {
-        final Object val = entry.getValue ();
-        final int tag = entry.getKey ();
+    private static HeaderEntry makeEntry(final Map.Entry<Integer, Object> entry, final Charset charset) {
+        final Object val = entry.getValue();
+        final int tag = entry.getKey();
 
-        if ( val instanceof HeaderEntry )
-        {
-            return (HeaderEntry)val;
+        if (val instanceof HeaderEntry) {
+            return (HeaderEntry) val;
         }
 
         // NULL
 
-        if ( val == null )
-        {
-            return new HeaderEntry ( Type.NULL, tag, 0, null );
+        if (val == null) {
+            return new HeaderEntry(Type.NULL, tag, 0, null);
         }
 
         // FIXME: CHAR
 
         // BYTE
 
-        if ( val instanceof byte[] )
-        {
-            final byte[] value = (byte[])val;
-            return new HeaderEntry ( Type.BYTE, tag, value.length, value );
+        if (val instanceof byte[]) {
+            final byte[] value = (byte[]) val;
+            return new HeaderEntry(Type.BYTE, tag, value.length, value);
         }
 
         // SHORT
 
-        if ( val instanceof short[] )
-        {
-            final short[] value = (short[])val;
+        if (val instanceof short[]) {
+            final short[] value = (short[]) val;
 
             final byte[] data = new byte[value.length * 2];
-            final ByteBuffer buffer = ByteBuffer.wrap ( data );
-            for ( final short v : value )
-            {
-                buffer.putShort ( v );
+            final ByteBuffer buffer = ByteBuffer.wrap(data);
+            for (final short v : value) {
+                buffer.putShort(v);
             }
 
-            return new HeaderEntry ( Type.SHORT, tag, value.length, data );
+            return new HeaderEntry(Type.SHORT, tag, value.length, data);
         }
 
         // INT
 
-        if ( val instanceof int[] )
-        {
-            final int[] value = (int[])val;
+        if (val instanceof int[]) {
+            final int[] value = (int[]) val;
 
             final byte[] data = new byte[value.length * 4];
-            final ByteBuffer buffer = ByteBuffer.wrap ( data );
-            for ( final int v : value )
-            {
-                buffer.putInt ( v );
+            final ByteBuffer buffer = ByteBuffer.wrap(data);
+            for (final int v : value) {
+                buffer.putInt(v);
             }
 
-            return new HeaderEntry ( Type.INT, tag, value.length, data );
+            return new HeaderEntry(Type.INT, tag, value.length, data);
         }
 
         // LONG
 
-        if ( val instanceof long[] )
-        {
-            final long[] value = (long[])val;
+        if (val instanceof long[]) {
+            final long[] value = (long[]) val;
 
             final byte[] data = new byte[value.length * 8];
-            final ByteBuffer buffer = ByteBuffer.wrap ( data );
-            for ( final long v : value )
-            {
-                buffer.putLong ( v );
+            final ByteBuffer buffer = ByteBuffer.wrap(data);
+            for (final long v : value) {
+                buffer.putLong(v);
             }
 
-            return new HeaderEntry ( Type.LONG, tag, value.length, data );
+            return new HeaderEntry(Type.LONG, tag, value.length, data);
         }
 
         // STRING
 
-        if ( val instanceof String )
-        {
-            final String value = (String)val;
+        if (val instanceof String) {
+            final String value = (String) val;
 
-            return new HeaderEntry ( Type.STRING, tag, 1, makeStringData ( new ByteArrayOutputStream (), value, charset ).toByteArray () );
+            return new HeaderEntry(Type.STRING, tag, 1, makeStringData(new ByteArrayOutputStream(), value, charset).toByteArray());
         }
 
         // BLOB
 
-        if ( val instanceof ByteBuffer )
-        {
-            final ByteBuffer value = (ByteBuffer)val;
+        if (val instanceof ByteBuffer) {
+            final ByteBuffer value = (ByteBuffer) val;
             byte[] data;
-            if ( value.hasArray () )
-            {
-                data = value.array ();
+            if (value.hasArray()) {
+                data = value.array();
+            } else {
+                data = new byte[value.remaining()];
+                value.get(data);
             }
-            else
-            {
-                data = new byte[value.remaining ()];
-                value.get ( data );
-            }
-            return new HeaderEntry ( Type.BLOB, tag, data.length, data );
+            return new HeaderEntry(Type.BLOB, tag, data.length, data);
         }
 
         // STRING_ARRAY
 
-        if ( val instanceof String[] )
-        {
-            final String[] value = (String[])val;
+        if (val instanceof String[]) {
+            final String[] value = (String[]) val;
 
-            return new HeaderEntry ( Type.STRING_ARRAY, tag, value.length, makeStringsData ( new ByteArrayOutputStream (), value, charset ).toByteArray () );
+            return new HeaderEntry(Type.STRING_ARRAY, tag, value.length, makeStringsData(new ByteArrayOutputStream(), value, charset).toByteArray());
         }
 
         // I18N_STRING
 
-        if ( val instanceof I18nString[] )
-        {
-            final I18nString[] value = (I18nString[])val;
+        if (val instanceof I18nString[]) {
+            final I18nString[] value = (I18nString[]) val;
 
-            return new HeaderEntry ( Type.I18N_STRING, tag, value.length, makeStringsData ( new ByteArrayOutputStream (), value, charset ).toByteArray () );
+            return new HeaderEntry(Type.I18N_STRING, tag, value.length, makeStringsData(new ByteArrayOutputStream(), value, charset).toByteArray());
         }
 
-        throw new IllegalArgumentException ( String.format ( "Unable to process value type: %s", val.getClass () ) );
+        throw new IllegalArgumentException(String.format("Unable to process value type: %s", val.getClass()));
     }
 
-    private static <T extends OutputStream> T makeStringData ( final T out, final String string, final Charset charset )
-    {
-        try
-        {
-            if ( string != null )
-            {
-                out.write ( string.getBytes ( charset ) );
+    private static <T extends OutputStream> T makeStringData(final T out, final String string, final Charset charset) {
+        try {
+            if (string != null) {
+                out.write(string.getBytes(charset));
             }
-            out.write ( 0 );
-        }
-        catch ( final IOException e )
-        {
-            throw new RuntimeException ( e );
+            out.write(0);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
         }
         return out;
     }
 
-    private static <T extends OutputStream> T makeStringsData ( final T out, final String[] strings, final Charset charset  )
-    {
-        for ( final String s : strings )
-        {
-            makeStringData ( out, s, charset );
+    private static <T extends OutputStream> T makeStringsData(final T out, final String[] strings, final Charset charset) {
+        for (final String s : strings) {
+            makeStringData(out, s, charset);
         }
         return out;
     }
 
-    private static <T extends OutputStream> T makeStringsData ( final T out, final I18nString[] strings, final Charset charset  )
-    {
-        for ( final I18nString s : strings )
-        {
-            if ( s != null )
-            {
-                makeStringData ( out, s.value, charset );
-            }
-            else
-            {
-                makeStringData ( out, null, charset );
+    private static <T extends OutputStream> T makeStringsData(final T out, final I18nString[] strings, final Charset charset) {
+        for (final I18nString s : strings) {
+            if (s != null) {
+                makeStringData(out, s.value, charset);
+            } else {
+                makeStringData(out, null, charset);
             }
         }
         return out;
     }
 
-    public static <E, V, T extends RpmBaseTag> void putFields ( final Header<T> header, final Collection<E> entries, final T tag, final ArrayAllocator<V> arrayAllocator, final Function<E, V> func, final Putter<T, V> putter )
-    {
-        if ( entries.isEmpty () )
-        {
+    public static <E, V, T extends RpmBaseTag> void putFields(final Header<T> header, final Collection<E> entries, final T tag, final ArrayAllocator<V> arrayAllocator, final Function<E, V> func, final Putter<T, V> putter) {
+        if (entries.isEmpty()) {
             return;
         }
 
-        final V[] values = arrayAllocator.allocate ( entries.size () );
+        final V[] values = arrayAllocator.allocate(entries.size());
         int i = 0;
-        for ( final E entry : entries )
-        {
-            values[i] = func.apply ( entry );
+        for (final E entry : entries) {
+            values[i] = func.apply(entry);
             i++;
         }
 
-        putter.put ( header, tag, values );
+        putter.put(header, tag, values);
     }
 
-    public static <E, T extends RpmBaseTag> void putShortFields ( final Header<T> header, final Collection<E> entries, final T tag, final ToShortFunction<E> func )
-    {
-        if ( entries.isEmpty () )
-        {
+    public static <E, T extends RpmBaseTag> void putShortFields(final Header<T> header, final Collection<E> entries, final T tag, final ToShortFunction<E> func) {
+        if (entries.isEmpty()) {
             return;
         }
 
-        final short[] values = new short[entries.size ()];
+        final short[] values = new short[entries.size()];
         int i = 0;
-        for ( final E entry : entries )
-        {
-            values[i] = func.applyAsShort ( entry );
+        for (final E entry : entries) {
+            values[i] = func.applyAsShort(entry);
             i++;
         }
 
-        header.putShort ( tag, values );
+        header.putShort(tag, values);
     }
 
-    public static <E, T extends RpmBaseTag> void putIntFields ( final Header<T> header, final Collection<E> entries, final T tag, final ToIntFunction<E> func )
-    {
-        if ( entries.isEmpty () )
-        {
+    public static <E, T extends RpmBaseTag> void putIntFields(final Header<T> header, final Collection<E> entries, final T tag, final ToIntFunction<E> func) {
+        if (entries.isEmpty()) {
             return;
         }
 
-        final int[] values = new int[entries.size ()];
+        final int[] values = new int[entries.size()];
         int i = 0;
-        for ( final E entry : entries )
-        {
-            values[i] = func.applyAsInt ( entry );
+        for (final E entry : entries) {
+            values[i] = func.applyAsInt(entry);
             i++;
         }
 
-        header.putInt ( tag, values );
+        header.putInt(tag, values);
     }
 
-    public static <E, T extends RpmBaseTag> void putLongFields ( final Header<T> header, final Collection<E> entries, final T tag, final ToLongFunction<E> func )
-    {
-        if ( entries.isEmpty () )
-        {
+    public static <E, T extends RpmBaseTag> void putLongFields(final Header<T> header, final Collection<E> entries, final T tag, final ToLongFunction<E> func) {
+        if (entries.isEmpty()) {
             return;
         }
 
-        final long[] values = new long[entries.size ()];
+        final long[] values = new long[entries.size()];
         int i = 0;
-        for ( final E entry : entries )
-        {
-            values[i] = func.applyAsLong ( entry );
+        for (final E entry : entries) {
+            values[i] = func.applyAsLong(entry);
             i++;
         }
 
-        header.putLong ( tag, values );
+        header.putLong(tag, values);
     }
 
 }

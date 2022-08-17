@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, 2016 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -19,26 +19,21 @@ import java.util.Map;
  * A generic control file <br>
  * This type can be used to implement other control files are directly.
  */
-public class GenericControlFile
-{
-    protected final Map<String, String> values = new HashMap<> ();
+public class GenericControlFile {
+    protected final Map<String, String> values = new HashMap<>();
 
-    public GenericControlFile ()
-    {
+    public GenericControlFile() {
     }
 
-    public void set ( final String name, final String value )
-    {
-        this.values.put ( name, value );
+    public void set(final String name, final String value) {
+        this.values.put(name, value);
     }
 
-    public String get ( final String field )
-    {
-        return this.values.get ( field );
+    public String get(final String field) {
+        return this.values.get(field);
     }
 
-    public Map<String, String> getValues ()
-    {
+    public Map<String, String> getValues() {
         return this.values;
     }
 }
