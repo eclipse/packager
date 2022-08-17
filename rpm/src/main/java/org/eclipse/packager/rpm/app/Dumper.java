@@ -65,7 +65,7 @@ public class Dumper
 
     public static void dumpAll ( final RpmInputStream in ) throws IOException
     {
-        final RpmLead lead = in.getLead();
+        final RpmLead lead = in.getLead ();
 
         if ( !SKIP_META )
         {
