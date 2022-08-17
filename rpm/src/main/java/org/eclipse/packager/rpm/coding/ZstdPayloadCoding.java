@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -25,56 +25,45 @@ import org.apache.commons.compress.compressors.zstandard.ZstdUtils;
 import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 
-public class ZstdPayloadCoding implements PayloadCodingProvider
-{
-    protected ZstdPayloadCoding ()
-    {
+public class ZstdPayloadCoding implements PayloadCodingProvider {
+    protected ZstdPayloadCoding() {
     }
 
     @Override
-    public String getCoding ()
-    {
+    public String getCoding() {
         return "zstd";
     }
 
     @Override
-    public void fillRequirements ( final Consumer<Dependency> requirementsConsumer )
-    {
-        requirementsConsumer.accept ( new Dependency ( "PayloadIsZstd", "5.4.18-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB ) );
+    public void fillRequirements(final Consumer<Dependency> requirementsConsumer) {
+        requirementsConsumer.accept(new Dependency("PayloadIsZstd", "5.4.18-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB));
     }
 
     @Override
-    public InputStream createInputStream ( final InputStream in ) throws IOException
-    {
-        if ( !ZstdUtils.isZstdCompressionAvailable () )
-        {
-            throw new IOException ( "Zstandard compression is not available" );
+    public InputStream createInputStream(final InputStream in) throws IOException {
+        if (!ZstdUtils.isZstdCompressionAvailable()) {
+            throw new IOException("Zstandard compression is not available");
         }
 
-        return new ZstdCompressorInputStream ( in );
+        return new ZstdCompressorInputStream(in);
     }
 
     @Override
-    public OutputStream createOutputStream ( final OutputStream out, final Optional<String> optionalFlags ) throws IOException
-    {
-        if ( !ZstdUtils.isZstdCompressionAvailable () )
-        {
-            throw new IOException ( "Zstandard compression is not available" );
+    public OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException {
+        if (!ZstdUtils.isZstdCompressionAvailable()) {
+            throw new IOException("Zstandard compression is not available");
         }
 
         final String flags;
 
         final int level;
 
-        if ( optionalFlags.isPresent () && ( flags = optionalFlags.get () ).length () > 0 )
-        {
-            level = Integer.parseInt ( flags.substring ( 0, 1 ) );
-        }
-        else
-        {
+        if (optionalFlags.isPresent() && (flags = optionalFlags.get()).length() > 0) {
+            level = Integer.parseInt(flags.substring(0, 1));
+        } else {
             level = 3;
         }
 
-        return new ZstdCompressorOutputStream ( out, level );
+        return new ZstdCompressorOutputStream(out, level);
     }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -13,8 +13,7 @@
 
 package org.eclipse.packager.rpm;
 
-public interface RpmBaseTag
-{
+public interface RpmBaseTag {
     /**
      * Get the key value of the tag
      * <p>
@@ -24,5 +23,5 @@ public interface RpmBaseTag
      *
      * @return the key value
      */
-    public Integer getValue ();
+    public Integer getValue();
 }

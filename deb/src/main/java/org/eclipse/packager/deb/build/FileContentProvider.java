@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, 2016 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -17,36 +17,30 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class FileContentProvider implements ContentProvider
-{
+public class FileContentProvider implements ContentProvider {
 
     private final File file;
 
-    public FileContentProvider ( final File file )
-    {
+    public FileContentProvider(final File file) {
         this.file = file;
     }
 
     @Override
-    public long getSize ()
-    {
-        return this.file.length ();
+    public long getSize() {
+        return this.file.length();
     }
 
     @Override
-    public InputStream createInputStream () throws IOException
-    {
-        if ( this.file == null )
-        {
+    public InputStream createInputStream() throws IOException {
+        if (this.file == null) {
             return null;
         }
 
-        return new FileInputStream ( this.file );
+        return new FileInputStream(this.file);
     }
 
     @Override
-    public boolean hasContent ()
-    {
+    public boolean hasContent() {
         return this.file != null;
     }
 

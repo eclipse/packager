@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, 2016 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -16,40 +16,33 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class StaticContentProvider implements ContentProvider
-{
+public class StaticContentProvider implements ContentProvider {
     private final byte[] data;
 
-    public StaticContentProvider ( final byte[] data )
-    {
+    public StaticContentProvider(final byte[] data) {
         this.data = data;
     }
 
-    public StaticContentProvider ( final String data )
-    {
-        this ( data.getBytes ( DebianPackageWriter.CHARSET ) );
+    public StaticContentProvider(final String data) {
+        this(data.getBytes(DebianPackageWriter.CHARSET));
     }
 
     @Override
-    public long getSize ()
-    {
+    public long getSize() {
         return this.data.length;
     }
 
     @Override
-    public InputStream createInputStream () throws IOException
-    {
-        if ( this.data == null )
-        {
+    public InputStream createInputStream() throws IOException {
+        if (this.data == null) {
             return null;
         }
 
-        return new ByteArrayInputStream ( this.data );
+        return new ByteArrayInputStream(this.data);
     }
 
     @Override
-    public boolean hasContent ()
-    {
+    public boolean hasContent() {
         return this.data != null;
     }
 

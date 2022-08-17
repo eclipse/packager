@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2014, 2016 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -15,30 +15,26 @@ package org.eclipse.packager.deb.build;
 import java.io.IOException;
 import java.io.InputStream;
 
-public interface ContentProvider
-{
-    public static final ContentProvider NULL_CONTENT = new ContentProvider () {
+public interface ContentProvider {
+    public static final ContentProvider NULL_CONTENT = new ContentProvider() {
 
         @Override
-        public long getSize ()
-        {
+        public long getSize() {
             return 0;
         }
 
         @Override
-        public InputStream createInputStream () throws IOException
-        {
+        public InputStream createInputStream() throws IOException {
             return null;
         }
 
         @Override
-        public boolean hasContent ()
-        {
+        public boolean hasContent() {
             return false;
         }
     };
 
-    public long getSize ();
+    public long getSize();
 
     /**
      * Create a new input stream <br>
@@ -47,7 +43,7 @@ public interface ContentProvider
      * @return a new input stream
      * @throws IOException in case of a n I/O error.
      */
-    public InputStream createInputStream () throws IOException;
+    public InputStream createInputStream() throws IOException;
 
-    public boolean hasContent ();
+    public boolean hasContent();
 }

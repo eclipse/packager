@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -20,18 +20,15 @@ import java.util.function.Function;
 
 import org.eclipse.packager.rpm.Rpms;
 
-public class HeaderValue
-{
-    private static final class Unknown
-    {
+public class HeaderValue {
+    private static final class Unknown {
         @Override
-        public String toString ()
-        {
+        public String toString() {
             return "UNKNOWN";
         }
     }
 
-    public static final Unknown UNKNOWN = new Unknown ();
+    public static final Unknown UNKNOWN = new Unknown();
 
     private final int tag;
 
@@ -43,80 +40,72 @@ public class HeaderValue
 
     private final int count;
 
-    public HeaderValue ( final int tag, final int type, final int index, final int count )
-    {
+    public HeaderValue(final int tag, final int type, final int index, final int count) {
         this.tag = tag;
         this.type = type;
         this.index = index;
         this.count = count;
     }
 
-    public int getTag ()
-    {
+    public int getTag() {
         return this.tag;
     }
 
-    public Object getValue ()
-    {
+    public Object getValue() {
         return this.value;
     }
 
-    public int getType ()
-    {
+    public int getType() {
         return this.type;
     }
 
-    public int getCount ()
-    {
+    public int getCount() {
         return this.count;
     }
 
-    public int getIndex ()
-    {
+    public int getIndex() {
         return this.index;
     }
 
-    void fillFromStore ( final ByteBuffer storeData ) throws IOException
-    {
-        switch ( this.type )
-        {
+    void fillFromStore(final ByteBuffer storeData) throws IOException {
+        switch (this.type) {
             case 0: // null value
                 break;
             case 1: // character
-                this.value = getFromStore ( storeData, true, buf -> (char)storeData.get (), size -> new Character[size] );
+                this.value = getFromStore(storeData, true, buf -> (char) storeData.get(), size -> new Character[size]);
                 break;
             case 2: // byte
-                this.value = getFromStore ( storeData, true, buf -> buf.get (), size -> new Byte[size] );
+                this.value = getFromStore(storeData, true, buf -> buf.get(), size -> new Byte[size]);
                 break;
             case 3: // 16bit integer
-                this.value = getFromStore ( storeData, true, buf -> buf.getShort (), size -> new Short[size] );
+                this.value = getFromStore(storeData, true, buf -> buf.getShort(), size -> new Short[size]);
                 break;
             case 4: // 32bit integer
-                this.value = getFromStore ( storeData, true, buf -> buf.getInt (), size -> new Integer[size] );
+                this.value = getFromStore(storeData, true, buf -> buf.getInt(), size -> new Integer[size]);
                 break;
             case 5: // 64bit integer
-                this.value = getFromStore ( storeData, true, buf -> buf.getLong (), size -> new Long[size] );
+                this.value = getFromStore(storeData, true, buf -> buf.getLong(), size -> new Long[size]);
                 break;
             case 6: // one string
             {
                 // only one allowed
-                storeData.position ( this.index );
-                this.value = makeString ( storeData );
+                storeData.position(this.index);
+                this.value = makeString(storeData);
             }
-                break;
+            break;
             case 7: // blob
             {
                 final byte[] data = new byte[this.count];
-                storeData.position ( this.index );
-                storeData.get ( data );
+                storeData.position(this.index);
+                storeData.get(data);
                 this.value = data;
             }
-                break;
+            break;
             case 8: // string array
-                this.value = getFromStore ( storeData, false, buf -> makeString ( buf ), size -> new String[size] );
+                this.value = getFromStore(storeData, false, buf -> makeString(buf), size -> new String[size]);
                 break;
             case 9: // i18n string array
-                this.value = getFromStore ( storeData, false, buf -> makeString ( buf ), size -> new String[size] );
+                this.value = getFromStore(storeData, false, buf -> makeString(buf), size -> new String[size]);
                 break;
             default:
                 this.value = UNKNOWN;
@@ -125,76 +114,63 @@ public class HeaderValue
     }
 
     @FunctionalInterface
-    public static interface IOFunction<T, R>
-    {
-        public R apply ( T t ) throws IOException;
+    public static interface IOFunction<T, R> {
+        public R apply(T t) throws IOException;
     }
 
-    private <R> Object getFromStore ( final ByteBuffer data, final boolean collapse, final IOFunction<ByteBuffer, R> func, final Function<Integer, R[]> creator ) throws IOException
-    {
-        data.position ( this.index );
-        if ( this.count == 1 && collapse )
-        {
-            return func.apply ( data );
+    private <R> Object getFromStore(final ByteBuffer data, final boolean collapse, final IOFunction<ByteBuffer, R> func, final Function<Integer, R[]> creator) throws IOException {
+        data.position(this.index);
+        if (this.count == 1 && collapse) {
+            return func.apply(data);
         }
 
-        final R[] result = creator.apply ( this.count );
-        for ( int i = 0; i < this.count; i++ )
-        {
-            result[i] = func.apply ( data );
+        final R[] result = creator.apply(this.count);
+        for (int i = 0; i < this.count; i++) {
+            result[i] = func.apply(data);
         }
         return result;
     }
 
-    private static String makeString ( final ByteBuffer buf ) throws IOException
-    {
-        final byte[] data = buf.array ();
-        final int start = buf.position ();
+    private static String makeString(final ByteBuffer buf) throws IOException {
+        final byte[] data = buf.array();
+        final int start = buf.position();
 
-        for ( int i = 0; i < buf.remaining (); i++ ) // check if there is at least one more byte, null byte
+        for (int i = 0; i < buf.remaining(); i++) // check if there is at least one more byte, null byte
         {
-            if ( data[start + i] == 0 )
-            {
-                buf.position ( start + i + 1 ); // skip content plus null byte
-                return new String ( data, start, i, StandardCharsets.UTF_8 );
+            if (data[start + i] == 0) {
+                buf.position(start + i + 1); // skip content plus null byte
+                return new String(data, start, i, StandardCharsets.UTF_8);
             }
         }
-        throw new IOException ( "Corrupt tag entry. Null byte missing!" );
+        throw new IOException("Corrupt tag entry. Null byte missing!");
     }
 
     @Override
-    public String toString ()
-    {
-        final StringBuilder sb = new StringBuilder ();
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
 
-        sb.append ( '[' );
-        sb.append ( this.tag );
-        sb.append ( " = " );
+        sb.append('[');
+        sb.append(this.tag);
+        sb.append(" = ");
 
-        Rpms.dumpValue ( sb, this.value );
+        Rpms.dumpValue(sb, this.value);
 
-        sb.append ( " - " ).append ( this.type ).append ( " = " );
+        sb.append(" - ").append(this.type).append(" = ");
 
-        if ( this.value != null )
-        {
-            if ( this.value != UNKNOWN )
-            {
-                sb.append ( this.value.getClass ().getName () );
+        if (this.value != null) {
+            if (this.value != UNKNOWN) {
+                sb.append(this.value.getClass().getName());
+            } else {
+                sb.append(this.type);
             }
-            else
-            {
-                sb.append ( this.type );
-            }
-        }
-        else
-        {
-            sb.append ( "NULL" );
+        } else {
+            sb.append("NULL");
         }
 
-        sb.append ( " # " );
-        sb.append ( this.count );
-        sb.append ( ']' );
+        sb.append(" # ");
+        sb.append(this.count);
+        sb.append(']');
 
-        return sb.toString ();
+        return sb.toString();
     }
 }

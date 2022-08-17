@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -23,21 +23,19 @@ import java.io.IOException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class UnsignedTest
-{
+public class UnsignedTest {
     @Test
-    public void test1 () throws IOException
-    {
+    public void test1() throws IOException {
         final long value = 0xFFFFFFFFL;
-        final ByteArrayOutputStream bos = new ByteArrayOutputStream ();
-        final DataOutput dos = new DataOutputStream ( bos );
+        final ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        final DataOutput dos = new DataOutputStream(bos);
 
-        dos.writeInt ( (int)value );
+        dos.writeInt((int) value);
 
-        Assertions.assertEquals ( 4, bos.size () );
+        Assertions.assertEquals(4, bos.size());
 
-        final DataInputStream dis = new DataInputStream ( new ByteArrayInputStream ( bos.toByteArray () ) );
+        final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(bos.toByteArray()));
 
-        Assertions.assertEquals ( value, dis.readInt () & 0xFFFFFFFFL );
+        Assertions.assertEquals(value, dis.readInt() & 0xFFFFFFFFL);
     }
 }

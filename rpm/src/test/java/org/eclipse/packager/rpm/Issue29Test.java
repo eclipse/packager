@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2016, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -21,14 +21,11 @@ import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 import org.junit.jupiter.api.Test;
 
-public class Issue29Test
-{
+public class Issue29Test {
     @Test
-    public void test1 () throws IOException
-    {
-        try ( final RpmInputStream in = new RpmInputStream ( new BufferedInputStream ( new URL ( "https://yum.puppetlabs.com/puppet5/el/7/x86_64/puppet-agent-5.3.8-1.el7.x86_64.rpm" ).openStream () ) ) )
-        {
-            Dumper.dumpAll ( in );
+    public void test1() throws IOException {
+        try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(new URL("https://yum.puppetlabs.com/puppet5/el/7/x86_64/puppet-agent-5.3.8-1.el7.x86_64.rpm").openStream()))) {
+            Dumper.dumpAll(in);
         }
 
     }

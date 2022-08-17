@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -17,35 +17,29 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public enum Type
-{
-    BINARY ( (short)0 ),
-    SOURCE ( (short)1 );
+public enum Type {
+    BINARY((short) 0),
+    SOURCE((short) 1);
 
-    private static final Map<Integer, Type> MAP = new HashMap<> ();
+    private static final Map<Integer, Type> MAP = new HashMap<>();
 
-    static
-    {
-        for ( final Type type : Type.values () )
-        {
-            MAP.put ( (int)type.value, type );
+    static {
+        for (final Type type : Type.values()) {
+            MAP.put((int) type.value, type);
         }
     }
 
-    private short value;
+    private final short value;
 
-    private Type ( final short value )
-    {
+    Type(final short value) {
         this.value = value;
     }
 
-    public short getValue ()
-    {
+    public short getValue() {
         return this.value;
     }
 
-    public static Optional<Type> fromValue ( final int value )
-    {
-        return Optional.ofNullable ( MAP.get ( value ) );
+    public static Optional<Type> fromValue(final int value) {
+        return Optional.ofNullable(MAP.get(value));
     }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -32,50 +32,44 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-public class Issue136Test
-{
-    private static final Path OUT_BASE = Paths.get ( "target", "data", "out" );
-
+public class Issue136Test {
+    private static final Path OUT_BASE = Paths.get("target", "data", "out");
 
     @BeforeAll
-    public static void setup () throws IOException
-    {
-        Files.createDirectories ( OUT_BASE );
+    public static void setup() throws IOException {
+        Files.createDirectories(OUT_BASE);
     }
 
     @ParameterizedTest
-    @ValueSource( strings = {
-        "ixufahyknfcniszxvctoioywushlidcjtolzknxiqffxbagcukfxczfmvdrktzchcjbhuzqhgtwmhqwqpdfgbkihwjucybiavxer",
-        "0123456789",
-        "0123456789012345678901234567890123456789012345678901234567890123",
-        "01234567890123456789012345678901234567890123456789012345678901234",
-        "012345678901234567890123456789012345678901234567890123456789012345",
-        "0123456789012345678901234567890123456789012345678901234567890123456",
+    @ValueSource(strings = {
+            "ixufahyknfcniszxvctoioywushlidcjtolzknxiqffxbagcukfxczfmvdrktzchcjbhuzqhgtwmhqwqpdfgbkihwjucybiavxer",
+            "0123456789",
+            "0123456789012345678901234567890123456789012345678901234567890123",
+            "01234567890123456789012345678901234567890123456789012345678901234",
+            "012345678901234567890123456789012345678901234567890123456789012345",
+            "0123456789012345678901234567890123456789012345678901234567890123456",
     })
-    public void test ( final String originalName ) throws IOException
-    {
+    public void test(final String originalName) throws IOException {
         Path outFile;
 
-        try ( RpmBuilder builder = new RpmBuilder ( originalName, "1.0.0", "1", "noarch", OUT_BASE ) )
-        {
-            outFile = builder.getTargetFile ();
+        try (RpmBuilder builder = new RpmBuilder(originalName, "1.0.0", "1", "noarch", OUT_BASE)) {
+            outFile = builder.getTargetFile();
 
-            builder.build ();
+            builder.build();
         }
 
-        try ( final RpmInputStream in = new RpmInputStream ( new BufferedInputStream ( Files.newInputStream ( outFile ) ) ) )
-        {
-            Dumper.dumpAll ( in );
+        try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(outFile)))) {
+            Dumper.dumpAll(in);
 
             final RpmLead lead = in.getLead();
-            final InputHeader<RpmTag> header = in.getPayloadHeader ();
-            final String name = RpmInformations.asString ( header.getTag ( RpmTag.NAME ) );
+            final InputHeader<RpmTag> header = in.getPayloadHeader();
+            final String name = RpmInformations.asString(header.getTag(RpmTag.NAME));
 
-            assertEquals ( originalName.length(), name.length() );
+            assertEquals(originalName.length(), name.length());
 
-            byte [] leadNameBytes = lead.getName().getBytes(StandardCharsets.UTF_8);
+            byte[] leadNameBytes = lead.getName().getBytes(StandardCharsets.UTF_8);
 
-            assertTrue( leadNameBytes.length < 66, () -> "Expected lead name bytes to be less than 66, was " + leadNameBytes.length );
+            assertTrue(leadNameBytes.length < 66, () -> "Expected lead name bytes to be less than 66, was " + leadNameBytes.length);
         }
     }
 

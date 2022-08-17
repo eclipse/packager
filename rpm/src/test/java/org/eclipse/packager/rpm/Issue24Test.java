@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -26,51 +26,46 @@ import org.eclipse.packager.rpm.build.RpmFileNameProvider;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
-public class Issue24Test
-{
-    private static final Path OUT_BASE = Paths.get ( "target", "data", "out" );
+public class Issue24Test {
+    private static final Path OUT_BASE = Paths.get("target", "data", "out");
 
     @BeforeAll
-    public static void setup () throws IOException
-    {
-        Files.createDirectories ( OUT_BASE );
+    public static void setup() throws IOException {
+        Files.createDirectories(OUT_BASE);
     }
 
     @Test
-    public void test () throws IOException
-    {
+    public void test() throws IOException {
         final String name = "issue-24-test";
         final String version = "1.0.0";
         final String release = "1";
         final String architecture = "noarch";
-        BuilderOptions options = new BuilderOptions ();
-        options.setFileNameProvider ( RpmFileNameProvider.DEFAULT_FILENAME_PROVIDER );
+        BuilderOptions options = new BuilderOptions();
+        options.setFileNameProvider(RpmFileNameProvider.DEFAULT_FILENAME_PROVIDER);
 
-        try ( final RpmBuilder builder = new RpmBuilder ( name, new RpmVersion ( version, release ), architecture, OUT_BASE, options ) )
-        {
-            final Path outFile = builder.getTargetFile ();
+        try (final RpmBuilder builder = new RpmBuilder(name, new RpmVersion(version, release), architecture, OUT_BASE, options)) {
+            final Path outFile = builder.getTargetFile();
 
-            builder.build ();
+            builder.build();
 
             final String expectedRpmFileName = name + "-" + version + "-" + release + "." + architecture + ".rpm";
-            final String rpmFileName = options.getFileNameProvider ().getRpmFileName ( builder.getName (), builder.getVersion (), builder.getArchitecture () );
-            assertEquals( expectedRpmFileName, rpmFileName );
-            assertEquals( expectedRpmFileName, outFile.getFileName ().toString () );
+            final String rpmFileName = options.getFileNameProvider().getRpmFileName(builder.getName(), builder.getVersion(), builder.getArchitecture());
+            assertEquals(expectedRpmFileName, rpmFileName);
+            assertEquals(expectedRpmFileName, outFile.getFileName().toString());
         }
 
-        options = new BuilderOptions ();
-        options.setFileNameProvider ( RpmFileNameProvider.LEGACY_FILENAME_PROVIDER );
+        options = new BuilderOptions();
+        options.setFileNameProvider(RpmFileNameProvider.LEGACY_FILENAME_PROVIDER);
 
-        try ( final RpmBuilder builder = new RpmBuilder ( name, new RpmVersion ( version, release ), architecture, OUT_BASE, options ) )
-        {
-            final Path outFile = builder.getTargetFile ();
+        try (final RpmBuilder builder = new RpmBuilder(name, new RpmVersion(version, release), architecture, OUT_BASE, options)) {
+            final Path outFile = builder.getTargetFile();
 
-            builder.build ();
+            builder.build();
 
             final String expectedRpmFileName = name + "-" + version + "-" + release + "-" + architecture + ".rpm";
-            final String rpmFileName = options.getFileNameProvider ().getRpmFileName ( builder.getName (), builder.getVersion (), builder.getArchitecture () );
-            assertEquals( expectedRpmFileName, rpmFileName );
-            assertEquals( expectedRpmFileName, outFile.getFileName ().toString () );
+            final String rpmFileName = options.getFileNameProvider().getRpmFileName(builder.getName(), builder.getVersion(), builder.getArchitecture());
+            assertEquals(expectedRpmFileName, rpmFileName);
+            assertEquals(expectedRpmFileName, outFile.getFileName().toString());
         }
     }
 }

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -16,7 +16,6 @@ package org.eclipse.packager.io;
 import java.io.IOException;
 
 @FunctionalInterface
-public interface IOConsumer<T>
-{
-    public void accept ( T data ) throws IOException;
+public interface IOConsumer<T> {
+    public void accept(T data) throws IOException;
 }

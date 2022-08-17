@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2016 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -18,19 +18,16 @@ import java.util.Map;
 
 import org.eclipse.packager.deb.FieldFormatter;
 
-public final class BinarySectionPackagesFile
-{
+public final class BinarySectionPackagesFile {
     public static final Map<String, FieldFormatter> FORMATTERS;
 
-    static
-    {
-        final Map<String, FieldFormatter> formatters = new HashMap<> ();
-        formatters.put ( "Description", FieldFormatter.MULTI );
+    static {
+        final Map<String, FieldFormatter> formatters = new HashMap<>();
+        formatters.put("Description", FieldFormatter.MULTI);
 
-        FORMATTERS = Collections.unmodifiableMap ( formatters );
+        FORMATTERS = Collections.unmodifiableMap(formatters);
     }
 
-    private BinarySectionPackagesFile ()
-    {
+    private BinarySectionPackagesFile() {
     }
 }

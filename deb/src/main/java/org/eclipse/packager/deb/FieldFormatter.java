@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -14,40 +14,33 @@ package org.eclipse.packager.deb;
 
 import java.io.IOException;
 
-public enum FieldFormatter
-{
+public enum FieldFormatter {
     /**
      * A single line of text
      */
-    SINGLE
-    {
+    SINGLE {
         @Override
-        public void appendValue ( String value, final Appendable appendable ) throws IOException
-        {
-            if ( value == null )
-            {
+        public void appendValue(String value, final Appendable appendable) throws IOException {
+            if (value == null) {
                 return;
             }
 
-            value = value.replaceAll ( "[\\n\\r]", "" );
-            appendable.append ( value );
+            value = value.replaceAll("[\\n\\r]", "");
+            appendable.append(value);
         }
 
         @Override
-        public void append ( final String key, final String value, final Appendable appendable ) throws IOException
-        {
-            if ( key == null || value == null )
-            {
+        public void append(final String key, final String value, final Appendable appendable) throws IOException {
+            if (key == null || value == null) {
                 return;
             }
-            appendable.append ( key ).append ( ':' );
+            appendable.append(key).append(':');
 
-            if ( !value.isEmpty () )
-            {
-                appendable.append ( ' ' );
+            if (!value.isEmpty()) {
+                appendable.append(' ');
             }
 
-            appendValue ( value, appendable );
+            appendValue(value, appendable);
         }
     },
 
@@ -58,98 +51,77 @@ public enum FieldFormatter
      * Whitespaces get preserved.
      * </p>
      */
-    MULTI
-    {
+    MULTI {
         @Override
-        public void append ( final String key, final String value, final Appendable appendable ) throws IOException
-        {
-            if ( key == null || value == null )
-            {
+        public void append(final String key, final String value, final Appendable appendable) throws IOException {
+            if (key == null || value == null) {
                 return;
             }
 
-            appendable.append ( key ).append ( ':' );
+            appendable.append(key).append(':');
 
-            final String[] lines = value.split ( "\\n" );
-            if ( lines.length > 0 && !lines[0].isEmpty () )
-            {
-                appendable.append ( ' ' );
+            final String[] lines = value.split("\\n");
+            if (lines.length > 0 && !lines[0].isEmpty()) {
+                appendable.append(' ');
             }
 
-            appendLines ( appendable, lines );
+            appendLines(appendable, lines);
         }
 
         @Override
-        public void appendValue ( final String value, final Appendable appendable ) throws IOException
-        {
-            if ( value == null )
-            {
+        public void appendValue(final String value, final Appendable appendable) throws IOException {
+            if (value == null) {
                 return;
             }
 
-            final String[] lines = value.split ( "\\n" );
-            appendLines ( appendable, lines );
+            final String[] lines = value.split("\\n");
+            appendLines(appendable, lines);
         }
 
-        private void appendLines ( final Appendable appendable, final String[] lines ) throws IOException
-        {
-            for ( int i = 0; i < lines.length; i++ )
-            {
+        private void appendLines(final Appendable appendable, final String[] lines) throws IOException {
+            for (int i = 0; i < lines.length; i++) {
                 final String line = lines[i];
 
-                if ( line.isEmpty () && i > 0 )
-                {
+                if (line.isEmpty() && i > 0) {
                     // only append a dot-line if we already are in the second line
-                    appendable.append ( " ." );
-                }
-                else if ( !line.isEmpty () )
-                {
-                    if ( i > 0 )
-                    {
+                    appendable.append(" .");
+                } else if (!line.isEmpty()) {
+                    if (i > 0) {
                         // only append the space when we are not in the first line and do have content
-                        appendable.append ( ' ' );
+                        appendable.append(' ');
                     }
-                    appendable.append ( line );
+                    appendable.append(line);
                 }
 
-                if ( i < lines.length - 1 )
-                {
+                if (i < lines.length - 1) {
                     // don't add a final new line
-                    appendable.append ( '\n' );
+                    appendable.append('\n');
                 }
             }
         }
     };
 
-    public abstract void appendValue ( final String value, final Appendable appendable ) throws IOException;
+    public abstract void appendValue(final String value, final Appendable appendable) throws IOException;
 
-    public abstract void append ( String key, String value, Appendable appendable ) throws IOException;
+    public abstract void append(String key, String value, Appendable appendable) throws IOException;
 
-    public String format ( final String key, final String value )
-    {
-        final StringBuilder sb = new StringBuilder ();
-        try
-        {
-            append ( key, value, sb );
-        }
-        catch ( final IOException e )
-        {
+    public String format(final String key, final String value) {
+        final StringBuilder sb = new StringBuilder();
+        try {
+            append(key, value, sb);
+        } catch (final IOException e) {
             // this should never ever happen
         }
-        return sb.toString ();
+        return sb.toString();
     }
 
-    public String formatValue ( final String value )
-    {
-        final StringBuilder sb = new StringBuilder ();
-        try
-        {
-            appendValue ( value, sb );
-        }
-        catch ( final IOException e )
-        {
+    public String formatValue(final String value) {
+        final StringBuilder sb = new StringBuilder();
+        try {
+            appendValue(value, sb);
+        } catch (final IOException e) {
             // this should never ever happen
         }
-        return sb.toString ();
+        return sb.toString();
     }
 }

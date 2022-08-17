@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2015, 2019 Contributors to the Eclipse Foundation
  *
  * See the NOTICE file(s) distributed with this work for additional
@@ -25,48 +25,39 @@ import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipParameters;
 import org.eclipse.packager.rpm.deps.Dependency;
 
-public class GzipPayloadCoding implements PayloadCodingProvider
-{
-    protected GzipPayloadCoding ()
-    {
+public class GzipPayloadCoding implements PayloadCodingProvider {
+    protected GzipPayloadCoding() {
     }
 
     @Override
-    public String getCoding ()
-    {
+    public String getCoding() {
         return "gzip";
     }
 
     @Override
-    public void fillRequirements ( final Consumer<Dependency> requirementsConsumer )
-    {
+    public void fillRequirements(final Consumer<Dependency> requirementsConsumer) {
     }
 
     @Override
-    public InputStream createInputStream ( final InputStream in ) throws IOException
-    {
-        return new GzipCompressorInputStream ( in );
+    public InputStream createInputStream(final InputStream in) throws IOException {
+        return new GzipCompressorInputStream(in);
     }
 
     @Override
-    public OutputStream createOutputStream ( final OutputStream out, final Optional<String> optionalFlags ) throws IOException
-    {
+    public OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException {
         final String flags;
         final int compressionLevel;
 
-        if ( optionalFlags.isPresent () && ( flags = optionalFlags.get () ).length () > 0 )
-        {
-            compressionLevel = Integer.parseInt ( flags.substring ( 0, 1 ) );
-        }
-        else
-        {
+        if (optionalFlags.isPresent() && (flags = optionalFlags.get()).length() > 0) {
+            compressionLevel = Integer.parseInt(flags.substring(0, 1));
+        } else {
             compressionLevel = Deflater.BEST_COMPRESSION;
         }
 
-        final GzipParameters parameters = new GzipParameters ();
+        final GzipParameters parameters = new GzipParameters();
 
-        parameters.setCompressionLevel ( compressionLevel );
+        parameters.setCompressionLevel(compressionLevel);
 
-        return new GzipCompressorOutputStream ( out, parameters );
+        return new GzipCompressorOutputStream(out, parameters);
     }
 }
