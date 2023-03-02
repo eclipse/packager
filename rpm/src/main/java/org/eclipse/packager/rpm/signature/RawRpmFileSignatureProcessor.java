@@ -17,7 +17,7 @@ import org.eclipse.packager.rpm.header.Header;
 import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 
-public class RawRpmFileSignatureProcessor implements SignatureProcessor {
+public class RawRpmFileSignatureProcessor {
 
     private RpmLead lead;
 
@@ -41,32 +41,16 @@ public class RawRpmFileSignatureProcessor implements SignatureProcessor {
         ReadableByteChannel headerChannel = Channels.newChannel(new ByteArrayInputStream(headerBytes));
         IOUtils.readFully(headerChannel, header);
 
-        ByteBuffer data = ByteBuffer.allocate(input.getCpioStream().available());
-        ReadableByteChannel payloadChannel = Channels.newChannel(new ByteArrayInputStream(headerBytes));
+        byte[] dataBytes = IOUtils.toByteArray(input.getCpioStream());
+        ByteBuffer data = ByteBuffer.allocate(dataBytes.length);
+        ReadableByteChannel payloadChannel = Channels.newChannel(new ByteArrayInputStream(dataBytes));
         IOUtils.readFully(payloadChannel, data);
 
-        feedHeader(header);
-        feedPayloadData(data);
+        RsaSignatureProcessor processor = new RsaSignatureProcessor(pgpKeyPair.getPrivateKey());
+        processor.feedHeader(header);
+        processor.feedPayloadData(data);
+
         this.signatureHeader = new Header<>();
-        finish(signatureHeader);
+        processor.finish(signatureHeader);
     }
-
-    @Override
-    public void feedHeader(ByteBuffer header) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void feedPayloadData(ByteBuffer data) {
-        // TODO Auto-generated method stub
-
-    }
-
-    @Override
-    public void finish(Header<RpmSignatureTag> signature) {
-        // TODO Auto-generated method stub
-
-    }
-
 }
