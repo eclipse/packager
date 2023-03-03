@@ -9,7 +9,7 @@ import java.nio.channels.ReadableByteChannel;
 
 import org.apache.commons.compress.archivers.cpio.CpioArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
-import org.bouncycastle.openpgp.PGPKeyPair;
+import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.eclipse.packager.rpm.RpmLead;
 import org.eclipse.packager.rpm.RpmSignatureTag;
 import org.eclipse.packager.rpm.RpmTag;
@@ -27,7 +27,7 @@ public class RawRpmFileSignatureProcessor {
 
     private CpioArchiveOutputStream cpioArchiveOutputStream;
 
-    public void perform(RpmInputStream input, PGPKeyPair pgpKeyPair) throws IOException {
+    public void perform(RpmInputStream input, PGPPrivateKey privateKey) throws IOException {
         input.available();
         this.lead = input.getLead();
         this.payloadHeader = input.getPayloadHeader();
@@ -35,7 +35,7 @@ public class RawRpmFileSignatureProcessor {
         IOUtils.copy(input.getCpioStream(), out);
         this.cpioArchiveOutputStream = new CpioArchiveOutputStream(out);
 
-        byte[] headerBytes = new byte[] {};
+        byte[] headerBytes = new byte[(int) payloadHeader.getLength()];
         input.read(headerBytes, (int) payloadHeader.getStart(), (int) payloadHeader.getLength());
         ByteBuffer header = ByteBuffer.allocate((int) payloadHeader.getLength());
         ReadableByteChannel headerChannel = Channels.newChannel(new ByteArrayInputStream(headerBytes));
@@ -46,9 +46,9 @@ public class RawRpmFileSignatureProcessor {
         ReadableByteChannel payloadChannel = Channels.newChannel(new ByteArrayInputStream(dataBytes));
         IOUtils.readFully(payloadChannel, data);
 
-        RsaSignatureProcessor processor = new RsaSignatureProcessor(pgpKeyPair.getPrivateKey());
-        processor.feedHeader(header);
-        processor.feedPayloadData(data);
+        RsaSignatureProcessor processor = new RsaSignatureProcessor(privateKey);
+        processor.feedHeader(header.slice());
+        processor.feedPayloadData(data.slice());
 
         this.signatureHeader = new Header<>();
         processor.finish(signatureHeader);
