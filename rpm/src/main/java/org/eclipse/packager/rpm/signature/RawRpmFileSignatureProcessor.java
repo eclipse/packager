@@ -1,56 +1,50 @@
 package org.eclipse.packager.rpm.signature;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
-import org.apache.commons.compress.archivers.cpio.CpioArchiveOutputStream;
 import org.apache.commons.compress.utils.IOUtils;
 import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.eclipse.packager.rpm.RpmLead;
 import org.eclipse.packager.rpm.RpmSignatureTag;
-import org.eclipse.packager.rpm.RpmTag;
 import org.eclipse.packager.rpm.header.Header;
-import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
+
+import com.google.common.io.CountingInputStream;
 
 public class RawRpmFileSignatureProcessor {
 
-    private RpmLead lead;
+    public void perform(InputStream in, PGPPrivateKey privateKey) throws IOException {
 
-    private InputHeader<RpmTag> payloadHeader;
+        RpmInputStream ref = new RpmInputStream(in);
+        ref.available();
+//        in.reset();
 
-    private Header<RpmSignatureTag> signatureHeader;
+        CountingInputStream count = new CountingInputStream(in);
+        DataInputStream data = new DataInputStream(count);
 
-    private CpioArchiveOutputStream cpioArchiveOutputStream;
+        byte[] lead = IOUtils.readRange(data, 96);
+        byte[] signatureHeader = IOUtils.readRange(data, (int) ref.getSignatureHeader().getLength());
+        byte[] payloadHeader = IOUtils.readRange(data, (int) ref.getPayloadHeader().getLength());
+        byte[] payloadBytes = IOUtils.toByteArray(ref.getCpioStream());
 
-    public void perform(RpmInputStream input, PGPPrivateKey privateKey) throws IOException {
-        input.available();
-        this.lead = input.getLead();
-        this.payloadHeader = input.getPayloadHeader();
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        IOUtils.copy(input.getCpioStream(), out);
-        this.cpioArchiveOutputStream = new CpioArchiveOutputStream(out);
-
-        byte[] headerBytes = new byte[(int) payloadHeader.getLength()];
-        input.read(headerBytes, (int) payloadHeader.getStart(), (int) payloadHeader.getLength());
-        ByteBuffer header = ByteBuffer.allocate((int) payloadHeader.getLength());
-        ReadableByteChannel headerChannel = Channels.newChannel(new ByteArrayInputStream(headerBytes));
+        ByteBuffer header = ByteBuffer.allocate(payloadHeader.length);
+        ReadableByteChannel headerChannel = Channels.newChannel(new ByteArrayInputStream(payloadHeader));
         IOUtils.readFully(headerChannel, header);
 
-        byte[] dataBytes = IOUtils.toByteArray(input.getCpioStream());
-        ByteBuffer data = ByteBuffer.allocate(dataBytes.length);
-        ReadableByteChannel payloadChannel = Channels.newChannel(new ByteArrayInputStream(dataBytes));
-        IOUtils.readFully(payloadChannel, data);
+        ByteBuffer payload = ByteBuffer.allocate(payloadBytes.length);
+        ReadableByteChannel payloadChannel = Channels.newChannel(new ByteArrayInputStream(payloadHeader));
+        IOUtils.readFully(payloadChannel, payload);
 
         RsaSignatureProcessor processor = new RsaSignatureProcessor(privateKey);
         processor.feedHeader(header.slice());
-        processor.feedPayloadData(data.slice());
+        processor.feedPayloadData(payload.slice());
 
-        this.signatureHeader = new Header<>();
-        processor.finish(signatureHeader);
+        Header<RpmSignatureTag> signature = new Header<>();
+        processor.finish(signature);
     }
 }

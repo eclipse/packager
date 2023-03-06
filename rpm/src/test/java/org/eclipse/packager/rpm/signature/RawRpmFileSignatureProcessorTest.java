@@ -13,7 +13,6 @@ import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.bouncycastle.openpgp.bc.BcPGPSecretKeyRing;
 import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
-import org.eclipse.packager.rpm.parse.RpmInputStream;
 import org.junit.jupiter.api.Test;
 
 public class RawRpmFileSignatureProcessorTest {
@@ -36,7 +35,7 @@ public class RawRpmFileSignatureProcessorTest {
         PGPSecretKey secretKey = secretKeyRing.getSecretKey();
         PGPPrivateKey privateKey = secretKey.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider()).build(passPhrase.toCharArray()));
 
-        signatureProcessor.perform(new RpmInputStream(rpmStream), privateKey);
+        signatureProcessor.perform(rpmStream, privateKey);
     }
 
 }
