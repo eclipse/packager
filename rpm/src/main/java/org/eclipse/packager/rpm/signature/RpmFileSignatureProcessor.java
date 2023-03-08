@@ -24,12 +24,14 @@ import org.eclipse.packager.rpm.RpmSignatureTag;
 import org.eclipse.packager.rpm.Rpms;
 import org.eclipse.packager.rpm.header.Header;
 import org.eclipse.packager.rpm.header.Headers;
+import org.eclipse.packager.rpm.info.RpmInformation;
+import org.eclipse.packager.rpm.info.RpmInformations;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 
 /**
  * 
- * @author <a href="https://github.com/mat1e">mat1e</a> 
- * (member of <a href="https://github.com/groupe-edf">Groupe EDF</a>)
+ * @author <a href="https://github.com/mat1e">mat1e</a> (member of
+ *         <a href="https://github.com/groupe-edf">Groupe EDF</a>)
  *
  */
 public class RpmFileSignatureProcessor {
@@ -55,6 +57,7 @@ public class RpmFileSignatureProcessor {
         IOUtils.copy(rpmIn, out);
         byte[] buf = out.toByteArray();
         RpmInputStream ref = getRpmInputStream(buf);
+        RpmInformation info = RpmInformations.makeInformation(ref);
         ByteArrayInputStream data = new ByteArrayInputStream(buf);
 
         byte[] lead = IOUtils.readRange(data, 96);
@@ -62,7 +65,7 @@ public class RpmFileSignatureProcessor {
         byte[] payloadHeader = IOUtils.readRange(data, (int) ref.getPayloadHeader().getLength());
         byte[] payload = IOUtils.toByteArray(data);
 
-        byte[] signature = buildSignature(privateKey, payloadHeader, payload);
+        byte[] signature = buildSignature(privateKey, payloadHeader, payload, info.getArchiveSize());
 
         ByteArrayOutputStream result = new ByteArrayOutputStream();
         result.write(lead);
@@ -84,22 +87,23 @@ public class RpmFileSignatureProcessor {
      * @param privateKey    : private key already extracted
      * @param payloadHeader : Payload's header as byte array
      * @param payload       : payload as byte array
+     * @param archiveSize   : archiveSize retrieved in {@link RpmInformation}
      * @return signature header as a bytes array
      * @throws IOException
      */
-    private byte[] buildSignature(PGPPrivateKey privateKey, byte[] payloadHeader, byte[] payload) throws IOException {
-        long archiveSize = payloadHeader.length + payload.length + 0L;
+    private byte[] buildSignature(PGPPrivateKey privateKey, byte[] payloadHeader, byte[] payload, long archiveSize)
+            throws IOException {
         ByteBuffer headerBuf = bufBytes(payloadHeader);
         ByteBuffer payloadBuf = bufBytes(payload);
         Header<RpmSignatureTag> signatureHeader = new Header<>();
         List<SignatureProcessor> signatureProcessors = getDefaultsSignatureProcessors();
         signatureProcessors.add(new RsaSignatureProcessor(privateKey));
         for (SignatureProcessor processor : signatureProcessors) {
+            headerBuf.clear();
+            payloadBuf.clear();
             processor.init(archiveSize);
             processor.feedHeader(headerBuf.slice());
             processor.feedPayloadData(payloadBuf.slice());
-            headerBuf.clear();
-            payloadBuf.clear();
             processor.finish(signatureHeader);
         }
         ByteBuffer signatureBuf = Headers.render(signatureHeader.makeEntries(), true, Rpms.IMMUTABLE_TAG_SIGNATURE);
