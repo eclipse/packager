@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.bouncycastle.bcpg.ArmoredInputStream;
@@ -24,6 +26,12 @@ import org.eclipse.packager.rpm.header.Header;
 import org.eclipse.packager.rpm.header.Headers;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 
+/**
+ * 
+ * @author <a href="https://github.com/mat1e">mat1e</a> 
+ * (member of <a href="https://github.com/groupe-edf">Groupe EDF</a>)
+ *
+ */
 public class RpmFileSignatureProcessor {
 
     /**
@@ -38,7 +46,7 @@ public class RpmFileSignatureProcessor {
      * @throws IOException
      * @throws PGPException
      */
-    public OutputStream perform(InputStream rpmIn, InputStream privateKeyIn, String passphrase)
+    public ByteArrayOutputStream perform(InputStream rpmIn, InputStream privateKeyIn, String passphrase)
             throws IOException, PGPException {
 
         PGPPrivateKey privateKey = getPrivateKey(privateKeyIn, passphrase);
@@ -80,17 +88,66 @@ public class RpmFileSignatureProcessor {
      * @throws IOException
      */
     private byte[] buildSignature(PGPPrivateKey privateKey, byte[] payloadHeader, byte[] payload) throws IOException {
+        long archiveSize = payloadHeader.length + payload.length + 0L;
         ByteBuffer headerBuf = bufBytes(payloadHeader);
         ByteBuffer payloadBuf = bufBytes(payload);
-
-        RsaSignatureProcessor processor = new RsaSignatureProcessor(privateKey);
-        processor.feedHeader(headerBuf.slice());
-        processor.feedPayloadData(payloadBuf.slice());
-
         Header<RpmSignatureTag> signatureHeader = new Header<>();
-        processor.finish(signatureHeader);
+        List<SignatureProcessor> signatureProcessors = getDefaultsSignatureProcessors();
+        signatureProcessors.add(new RsaSignatureProcessor(privateKey));
+        for (SignatureProcessor processor : signatureProcessors) {
+            processor.init(archiveSize);
+            processor.feedHeader(headerBuf.slice());
+            processor.feedPayloadData(payloadBuf.slice());
+            headerBuf.clear();
+            payloadBuf.clear();
+            processor.finish(signatureHeader);
+        }
+        ByteBuffer signatureBuf = Headers.render(signatureHeader.makeEntries(), true, Rpms.IMMUTABLE_TAG_SIGNATURE);
+        final int payloadSize = signatureBuf.remaining();
+        final int padding = Rpms.padding(payloadSize);
+        byte[] signature = safeReadBuffer(signatureBuf);
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        result.write(signature);
+        if (padding > 0) {
+            result.write(safeReadBuffer(ByteBuffer.wrap(Rpms.EMPTY_128, 0, padding)));
+        }
+        return result.toByteArray();
+    }
 
-        return Headers.render(signatureHeader.makeEntries(), true, Rpms.IMMUTABLE_TAG_SIGNATURE).array();
+    /**
+     * <p>
+     * Safe read (without buffer bytes) the given buffer and return it to a byte
+     * array
+     * </p>
+     * 
+     * @param buf : the {@link ByteBuffer} to read
+     * @return byte array
+     */
+    private byte[] safeReadBuffer(ByteBuffer buf) {
+        ByteArrayOutputStream result = new ByteArrayOutputStream();
+        while (buf.hasRemaining()) {
+            result.write(buf.get());
+        }
+        return result.toByteArray();
+    }
+
+    /**
+     * <p>
+     * Return all default {@link SignatureProcessor} defined in
+     * {@link SignatureProcessors}
+     * </p>
+     * 
+     * @return {@link List<SignatureProcessor>} of {@link SignatureProcessor}
+     */
+    private List<SignatureProcessor> getDefaultsSignatureProcessors() {
+        List<SignatureProcessor> signatureProcessors = new ArrayList<>();
+        signatureProcessors.add(SignatureProcessors.size());
+        signatureProcessors.add(SignatureProcessors.sha256Header());
+        signatureProcessors.add(SignatureProcessors.sha1Header());
+        signatureProcessors.add(SignatureProcessors.md5());
+        signatureProcessors.add(SignatureProcessors.payloadSize());
+
+        return signatureProcessors;
     }
 
     /**
