@@ -1,40 +1,113 @@
 package org.eclipse.packager.rpm.signature;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.openpgp.PGPException;
-import org.eclipse.packager.rpm.app.Dumper;
+import org.bouncycastle.openpgp.PGPPublicKey;
+import org.bouncycastle.openpgp.PGPPublicKeyRing;
+import org.bouncycastle.openpgp.bc.BcPGPPublicKeyRing;
+import org.eclipse.packager.rpm.RpmSignatureTag;
+import org.eclipse.packager.rpm.Rpms;
+import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
+@TestMethodOrder(OrderAnnotation.class)
 public class RpmFileSignatureProcessorTest {
 
+    private static final String RESULT_FILE_PATH = "src/test/resources/result/org.eclipse.scada-0.2.1-1.noarch.rpm";
+    private static final String RESULT_DIR = "src/test/resources/result";
+
     @Test
+    @Order(1)
     public void test_signing_existing_rpm() throws IOException, PGPException {
         String passPhrase = "testkey";
         File rpm = new File("src/test/resources/data/org.eclipse.scada-0.2.1-1.noarch.rpm");
         File private_key = new File("src/test/resources/key/private_key.txt");
         if (!rpm.exists() || !private_key.exists()) {
-            return;
+            fail("Input files rpm or private_key does not exist");
         }
         InputStream rpmStream = new FileInputStream(rpm);
         InputStream privateKeyStream = new FileInputStream(private_key);
-        System.out.println("###########################################################");
-        Dumper.dumpAll(new RpmInputStream(new FileInputStream(rpm)));
-        System.out.println("###########################################################");
 
         RpmFileSignatureProcessor signatureProcessor = new RpmFileSignatureProcessor();
         ByteArrayOutputStream signedPackage = signatureProcessor.perform(rpmStream, privateKeyStream, passPhrase);
         byte[] bytes = signedPackage.toByteArray();
+
+        File resultDirectory = new File(RESULT_DIR);
+        resultDirectory.mkdir();
+        File signedRpm = new File(RESULT_FILE_PATH);
+        signedRpm.createNewFile();
+        FileOutputStream resultOut = new FileOutputStream(signedRpm);
+        resultOut.write(bytes);
+        resultOut.close();
+
+        RpmInputStream initialRpm = new RpmInputStream(new FileInputStream(rpm));
+        initialRpm.available();
+        initialRpm.close();
+        InputHeader<RpmSignatureTag> initialHeader = initialRpm.getSignatureHeader();
         RpmInputStream rpmSigned = new RpmInputStream(new ByteArrayInputStream(bytes));
         rpmSigned.available();
-        System.out.println("###########################################################");
-        Dumper.dumpAll(rpmSigned);
-        System.out.println("###########################################################");
+        rpmSigned.close();
+        InputHeader<RpmSignatureTag> signedHeader = rpmSigned.getSignatureHeader();
+
+        int initialSize = (int) initialHeader.getEntry(RpmSignatureTag.SIZE).get().getValue();
+        int initialPayloadSize = (int) initialHeader.getEntry(RpmSignatureTag.PAYLOAD_SIZE).get().getValue();
+        String initialSha1 = initialHeader.getEntry(RpmSignatureTag.SHA1HEADER).get().getValue().toString();
+        String initialMd5 = Rpms.dumpValue(initialHeader.getEntry(RpmSignatureTag.MD5).get().getValue());
+
+        int signedSize = (int) signedHeader.getEntry(RpmSignatureTag.SIZE).get().getValue();
+        int signedPayloadSize = (int) signedHeader.getEntry(RpmSignatureTag.PAYLOAD_SIZE).get().getValue();
+        String signedSha1 = signedHeader.getEntry(RpmSignatureTag.SHA1HEADER).get().getValue().toString();
+        String signedMd5 = Rpms.dumpValue(signedHeader.getEntry(RpmSignatureTag.MD5).get().getValue());
+        String pgpSignature = Rpms.dumpValue(signedHeader.getEntry(RpmSignatureTag.PGP).get().getValue());
+
+        assertEquals(initialSize, signedSize);
+        assertEquals(initialPayloadSize, signedPayloadSize);
+        assertEquals(initialSha1, signedSha1);
+        assertEquals(initialMd5, signedMd5);
+        assertNotNull(pgpSignature);
+    }
+
+    @Test
+    @Order(2)
+    public void verify_rpm_signature() throws IOException, PGPException {
+        File public_key = new File("src/test/resources/key/public_key.txt");
+        File signedRpm = new File(RESULT_FILE_PATH);
+        if (!public_key.exists() || !signedRpm.exists()) {
+            fail("Input files signedRpm or public_key does not exist");
+        }
+        InputStream publicKeyStream = new FileInputStream(public_key);
+        ArmoredInputStream armoredInputStream = new ArmoredInputStream(publicKeyStream);
+        PGPPublicKeyRing publicKeyRing = new BcPGPPublicKeyRing(armoredInputStream);
+        PGPPublicKey publicKey = publicKeyRing.getPublicKey();
+        // TODO Signature Check
+    }
+
+    @AfterAll
+    public static void clean() {
+        File resultDir = new File(RESULT_DIR);
+        File signedRpm = new File(RESULT_FILE_PATH);
+        if (resultDir.exists()) {
+            if (signedRpm.exists()) {
+                signedRpm.delete();
+            }
+            resultDir.delete();
+        }
     }
 }
