@@ -38,7 +38,8 @@ public class RpmFileSignatureProcessor {
 
     /**
      * <p>
-     * Perform the signature of the given RPM file with the given private key.
+     * Perform the signature of the given RPM file with the given private key. This
+     * support only PGP.
      * </p>
      * 
      * @param rpmIn        : RPM file as an {@link InputStream}
