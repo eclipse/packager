@@ -35,7 +35,8 @@ public class RpmFileSignatureProcessorTest {
 
     @Test
     @Order(1)
-    public void test_signing_existing_rpm() throws IOException, PGPException {
+    public void testSigningExistingRpm() throws IOException, PGPException {
+        // Read files
         String passPhrase = "testkey";
         File rpm = new File("src/test/resources/data/org.eclipse.scada-0.2.1-1.noarch.rpm");
         File private_key = new File("src/test/resources/key/private_key.txt");
@@ -45,10 +46,11 @@ public class RpmFileSignatureProcessorTest {
         InputStream rpmStream = new FileInputStream(rpm);
         InputStream privateKeyStream = new FileInputStream(private_key);
 
-        RpmFileSignatureProcessor signatureProcessor = new RpmFileSignatureProcessor();
-        ByteArrayOutputStream signedPackage = signatureProcessor.perform(rpmStream, privateKeyStream, passPhrase);
+        // Sign the RPM
+        ByteArrayOutputStream signedPackage = RpmFileSignatureProcessor.perform(rpmStream, privateKeyStream, passPhrase);
         byte[] bytes = signedPackage.toByteArray();
 
+        // Write the signed RPM
         File resultDirectory = new File(RESULT_DIR);
         resultDirectory.mkdir();
         File signedRpm = new File(RESULT_FILE_PATH);
@@ -57,6 +59,7 @@ public class RpmFileSignatureProcessorTest {
         resultOut.write(bytes);
         resultOut.close();
 
+        // Read the initial (non signed) rpm file
         RpmInputStream initialRpm = new RpmInputStream(new FileInputStream(rpm));
         initialRpm.available();
         initialRpm.close();
@@ -66,27 +69,31 @@ public class RpmFileSignatureProcessorTest {
         rpmSigned.close();
         InputHeader<RpmSignatureTag> signedHeader = rpmSigned.getSignatureHeader();
 
+        // Get informations of the initial rpm file
         int initialSize = (int) initialHeader.getEntry(RpmSignatureTag.SIZE).get().getValue();
         int initialPayloadSize = (int) initialHeader.getEntry(RpmSignatureTag.PAYLOAD_SIZE).get().getValue();
         String initialSha1 = initialHeader.getEntry(RpmSignatureTag.SHA1HEADER).get().getValue().toString();
         String initialMd5 = Rpms.dumpValue(initialHeader.getEntry(RpmSignatureTag.MD5).get().getValue());
 
+        // Read information of the signed rpm file
         int signedSize = (int) signedHeader.getEntry(RpmSignatureTag.SIZE).get().getValue();
         int signedPayloadSize = (int) signedHeader.getEntry(RpmSignatureTag.PAYLOAD_SIZE).get().getValue();
         String signedSha1 = signedHeader.getEntry(RpmSignatureTag.SHA1HEADER).get().getValue().toString();
         String signedMd5 = Rpms.dumpValue(signedHeader.getEntry(RpmSignatureTag.MD5).get().getValue());
         String pgpSignature = Rpms.dumpValue(signedHeader.getEntry(RpmSignatureTag.PGP).get().getValue());
 
+        // Compare informations values of initial rpm and signed rpm
         assertEquals(initialSize, signedSize);
         assertEquals(initialPayloadSize, signedPayloadSize);
         assertEquals(initialSha1, signedSha1);
         assertEquals(initialMd5, signedMd5);
+        // verify if signature is present
         assertNotNull(pgpSignature);
     }
 
     @Test
     @Order(2)
-    public void verify_rpm_signature() throws IOException, PGPException {
+    public void verifyRpmSignature() throws IOException, PGPException {
         File public_key = new File("src/test/resources/key/public_key.txt");
         File signedRpm = new File(RESULT_FILE_PATH);
         if (!public_key.exists() || !signedRpm.exists()) {
