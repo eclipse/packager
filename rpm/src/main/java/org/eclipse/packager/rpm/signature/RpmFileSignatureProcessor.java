@@ -49,6 +49,10 @@ import org.eclipse.packager.rpm.parse.RpmInputStream;
  */
 public class RpmFileSignatureProcessor {
 
+    private RpmFileSignatureProcessor() {
+        // Hide default constructor because of the static context
+    }
+
     /**
      * <p>
      * Perform the signature of the given RPM file with the given private key. This
