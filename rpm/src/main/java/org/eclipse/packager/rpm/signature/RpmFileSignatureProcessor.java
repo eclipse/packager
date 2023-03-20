@@ -12,18 +12,18 @@
  ********************************************************************************/
 package org.eclipse.packager.rpm.signature;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
+import java.nio.channels.FileChannel;
+import java.nio.channels.WritableByteChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.compress.utils.IOUtils;
 import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPrivateKey;
@@ -56,152 +56,125 @@ public class RpmFileSignatureProcessor {
     /**
      * <p>
      * Perform the signature of the given RPM file with the given private key. This
-     * support only PGP.
+     * support only PGP. Write the result into the given {@link OutputStream}
      * </p>
      * 
-     * @param rpmIn        : RPM file as an {@link InputStream}
+     * @param rpm          : RPM file
      * @param privateKeyIn : encrypted private key as {@link InputStream}
      * @param passphrase   : passphrase to decrypt the private key
-     * @return The signed RPM as an {@link OutputStream}
+     * @param out          : {@link OutputStream} to write to
      * @throws IOException
      * @throws PGPException
      */
-    public static ByteArrayOutputStream perform(InputStream rpmIn, InputStream privateKeyIn, String passphrase)
+    public static void perform(File rpm, InputStream privateKeyIn, String passphrase, OutputStream out)
             throws IOException, PGPException {
+
+        if (!rpm.exists()) {
+            throw new IOException("The file " + rpm.getName() + " does not exist");
+        }
 
         PGPPrivateKey privateKey = getPrivateKey(privateKeyIn, passphrase);
 
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        IOUtils.copy(rpmIn, out);
-        byte[] buf = out.toByteArray();
-        RpmInputStream ref = getRpmInputStream(buf);
-        RpmInformation info = RpmInformations.makeInformation(ref);
-        ByteArrayInputStream data = new ByteArrayInputStream(buf);
+        try (RpmInputStream rpmIn = new RpmInputStream(new FileInputStream(rpm))) {
+            long signatureHeaderStart = rpmIn.getSignatureHeader().getStart();
+            long signatureHeaderLength = rpmIn.getSignatureHeader().getLength();
+            long payloadHeaderStart = rpmIn.getPayloadHeader().getStart();
+            long payloadHeaderLength = rpmIn.getPayloadHeader().getLength();
+            RpmInformation info = RpmInformations.makeInformation(rpmIn);
+            long payloadStart = info.getHeaderEnd();
+            long archiveSize = info.getArchiveSize();
 
-        byte[] lead = IOUtils.readRange(data, 96);
-        IOUtils.readRange(data, (int) ref.getSignatureHeader().getLength()); // skip existing signature header
-        byte[] payloadHeader = IOUtils.readRange(data, (int) ref.getPayloadHeader().getLength());
-        byte[] payload = IOUtils.toByteArray(data);
+            if (signatureHeaderStart == 0L || signatureHeaderLength == 0L || payloadHeaderStart == 0L
+                    || payloadHeaderLength == 0L || archiveSize == 0L) {
+                throw new IOException("Unable to read " + rpm.getName() + " informations.");
+            }
 
-        byte[] signature = buildSignature(privateKey, payloadHeader, payload, info.getArchiveSize());
+            try (FileInputStream in = new FileInputStream(rpm)) {
+                FileChannel channelIn = in.getChannel();
+                ByteBuffer payloadHeaderBuff = ByteBuffer.allocate((int) payloadHeaderLength);
+                channelIn.read(payloadHeaderBuff, payloadHeaderStart);
+                ByteBuffer payloadBuff = ByteBuffer.allocate((int) (channelIn.size() - payloadStart));
+                channelIn.read(payloadBuff, payloadStart);
 
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-        result.write(lead);
-        result.write(signature);
-        result.write(payloadHeader);
-        result.write(payload);
-
-        return result;
+                try (WritableByteChannel channelOut = Channels.newChannel(out)) {
+                    channelIn.transferTo(0, 96, channelOut);
+                    writeSignature(privateKey, payloadHeaderBuff, payloadBuff, info.getArchiveSize(), channelOut);
+                    channelIn.transferTo(payloadHeaderStart, payloadHeaderLength, channelOut);
+                    channelIn.transferTo(payloadStart, channelIn.size() - payloadStart, channelOut);
+                }
+            }
+        }
     }
 
     /**
      * <p>
-     * Sign the payload with its header with the given private key and return the
-     * signature header as a bytes array. For more information about RPM format, see
-     * <a href=
+     * Sign the payload with its header with the given private key and write it in
+     * channelOut, see <a href=
      * "https://rpm-software-management.github.io/rpm/manual/format.html">https://rpm-software-management.github.io/rpm/manual/format.html</a>
      * </p>
      * 
      * @param privateKey    : private key already extracted
-     * @param payloadHeader : Payload's header as byte array
-     * @param payload       : payload as byte array
+     * @param payloadHeader : Payload's header as {@link ByteBuffer}
+     * @param payload       : Payload as {@link ByteBuffer}
      * @param archiveSize   : archiveSize retrieved in {@link RpmInformation}
-     * @return signature header as a bytes array
+     * @param channelOut    : output to write to
      * @throws IOException
      */
-    private static byte[] buildSignature(PGPPrivateKey privateKey, byte[] payloadHeader, byte[] payload,
-            long archiveSize) throws IOException {
-        ByteBuffer headerBuf = bufBytes(payloadHeader);
-        ByteBuffer payloadBuf = bufBytes(payload);
+    private static void writeSignature(PGPPrivateKey privateKey, ByteBuffer payloadHeader, ByteBuffer payload,
+            long archiveSize, WritableByteChannel channelOut) throws IOException {
         Header<RpmSignatureTag> signatureHeader = new Header<>();
-        List<SignatureProcessor> signatureProcessors = getDefaultsSignatureProcessors();
-        signatureProcessors.add(new RsaSignatureProcessor(privateKey));
+        List<SignatureProcessor> signatureProcessors = getSignatureProcessors(privateKey);
+        payloadHeader.flip();
+        payload.flip();
         for (SignatureProcessor processor : signatureProcessors) {
-            headerBuf.clear();
-            payloadBuf.clear();
             processor.init(archiveSize);
-            processor.feedHeader(headerBuf.slice());
-            processor.feedPayloadData(payloadBuf.slice());
+            processor.feedHeader(payloadHeader.slice());
+            processor.feedPayloadData(payload.slice());
             processor.finish(signatureHeader);
         }
         ByteBuffer signatureBuf = Headers.render(signatureHeader.makeEntries(), true, Rpms.IMMUTABLE_TAG_SIGNATURE);
         final int payloadSize = signatureBuf.remaining();
         final int padding = Rpms.padding(payloadSize);
-        byte[] signature = safeReadBuffer(signatureBuf);
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
-        result.write(signature);
+        safeWrite(signatureBuf, channelOut);
         if (padding > 0) {
-            result.write(safeReadBuffer(ByteBuffer.wrap(Rpms.EMPTY_128, 0, padding)));
+            safeWrite(ByteBuffer.wrap(Rpms.EMPTY_128, 0, padding), channelOut);
         }
-        return result.toByteArray();
     }
 
     /**
      * <p>
-     * Safe read (without buffer bytes) the given buffer and return it to a byte
-     * array
+     * Safe write (without buffer bytes) the given buffer into the channel array
      * </p>
      * 
-     * @param buf : the {@link ByteBuffer} to read
-     * @return byte array
+     * @param buf : the {@link ByteBuffer} to write
+     * @param out : the {@link WritableByteChannel} output
+     * @throws IOException
      */
-    private static byte[] safeReadBuffer(ByteBuffer buf) {
-        ByteArrayOutputStream result = new ByteArrayOutputStream();
+    private static void safeWrite(ByteBuffer buf, WritableByteChannel out) throws IOException {
         while (buf.hasRemaining()) {
-            result.write(buf.get());
+            out.write(buf);
         }
-        return result.toByteArray();
     }
 
     /**
      * <p>
-     * Return all default {@link SignatureProcessor} defined in
+     * Return all {@link SignatureProcessor} required to perform signature
      * {@link SignatureProcessors}
      * </p>
      * 
+     * @param privateKey : the private key, already extracted
+     * 
      * @return {@link List<SignatureProcessor>} of {@link SignatureProcessor}
      */
-    private static List<SignatureProcessor> getDefaultsSignatureProcessors() {
+    private static List<SignatureProcessor> getSignatureProcessors(PGPPrivateKey privateKey) {
         List<SignatureProcessor> signatureProcessors = new ArrayList<>();
         signatureProcessors.add(SignatureProcessors.size());
         signatureProcessors.add(SignatureProcessors.sha256Header());
         signatureProcessors.add(SignatureProcessors.sha1Header());
         signatureProcessors.add(SignatureProcessors.md5());
         signatureProcessors.add(SignatureProcessors.payloadSize());
-
+        signatureProcessors.add(new RsaSignatureProcessor(privateKey));
         return signatureProcessors;
-    }
-
-    /**
-     * <p>
-     * Convert an array of bytes into a ByteBuffer
-     * </p>
-     * 
-     * @param data : byte array to convert
-     * @return a {@link ByteBuffer} built with data
-     * @throws IOException
-     */
-    private static ByteBuffer bufBytes(byte[] data) throws IOException {
-        ByteBuffer buf = ByteBuffer.allocate(data.length);
-        ReadableByteChannel headerChannel = Channels.newChannel(new ByteArrayInputStream(data));
-        IOUtils.readFully(headerChannel, buf);
-        return buf;
-    }
-
-    /**
-     * <p>
-     * Parse the byte[] to an RpmInputStream
-     * </p>
-     * 
-     * @param buf : byte array representing the rpm file
-     * @return {@link RpmInputStream}
-     * @throws IOException
-     */
-    private static RpmInputStream getRpmInputStream(byte[] buf) throws IOException {
-        try (RpmInputStream ref = new RpmInputStream(new ByteArrayInputStream(buf))) {
-            ref.available(); // init RpmInputStream
-            return ref;
-        }
     }
 
     /**
