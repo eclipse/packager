@@ -69,39 +69,51 @@ public class RpmFileSignatureProcessor {
     public static void perform(File rpm, InputStream privateKeyIn, String passphrase, OutputStream out)
             throws IOException, PGPException {
 
+        long signatureHeaderStart = 0L;
+        long signatureHeaderLength = 0L;
+        long payloadHeaderStart = 0L;
+        long payloadHeaderLength = 0L;
+        long payloadStart = 0L;
+        long archiveSize = 0L;
+
         if (!rpm.exists()) {
             throw new IOException("The file " + rpm.getName() + " does not exist");
         }
 
+        // Extract private key
         PGPPrivateKey privateKey = getPrivateKey(privateKeyIn, passphrase);
 
+        // Get the informations of the RPM
         try (RpmInputStream rpmIn = new RpmInputStream(new FileInputStream(rpm))) {
-            long signatureHeaderStart = rpmIn.getSignatureHeader().getStart();
-            long signatureHeaderLength = rpmIn.getSignatureHeader().getLength();
-            long payloadHeaderStart = rpmIn.getPayloadHeader().getStart();
-            long payloadHeaderLength = rpmIn.getPayloadHeader().getLength();
+            signatureHeaderStart = rpmIn.getSignatureHeader().getStart();
+            signatureHeaderLength = rpmIn.getSignatureHeader().getLength();
+            payloadHeaderStart = rpmIn.getPayloadHeader().getStart();
+            payloadHeaderLength = rpmIn.getPayloadHeader().getLength();
             RpmInformation info = RpmInformations.makeInformation(rpmIn);
-            long payloadStart = info.getHeaderEnd();
-            long archiveSize = info.getArchiveSize();
+            payloadStart = info.getHeaderEnd();
+            archiveSize = info.getArchiveSize();
+        }
 
-            if (signatureHeaderStart == 0L || signatureHeaderLength == 0L || payloadHeaderStart == 0L
-                    || payloadHeaderLength == 0L || archiveSize == 0L) {
-                throw new IOException("Unable to read " + rpm.getName() + " informations.");
-            }
+        if (signatureHeaderStart == 0L || signatureHeaderLength == 0L || payloadHeaderStart == 0L
+                || payloadHeaderLength == 0L || payloadStart == 0L || archiveSize == 0L) {
+            throw new IOException("Unable to read " + rpm.getName() + " informations.");
+        }
 
-            try (FileInputStream in = new FileInputStream(rpm)) {
-                FileChannel channelIn = in.getChannel();
-                ByteBuffer payloadHeaderBuff = ByteBuffer.allocate((int) payloadHeaderLength);
-                channelIn.read(payloadHeaderBuff, payloadHeaderStart);
-                ByteBuffer payloadBuff = ByteBuffer.allocate((int) (channelIn.size() - payloadStart));
-                channelIn.read(payloadBuff, payloadStart);
+        // Read the file parts for the signature (payload header + payload)
+        try (FileInputStream in = new FileInputStream(rpm)) {
+            FileChannel channelIn = in.getChannel();
+            ByteBuffer payloadHeaderBuff = ByteBuffer.allocate((int) payloadHeaderLength);
+            channelIn.read(payloadHeaderBuff, payloadHeaderStart);
+            ByteBuffer payloadBuff = ByteBuffer.allocate((int) (channelIn.size() - payloadStart));
+            channelIn.read(payloadBuff, payloadStart);
 
-                try (WritableByteChannel channelOut = Channels.newChannel(out)) {
-                    channelIn.transferTo(0, 96, channelOut);
-                    writeSignature(privateKey, payloadHeaderBuff, payloadBuff, info.getArchiveSize(), channelOut);
-                    channelIn.transferTo(payloadHeaderStart, payloadHeaderLength, channelOut);
-                    channelIn.transferTo(payloadStart, channelIn.size() - payloadStart, channelOut);
-                }
+            // Write into out
+            try (WritableByteChannel channelOut = Channels.newChannel(out)) {
+                channelIn.transferTo(0, 96, channelOut);
+                //Generate and write signature
+                writeSignature(privateKey, payloadHeaderBuff, payloadBuff, archiveSize, channelOut);
+                channelIn.transferTo(payloadHeaderStart, payloadHeaderLength, channelOut);
+                channelIn.transferTo(payloadStart, channelIn.size() - payloadStart, channelOut);
             }
         }
     }
