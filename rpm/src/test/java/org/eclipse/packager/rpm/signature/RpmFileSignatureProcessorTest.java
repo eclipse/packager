@@ -54,52 +54,51 @@ public class RpmFileSignatureProcessorTest {
         if (!rpm.exists() || !private_key.exists()) {
             fail("Input files rpm or private_key does not exist");
         }
-        // Write the signed RPM
+        // Init the signed RPM
         File resultDirectory = new File(RESULT_DIR);
         resultDirectory.mkdir();
         File signedRpm = new File(RESULT_FILE_PATH);
         signedRpm.createNewFile();
 
-        try (FileOutputStream resultOut = new FileOutputStream(signedRpm)) {
+        try (FileOutputStream resultOut = new FileOutputStream(signedRpm);
+                InputStream privateKeyStream = new FileInputStream(private_key)) {
             // Sign the RPM
-            try (InputStream privateKeyStream = new FileInputStream(private_key)) {
-                RpmFileSignatureProcessor.perform(rpm, privateKeyStream, passPhrase, resultOut);
+            RpmFileSignatureProcessor.perform(rpm, privateKeyStream, passPhrase, resultOut);
 
-                // Read the initial (non signed) rpm file
-                RpmInputStream initialRpm = new RpmInputStream(new FileInputStream(rpm));
-                initialRpm.available();
-                System.out.println("#########################################################################");
-                Dumper.dumpAll(initialRpm);
-                initialRpm.close();
-                System.out.println("#########################################################################");
-                InputHeader<RpmSignatureTag> initialHeader = initialRpm.getSignatureHeader();
-                RpmInputStream rpmSigned = new RpmInputStream(new FileInputStream(signedRpm));
-                rpmSigned.available();
-                Dumper.dumpAll(rpmSigned);
-                rpmSigned.close();
-                InputHeader<RpmSignatureTag> signedHeader = rpmSigned.getSignatureHeader();
+            // Read the initial (non signed) rpm file
+            RpmInputStream initialRpm = new RpmInputStream(new FileInputStream(rpm));
+            initialRpm.available();
+            System.out.println("#########################################################################");
+            Dumper.dumpAll(initialRpm);
+            initialRpm.close();
+            System.out.println("#########################################################################");
+            InputHeader<RpmSignatureTag> initialHeader = initialRpm.getSignatureHeader();
+            RpmInputStream rpmSigned = new RpmInputStream(new FileInputStream(signedRpm));
+            rpmSigned.available();
+            Dumper.dumpAll(rpmSigned);
+            rpmSigned.close();
+            InputHeader<RpmSignatureTag> signedHeader = rpmSigned.getSignatureHeader();
 
-                // Get informations of the initial rpm file
-                int initialSize = (int) initialHeader.getEntry(RpmSignatureTag.SIZE).get().getValue();
-                int initialPayloadSize = (int) initialHeader.getEntry(RpmSignatureTag.PAYLOAD_SIZE).get().getValue();
-                String initialSha1 = initialHeader.getEntry(RpmSignatureTag.SHA1HEADER).get().getValue().toString();
-                String initialMd5 = Rpms.dumpValue(initialHeader.getEntry(RpmSignatureTag.MD5).get().getValue());
+            // Get informations of the initial rpm file
+            int initialSize = (int) initialHeader.getEntry(RpmSignatureTag.SIZE).get().getValue();
+            int initialPayloadSize = (int) initialHeader.getEntry(RpmSignatureTag.PAYLOAD_SIZE).get().getValue();
+            String initialSha1 = initialHeader.getEntry(RpmSignatureTag.SHA1HEADER).get().getValue().toString();
+            String initialMd5 = Rpms.dumpValue(initialHeader.getEntry(RpmSignatureTag.MD5).get().getValue());
 
-                // Read information of the signed rpm file
-                int signedSize = (int) signedHeader.getEntry(RpmSignatureTag.SIZE).get().getValue();
-                int signedPayloadSize = (int) signedHeader.getEntry(RpmSignatureTag.PAYLOAD_SIZE).get().getValue();
-                String signedSha1 = signedHeader.getEntry(RpmSignatureTag.SHA1HEADER).get().getValue().toString();
-                String signedMd5 = Rpms.dumpValue(signedHeader.getEntry(RpmSignatureTag.MD5).get().getValue());
-                String pgpSignature = Rpms.dumpValue(signedHeader.getEntry(RpmSignatureTag.PGP).get().getValue());
+            // Read information of the signed rpm file
+            int signedSize = (int) signedHeader.getEntry(RpmSignatureTag.SIZE).get().getValue();
+            int signedPayloadSize = (int) signedHeader.getEntry(RpmSignatureTag.PAYLOAD_SIZE).get().getValue();
+            String signedSha1 = signedHeader.getEntry(RpmSignatureTag.SHA1HEADER).get().getValue().toString();
+            String signedMd5 = Rpms.dumpValue(signedHeader.getEntry(RpmSignatureTag.MD5).get().getValue());
+            String pgpSignature = Rpms.dumpValue(signedHeader.getEntry(RpmSignatureTag.PGP).get().getValue());
 
-                // Compare informations values of initial rpm and signed rpm
-                assertEquals(initialSize, signedSize);
-                assertEquals(initialPayloadSize, signedPayloadSize);
-                assertEquals(initialSha1, signedSha1);
-                assertEquals(initialMd5, signedMd5);
-                // Verify if signature is present
-                assertNotNull(pgpSignature);
-            }
+            // Compare informations values of initial rpm and signed rpm
+            assertEquals(initialSize, signedSize);
+            assertEquals(initialPayloadSize, signedPayloadSize);
+            assertEquals(initialSha1, signedSha1);
+            assertEquals(initialMd5, signedMd5);
+            // Verify if signature is present
+            assertNotNull(pgpSignature);
         }
     }
 

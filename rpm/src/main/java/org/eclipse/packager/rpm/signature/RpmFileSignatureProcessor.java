@@ -75,6 +75,8 @@ public class RpmFileSignatureProcessor {
         long payloadHeaderLength = 0L;
         long payloadStart = 0L;
         long archiveSize = 0L;
+        long payloadSize = 0L;
+        long bytesRead = 0L;
 
         if (!rpm.exists()) {
             throw new IOException("The file " + rpm.getName() + " does not exist");
@@ -102,18 +104,24 @@ public class RpmFileSignatureProcessor {
         // Read the file parts for the signature (payload header + payload)
         try (FileInputStream in = new FileInputStream(rpm)) {
             FileChannel channelIn = in.getChannel();
+            payloadSize = channelIn.size() - payloadStart;
             ByteBuffer payloadHeaderBuff = ByteBuffer.allocate((int) payloadHeaderLength);
-            channelIn.read(payloadHeaderBuff, payloadHeaderStart);
-            ByteBuffer payloadBuff = ByteBuffer.allocate((int) (channelIn.size() - payloadStart));
-            channelIn.read(payloadBuff, payloadStart);
+            bytesRead = channelIn.read(payloadHeaderBuff, payloadHeaderStart);
+            checkBytes(bytesRead, payloadHeaderLength);
+            ByteBuffer payloadBuff = ByteBuffer.allocate((int) payloadSize);
+            bytesRead = channelIn.read(payloadBuff, payloadStart);
+            checkBytes(bytesRead, payloadSize);
 
             // Write into out
             try (WritableByteChannel channelOut = Channels.newChannel(out)) {
-                channelIn.transferTo(0, 96, channelOut);
-                //Generate and write signature
+                bytesRead = channelIn.transferTo(0, 96, channelOut);
+                checkBytes(bytesRead, 96);
+                // Generate and write signature
                 writeSignature(privateKey, payloadHeaderBuff, payloadBuff, archiveSize, channelOut);
-                channelIn.transferTo(payloadHeaderStart, payloadHeaderLength, channelOut);
-                channelIn.transferTo(payloadStart, channelIn.size() - payloadStart, channelOut);
+                bytesRead = channelIn.transferTo(payloadHeaderStart, payloadHeaderLength, channelOut);
+                checkBytes(bytesRead, payloadHeaderLength);
+                bytesRead = channelIn.transferTo(payloadStart, payloadSize, channelOut);
+                checkBytes(bytesRead, payloadSize);
             }
         }
     }
@@ -165,6 +173,22 @@ public class RpmFileSignatureProcessor {
     private static void safeWrite(ByteBuffer buf, WritableByteChannel out) throws IOException {
         while (buf.hasRemaining()) {
             out.write(buf);
+        }
+    }
+
+    /**
+     * <p>
+     * Check if the good number of bytes was read from the channel
+     * </p>
+     * 
+     * @param actual    : number of bytes read from the channel
+     * @param expected: expected number
+     * @throws IOException if actual is different of the expected
+     */
+    private static void checkBytes(long actual, long expected) throws IOException {
+        if (actual != expected) {
+            throw new IOException(
+                    "The number of bytes read (" + actual + ") are differents of the attemp (" + expected + ")");
         }
     }
 
