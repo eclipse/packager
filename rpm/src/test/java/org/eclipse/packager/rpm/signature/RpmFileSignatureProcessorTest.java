@@ -29,7 +29,6 @@ import org.bouncycastle.openpgp.PGPPublicKeyRing;
 import org.bouncycastle.openpgp.bc.BcPGPPublicKeyRing;
 import org.eclipse.packager.rpm.RpmSignatureTag;
 import org.eclipse.packager.rpm.Rpms;
-import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 import org.junit.jupiter.api.AfterAll;
@@ -42,6 +41,9 @@ import org.junit.jupiter.api.TestMethodOrder;
 @TestMethodOrder(OrderAnnotation.class)
 public class RpmFileSignatureProcessorTest {
 
+    private static final String SOURCE_FILE_PATH = "src/test/resources/data/org.eclipse.scada-0.2.1-1.noarch.rpm";
+    private static final String PRIVATE_KEY_PATH = "src/test/resources/key/private_key.txt";
+    private static final String PUBLIC_KEY_PATH = "src/test/resources/key/public_key.txt";
     private static final String RESULT_FILE_PATH = "src/test/resources/result/org.eclipse.scada-0.2.1-1.noarch.rpm";
     private static final String RESULT_DIR = "src/test/resources/result";
 
@@ -49,9 +51,9 @@ public class RpmFileSignatureProcessorTest {
     @Order(1)
     public void testSigningExistingRpm() throws IOException, PGPException {
         // Read files
-        String passPhrase = "testkey";
-        File rpm = new File("src/test/resources/data/org.eclipse.scada-0.2.1-1.noarch.rpm");
-        File private_key = new File("src/test/resources/key/private_key.txt");
+        final String passPhrase = "testkey"; // Do not change
+        File rpm = new File(SOURCE_FILE_PATH);
+        File private_key = new File(PRIVATE_KEY_PATH);
         if (!rpm.exists() || !private_key.exists()) {
             fail("Input files rpm or private_key does not exist");
         }
@@ -69,14 +71,12 @@ public class RpmFileSignatureProcessorTest {
             // Read the initial (non signed) rpm file
             RpmInputStream initialRpm = new RpmInputStream(new FileInputStream(rpm));
             initialRpm.available();
-            System.out.println("#########################################################################");
-            Dumper.dumpAll(initialRpm);
             initialRpm.close();
-            System.out.println("#########################################################################");
             InputHeader<RpmSignatureTag> initialHeader = initialRpm.getSignatureHeader();
+
+            // Read the signed rpm file
             RpmInputStream rpmSigned = new RpmInputStream(new FileInputStream(signedRpm));
             rpmSigned.available();
-            Dumper.dumpAll(rpmSigned);
             rpmSigned.close();
             InputHeader<RpmSignatureTag> signedHeader = rpmSigned.getSignatureHeader();
 
@@ -86,7 +86,7 @@ public class RpmFileSignatureProcessorTest {
             String initialSha1 = initialHeader.getEntry(RpmSignatureTag.SHA1HEADER).get().getValue().toString();
             String initialMd5 = Rpms.dumpValue(initialHeader.getEntry(RpmSignatureTag.MD5).get().getValue());
 
-            // Read information of the signed rpm file
+            // Get informations of the signed rpm file
             int signedSize = (int) signedHeader.getEntry(RpmSignatureTag.SIZE).get().getValue();
             int signedPayloadSize = (int) signedHeader.getEntry(RpmSignatureTag.PAYLOAD_SIZE).get().getValue();
             String signedSha1 = signedHeader.getEntry(RpmSignatureTag.SHA1HEADER).get().getValue().toString();
@@ -98,6 +98,7 @@ public class RpmFileSignatureProcessorTest {
             assertEquals(initialPayloadSize, signedPayloadSize);
             assertEquals(initialSha1, signedSha1);
             assertEquals(initialMd5, signedMd5);
+
             // Verify if signature is present
             assertNotNull(pgpSignature);
         }
@@ -107,7 +108,7 @@ public class RpmFileSignatureProcessorTest {
     @Order(2)
     @Disabled
     public void verifyRpmSignature() throws IOException, PGPException {
-        File public_key = new File("src/test/resources/key/public_key.txt");
+        File public_key = new File(PUBLIC_KEY_PATH);
         File signedRpm = new File(RESULT_FILE_PATH);
         if (!public_key.exists() || !signedRpm.exists()) {
             fail("Input files signedRpm or public_key does not exist");
