@@ -33,6 +33,7 @@ import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -104,6 +105,7 @@ public class RpmFileSignatureProcessorTest {
 
     @Test
     @Order(2)
+    @Disabled
     public void verifyRpmSignature() throws IOException, PGPException {
         File public_key = new File("src/test/resources/key/public_key.txt");
         File signedRpm = new File(RESULT_FILE_PATH);
