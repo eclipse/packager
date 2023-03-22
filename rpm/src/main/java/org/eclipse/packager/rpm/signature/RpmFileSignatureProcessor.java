@@ -43,7 +43,7 @@ import org.eclipse.packager.rpm.parse.RpmInputStream;
 /**
  * 
  * Sign existing RPM file by calling
- * {@link #perform(InputStream, InputStream, String)}
+ * {@link #perform(File, InputStream, String, OutputStream)}
  * 
  *
  */
