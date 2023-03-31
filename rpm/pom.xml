@@ -32,6 +32,14 @@
             <groupId>org.tukaani</groupId>
             <artifactId>xz</artifactId>
         </dependency>
+        <!-- enable to have Zstd support on local runs
+        <dependency>
+            <groupId>com.github.luben</groupId>
+            <artifactId>zstd-jni</artifactId>
+            <version>1.5.2-5</version>
+            <optional>true</optional>
+        </dependency>
+        -->
 
         <!-- testing -->
 
