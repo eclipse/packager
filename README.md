@@ -5,7 +5,7 @@ Create Linux software packages in plain Java.
 Currently, this project can:
 
 * Read and create Debian packages (`.deb`)
-* Read and create RPM packages (`.rpm`)
+* Read, create, and sign RPM packages (`.rpm`)
 
 There are three modules: core, deb and rpm. To import, depend on the modules you require:
 
