@@ -1,4 +1,5 @@
-# Eclipse Packager™ [![Maven Central](https://img.shields.io/maven-central/v/org.eclipse.packager/packager)](https://search.maven.org/search?q=g:org.eclipse.packager "Eclipse Packager")
+# Eclipse Packager™ [![Maven Central](https://img.shields.io/maven-central/v/org.eclipse.packager/packager)](https://search.maven.org/search?q=g:org.eclipse.packager "Eclipse Packager") [![Matrix](https://img.shields.io/matrix/packager:matrix.eclipse.org)](https://matrix.to/#/#packager:matrix.eclipse.org)
+
 
 Create Linux software packages in plain Java.
 
