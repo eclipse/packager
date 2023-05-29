@@ -50,7 +50,7 @@ public class RsaHeaderSignatureProcessor implements SignatureProcessor {
     }
 
     public RsaHeaderSignatureProcessor(final PGPPrivateKey privateKey) {
-        this(privateKey, HashAlgorithmTags.SHA1);
+        this(privateKey, HashAlgorithmTags.SHA256);
     }
 
     @Override
