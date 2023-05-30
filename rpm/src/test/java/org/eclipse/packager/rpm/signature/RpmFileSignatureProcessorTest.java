@@ -76,7 +76,7 @@ public class RpmFileSignatureProcessorTest {
         try (FileOutputStream resultOut = new FileOutputStream(signedRpm);
             InputStream privateKeyStream = new FileInputStream(private_key)) {
             // Sign the RPM
-            RpmFileSignatureProcessor.perform(rpm, privateKeyStream, passPhrase, resultOut, HashAlgorithm.SHA256);
+            RpmFileSignatureProcessor.perform(rpm, privateKeyStream, passPhrase, resultOut);
 
             // Read the initial (unsigned) rpm file
             RpmInputStream initialRpm = new RpmInputStream(new FileInputStream(rpm));
