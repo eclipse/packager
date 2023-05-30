@@ -142,7 +142,7 @@ public class SigningStream extends OutputStream {
         }
 
         EncryptionResult result = signingStream.getResult();
-        final PGPSignature signature = result.getDetachedSignatures().values().iterator().next().iterator().next();;
+        final PGPSignature signature = result.getDetachedSignatures().values().iterator().next().iterator().next();
         ArmoredOutputStream armoredOutput = ArmoredOutputStreamFactory.get(stream);
         signature.encode(new BCPGOutputStream(armoredOutput));
         armoredOutput.close();
