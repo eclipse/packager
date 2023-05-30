@@ -14,6 +14,7 @@
 package org.eclipse.packager.rpm.yum;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Instant;
 import java.util.Arrays;
@@ -39,8 +40,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.bouncycastle.bcpg.HashAlgorithmTags;
-import org.bouncycastle.openpgp.PGPPrivateKey;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.packager.io.IOConsumer;
 import org.eclipse.packager.io.OutputSpooler;
 import org.eclipse.packager.io.SpoolOutTarget;
@@ -51,6 +51,8 @@ import org.eclipse.packager.rpm.info.RpmInformation;
 import org.eclipse.packager.rpm.info.RpmInformation.Changelog;
 import org.eclipse.packager.rpm.info.RpmInformation.Dependency;
 import org.eclipse.packager.security.pgp.SigningStream;
+import org.pgpainless.PGPainless;
+import org.pgpainless.key.protection.SecretKeyRingProtector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -439,21 +441,24 @@ public class RepositoryCreator {
             return this;
         }
 
-        public Builder setSigning(final PGPPrivateKey privateKey) {
-            return setSigning(privateKey, HashAlgorithmTags.SHA1);
-        }
-
-        public Builder setSigning(final PGPPrivateKey privateKey, final HashAlgorithm hashAlgorithm) {
-            return setSigning(privateKey, hashAlgorithm.getValue());
-        }
-
-        public Builder setSigning(final PGPPrivateKey privateKey, final int digestAlgorithm) {
-            if (privateKey != null) {
-                this.signingStreamCreator = output -> new SigningStream(output, privateKey, digestAlgorithm, false);
+        public Builder setSigning(final PGPSecretKeyRing secretKeys, SecretKeyRingProtector protector) {
+            if (secretKeys != null) {
+                return setSigning(output -> new SigningStream(output, secretKeys, protector, false));
             } else {
                 this.signingStreamCreator = null;
             }
             return this;
+        }
+
+        public Builder setSigning(final InputStream keyInputStream)
+            throws IOException {
+            return setSigning(keyInputStream, SecretKeyRingProtector.unprotectedKeys());
+        }
+
+        public Builder setSigning(final InputStream keyInputStream, SecretKeyRingProtector keyProtector)
+            throws IOException {
+            PGPSecretKeyRing secretKeys = PGPainless.readKeyRing().secretKeyRing(keyInputStream);
+            return setSigning(secretKeys, keyProtector);
         }
 
         public RepositoryCreator build() {

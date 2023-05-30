@@ -13,50 +13,52 @@
 
 package org.eclipse.packager.security.pgp;
 
+import org.bouncycastle.bcpg.ArmoredOutputStream;
+import org.bouncycastle.bcpg.BCPGOutputStream;
+import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
+import org.bouncycastle.openpgp.PGPSignature;
+import org.pgpainless.PGPainless;
+import org.pgpainless.algorithm.DocumentSignatureType;
+import org.pgpainless.encryption_signing.EncryptionResult;
+import org.pgpainless.encryption_signing.EncryptionStream;
+import org.pgpainless.encryption_signing.ProducerOptions;
+import org.pgpainless.encryption_signing.SigningOptions;
+import org.pgpainless.key.protection.SecretKeyRingProtector;
+import org.pgpainless.util.ArmoredOutputStreamFactory;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Objects;
 
-import org.bouncycastle.bcpg.ArmoredOutputStream;
-import org.bouncycastle.bcpg.BCPGOutputStream;
-import org.bouncycastle.bcpg.HashAlgorithmTags;
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPSignature;
-import org.bouncycastle.openpgp.PGPSignatureGenerator;
-import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
-
 public class SigningStream extends OutputStream {
     private final OutputStream stream;
 
-    private final PGPPrivateKey privateKey;
+    private final PGPSecretKeyRing secretKeys;
+
+    private final SecretKeyRingProtector protector;
 
     private final boolean inline;
-
-    private PGPSignatureGenerator signatureGenerator;
-
-    private ArmoredOutputStream armoredOutput;
 
     private boolean initialized;
 
     private final String version;
 
-    private final int digestAlgorithm;
+    private EncryptionStream signingStream;
 
     /**
      * Create a new signing stream
      *
      * @param stream the actual output stream
-     * @param privateKey the private key to sign with
-     * @param digestAlgorithm the digest algorithm to use, from
-     *            {@link HashAlgorithmTags}
+     * @param secretKeys the signing key ring
+     * @param protector protector to unlock the signing key
      * @param inline whether to sign inline or just write the signature
      * @param version the optional version which will be in the signature comment
      */
-    public SigningStream(final OutputStream stream, final PGPPrivateKey privateKey, final int digestAlgorithm, final boolean inline, final String version) {
+    public SigningStream(final OutputStream stream, final PGPSecretKeyRing secretKeys, final SecretKeyRingProtector protector, final boolean inline, final String version) {
         this.stream = stream;
-        this.privateKey = privateKey;
-        this.digestAlgorithm = digestAlgorithm;
+        this.secretKeys = secretKeys;
+        this.protector = protector;
         this.inline = inline;
         this.version = version;
     }
@@ -65,13 +67,12 @@ public class SigningStream extends OutputStream {
      * Create a new signing stream
      *
      * @param stream the actual output stream
-     * @param privateKey the private key to sign with
-     * @param digestAlgorithm the digest algorithm to use, from
-     *            {@link HashAlgorithmTags}
+     * @param secretKeys the signing key ring
+     * @param protector protector to unlock the signing key
      * @param inline whether to sign inline or just write the signature
      */
-    public SigningStream(final OutputStream stream, final PGPPrivateKey privateKey, final int digestAlgorithm, final boolean inline) {
-        this(stream, privateKey, digestAlgorithm, inline, null);
+    public SigningStream(final OutputStream stream, final PGPSecretKeyRing secretKeys, SecretKeyRingProtector protector, final boolean inline) {
+        this(stream, secretKeys, protector, inline, null);
     }
 
     protected void testInit() throws IOException {
@@ -81,17 +82,35 @@ public class SigningStream extends OutputStream {
 
         this.initialized = true;
 
+        ArmoredOutputStreamFactory.setVersionInfo(version);
+
         try {
-            this.signatureGenerator = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(this.privateKey.getPublicKeyPacket().getAlgorithm(), this.digestAlgorithm));
-            this.signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, this.privateKey);
+            if (inline) {
 
-            this.armoredOutput = new ArmoredOutputStream(this.stream);
-            if (this.version != null) {
-                this.armoredOutput.setHeader("Version", this.version);
-            }
+                SigningOptions signingOptions = SigningOptions.get();
+                signingOptions.addInlineSignature(protector, secretKeys, DocumentSignatureType.BINARY_DOCUMENT);
+                ProducerOptions producerOptions = ProducerOptions.sign(signingOptions)
+                    .setCleartextSigned();
 
-            if (this.inline) {
-                this.armoredOutput.beginClearText(this.digestAlgorithm);
+                signingStream = PGPainless.encryptAndOrSign()
+                    .onOutputStream(stream) // write data and sig to the output stream
+                    .withOptions(producerOptions);
+
+            } else {
+
+                SigningOptions signingOptions = SigningOptions.get();
+                signingOptions.addDetachedSignature(protector, secretKeys, DocumentSignatureType.BINARY_DOCUMENT);
+                ProducerOptions producerOptions = ProducerOptions.sign(signingOptions);
+
+                signingStream = PGPainless.encryptAndOrSign()
+                    .onOutputStream(
+                        // do not output the plaintext data, just emit the signature in close()
+                        new OutputStream() {
+                            @Override
+                            public void write(int i) throws IOException {
+                                // Ignore data
+                            }
+                        }).withOptions(producerOptions);
             }
         } catch (final PGPException e) {
             throw new IOException(e);
@@ -109,28 +128,24 @@ public class SigningStream extends OutputStream {
 
         testInit();
 
-        if (this.inline) {
-            this.armoredOutput.write(b, off, len);
-        }
-        this.signatureGenerator.update(b, off, len);
+        signingStream.write(b, off, len);
     }
 
     @Override
     public void close() throws IOException {
         testInit();
 
+        signingStream.close();
+
         if (this.inline) {
-            this.armoredOutput.endClearText();
+            return;
         }
 
-        try {
-            final PGPSignature signature = this.signatureGenerator.generate();
-            signature.encode(new BCPGOutputStream(this.armoredOutput));
-        } catch (final PGPException e) {
-            throw new IOException(e);
-        }
-
-        this.armoredOutput.close();
+        EncryptionResult result = signingStream.getResult();
+        final PGPSignature signature = result.getDetachedSignatures().values().iterator().next().iterator().next();;
+        ArmoredOutputStream armoredOutput = ArmoredOutputStreamFactory.get(stream);
+        signature.encode(new BCPGOutputStream(armoredOutput));
+        armoredOutput.close();
 
         super.close();
     }
