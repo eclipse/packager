@@ -40,6 +40,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.bouncycastle.bcpg.HashAlgorithmTags;
+import org.bouncycastle.openpgp.PGPPrivateKey;
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.packager.io.IOConsumer;
 import org.eclipse.packager.io.OutputSpooler;
@@ -51,6 +53,7 @@ import org.eclipse.packager.rpm.info.RpmInformation;
 import org.eclipse.packager.rpm.info.RpmInformation.Changelog;
 import org.eclipse.packager.rpm.info.RpmInformation.Dependency;
 import org.eclipse.packager.security.pgp.SigningStream;
+import org.eclipse.packager.security.pgp.SigningStream2;
 import org.pgpainless.PGPainless;
 import org.pgpainless.key.protection.SecretKeyRingProtector;
 import org.w3c.dom.Document;
@@ -436,29 +439,110 @@ public class RepositoryCreator {
             return this;
         }
 
-        public Builder setSigning(final Function<OutputStream, OutputStream> signingStreamCreator) {
-            this.signingStreamCreator = signingStreamCreator;
-            return this;
+        /**
+         * Enable signing using an (unprotected) PGP private key.
+         *
+         * @param privateKey unlocked PGP private key
+         * @return builder
+         * @deprecated use {@link #setSigning(PGPSecretKeyRing)} instead.
+         */
+        @Deprecated
+        public Builder setSigning(final PGPPrivateKey privateKey) {
+            return setSigning(privateKey, HashAlgorithmTags.SHA256);
         }
 
-        public Builder setSigning(final PGPSecretKeyRing secretKeys, SecretKeyRingProtector protector) {
-            if (secretKeys != null) {
-                return setSigning(output -> new SigningStream(output, secretKeys, protector, false));
+        /**
+         * Enable signing using a PGP private key using the given digest algorithm.
+         *
+         * @param privateKey unlocked PGP private key
+         * @param hashAlgorithm digest algorithm to be used in the signature
+         * @return builder
+         * @deprecated use {@link #setSigning(PGPSecretKeyRing)} instead.
+         */
+        @Deprecated
+        public Builder setSigning(final PGPPrivateKey privateKey, final HashAlgorithm hashAlgorithm) {
+            return setSigning(privateKey, hashAlgorithm.getValue());
+        }
+
+        /**
+         * Enable signing using a PGP private key, using the given digest algorithm.
+         *
+         * @param privateKey unlocked PGP private key
+         * @param digestAlgorithm digest algorithm to be used in the signature
+         * @return builder
+         * @deprecated use {@link #setSigning(PGPSecretKeyRing, SecretKeyRingProtector)} instead.
+         */
+        @Deprecated
+        public Builder setSigning(final PGPPrivateKey privateKey, final int digestAlgorithm) {
+            if (privateKey != null) {
+                this.signingStreamCreator = output -> new SigningStream(output, privateKey, digestAlgorithm, false);
             } else {
                 this.signingStreamCreator = null;
             }
             return this;
         }
 
+        /**
+         * Enable signing using an (unprotected) PGP secret key.
+         *
+         * @param secretKeys secret key
+         * @return builder
+         */
+        public Builder setSigning(final PGPSecretKeyRing secretKeys) {
+            return setSigning(secretKeys, SecretKeyRingProtector.unprotectedKeys());
+        }
+
+        /**
+         * Enable signing using a PGP secret key.
+         *
+         * @param secretKeys secret key
+         * @param protector protector to unlock the secret key
+         * @return builder
+         */
+        public Builder setSigning(final PGPSecretKeyRing secretKeys, SecretKeyRingProtector protector) {
+            if (secretKeys != null) {
+                return setSigning(output -> new SigningStream2(output, secretKeys, protector, false));
+            } else {
+                this.signingStreamCreator = null;
+            }
+            return this;
+        }
+
+        /**
+         * Enable signing using a PGP secret key.
+         *
+         * @param keyInputStream input stream containing the (unprotected) secret key.
+         * @return builder
+         * @throws IOException if the key cannot be parsed
+         */
         public Builder setSigning(final InputStream keyInputStream)
             throws IOException {
             return setSigning(keyInputStream, SecretKeyRingProtector.unprotectedKeys());
         }
 
+        /**
+         * Enable signing using a PGP secret key.
+         *
+         * @param keyInputStream input stream containing the secret key.
+         * @param keyProtector protector to unlock the secret key.
+         * @return builder
+         * @throws IOException if the key cannot be parsed
+         */
         public Builder setSigning(final InputStream keyInputStream, SecretKeyRingProtector keyProtector)
             throws IOException {
             PGPSecretKeyRing secretKeys = PGPainless.readKeyRing().secretKeyRing(keyInputStream);
             return setSigning(secretKeys, keyProtector);
+        }
+
+        /**
+         * Apply PGP signing to the data stream.
+         *
+         * @param signingStreamCreator function that wraps the output stream into a signing stream.
+         * @return builder
+         */
+        public Builder setSigning(final Function<OutputStream, OutputStream> signingStreamCreator) {
+            this.signingStreamCreator = signingStreamCreator;
+            return this;
         }
 
         public RepositoryCreator build() {
