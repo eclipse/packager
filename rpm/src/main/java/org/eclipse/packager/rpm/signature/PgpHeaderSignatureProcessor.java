@@ -88,7 +88,7 @@ public class PgpHeaderSignatureProcessor implements SignatureProcessor {
             signingStream.close();
             EncryptionResult result = signingStream.getResult();
 
-            this.value = result.getDetachedSignatures().values().iterator().next().iterator().next().getEncoded();
+            this.value = result.getDetachedSignatures().flatten().iterator().next().getEncoded();
             logger.info("RSA HEADER: {}", this.value);
         } catch (final Exception e) {
             throw new RuntimeException(e);

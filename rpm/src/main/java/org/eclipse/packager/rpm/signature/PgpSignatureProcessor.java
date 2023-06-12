@@ -113,7 +113,7 @@ public class PgpSignatureProcessor implements SignatureProcessor {
         try {
             signingStream.close();
             EncryptionResult result = signingStream.getResult();
-            PGPSignature sig = result.getDetachedSignatures().values().iterator().next().iterator().next();
+            PGPSignature sig = result.getDetachedSignatures().flatten().iterator().next();
             signature.putBlob(RpmSignatureTag.PGP, sig.getEncoded());
         } catch (IOException e) {
             throw new RuntimeException(e);
