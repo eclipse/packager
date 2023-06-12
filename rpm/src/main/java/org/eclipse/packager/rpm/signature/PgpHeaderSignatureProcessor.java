@@ -39,11 +39,19 @@ public class PgpHeaderSignatureProcessor implements SignatureProcessor {
 
     private final PGPSecretKeyRing secretKeys;
     private final SecretKeyRingProtector protector;
+    private final long keyId;
     private byte[] value;
 
-    protected PgpHeaderSignatureProcessor(final PGPSecretKeyRing secretKeys, SecretKeyRingProtector protector) {
+    public PgpHeaderSignatureProcessor(final PGPSecretKeyRing secretKeys,
+                                       final SecretKeyRingProtector protector,
+                                       final long keyId) {
         this.secretKeys = Objects.requireNonNull(secretKeys);
         this.protector = Objects.requireNonNull(protector);
+        this.keyId = keyId;
+    }
+
+    public PgpHeaderSignatureProcessor(final PGPSecretKeyRing secretKeys, SecretKeyRingProtector protector) {
+        this(secretKeys, protector, 0);
     }
 
     public PgpHeaderSignatureProcessor(final PGPSecretKeyRing secretKeys) {
@@ -59,10 +67,15 @@ public class PgpHeaderSignatureProcessor implements SignatureProcessor {
                     // ignore "ciphertext"
                 }
             };
+            SigningOptions signingOptions = SigningOptions.get();
+            if (keyId == 0) {
+                signingOptions.addDetachedSignature(protector, secretKeys, DocumentSignatureType.BINARY_DOCUMENT);
+            } else {
+                signingOptions.addDetachedSignature(protector, secretKeys, keyId);
+            }
             EncryptionStream signingStream = PGPainless.encryptAndOrSign()
                 .onOutputStream(sink)
-                .withOptions(ProducerOptions.sign(SigningOptions.get()
-                    .addDetachedSignature(protector, secretKeys, DocumentSignatureType.BINARY_DOCUMENT)));
+                .withOptions(ProducerOptions.sign(signingOptions));
 
             if (header.hasArray()) {
                 signingStream.write(header.array(), header.position(), header.remaining());

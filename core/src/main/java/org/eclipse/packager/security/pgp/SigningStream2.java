@@ -16,6 +16,7 @@ package org.eclipse.packager.security.pgp;
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.openpgp.PGPException;
+import org.bouncycastle.openpgp.PGPPublicKey;
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.pgpainless.PGPainless;
@@ -29,6 +30,7 @@ import org.pgpainless.util.ArmoredOutputStreamFactory;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
 import java.util.Objects;
 
 public class SigningStream2 extends OutputStream {
@@ -37,6 +39,8 @@ public class SigningStream2 extends OutputStream {
     private final PGPSecretKeyRing secretKeys;
 
     private final SecretKeyRingProtector protector;
+
+    private final long keyId;
 
     private final boolean inline;
 
@@ -53,10 +57,16 @@ public class SigningStream2 extends OutputStream {
      * @param inline whether to sign inline or just write the signature
      * @param version the optional version which will be in the signature comment
      */
-    public SigningStream2(final OutputStream stream, final PGPSecretKeyRing secretKeys, final SecretKeyRingProtector protector, final boolean inline, final String version) {
+    public SigningStream2(final OutputStream stream,
+                          final PGPSecretKeyRing secretKeys,
+                          final SecretKeyRingProtector protector,
+                          final long keyId,
+                          final boolean inline,
+                          final String version) {
         this.stream = stream;
         this.secretKeys = secretKeys;
         this.protector = protector;
+        this.keyId = keyId;
         this.inline = inline;
 
         ArmoredOutputStreamFactory.setVersionInfo(version);
@@ -70,8 +80,12 @@ public class SigningStream2 extends OutputStream {
      * @param protector protector to unlock the signing key
      * @param inline whether to sign inline or just write the signature
      */
-    public SigningStream2(final OutputStream stream, final PGPSecretKeyRing secretKeys, SecretKeyRingProtector protector, final boolean inline) {
-        this(stream, secretKeys, protector, inline, null);
+    public SigningStream2(final OutputStream stream,
+                          final PGPSecretKeyRing secretKeys,
+                          final SecretKeyRingProtector protector,
+                          final long keyId,
+                          final boolean inline) {
+        this(stream, secretKeys, protector, keyId, inline, null);
     }
 
     protected void testInit() throws IOException {
@@ -81,12 +95,25 @@ public class SigningStream2 extends OutputStream {
 
         this.initialized = true;
 
-
         try {
+            long signingKeyId = keyId;
+            if (signingKeyId == 0) {
+                List<PGPPublicKey> signingKeys = PGPainless.inspectKeyRing(secretKeys).getSigningSubkeys();
+                if (signingKeys.isEmpty()) {
+                    throw new PGPException("No available signing subkey found.");
+                }
+                // Sign with first signing subkey found
+                signingKeyId = signingKeys.get(0).getKeyID();
+            }
+
             if (inline) {
 
                 SigningOptions signingOptions = SigningOptions.get();
-                signingOptions.addInlineSignature(protector, secretKeys, DocumentSignatureType.BINARY_DOCUMENT);
+                if (keyId != 0) {
+                    signingOptions.addInlineSignature(protector, secretKeys, signingKeyId);
+                } else {
+                    signingOptions.addInlineSignature(protector, secretKeys, DocumentSignatureType.BINARY_DOCUMENT);
+                }
                 ProducerOptions producerOptions = ProducerOptions.sign(signingOptions)
                     .setCleartextSigned();
 
@@ -97,7 +124,11 @@ public class SigningStream2 extends OutputStream {
             } else {
 
                 SigningOptions signingOptions = SigningOptions.get();
-                signingOptions.addDetachedSignature(protector, secretKeys, DocumentSignatureType.BINARY_DOCUMENT);
+                if (keyId != 0) {
+                    signingOptions.addDetachedSignature(protector, secretKeys, keyId);
+                } else {
+                    signingOptions.addDetachedSignature(protector, secretKeys, DocumentSignatureType.BINARY_DOCUMENT);
+                }
                 ProducerOptions producerOptions = ProducerOptions.sign(signingOptions);
 
                 signingStream = PGPainless.encryptAndOrSign()
@@ -140,7 +171,7 @@ public class SigningStream2 extends OutputStream {
         }
 
         EncryptionResult result = signingStream.getResult();
-        final PGPSignature signature = result.getDetachedSignatures().values().iterator().next().iterator().next();
+        final PGPSignature signature = result.getDetachedSignatures().flatten().iterator().next();
         ArmoredOutputStream armoredOutput = ArmoredOutputStreamFactory.get(stream);
         signature.encode(new BCPGOutputStream(armoredOutput));
         armoredOutput.close();

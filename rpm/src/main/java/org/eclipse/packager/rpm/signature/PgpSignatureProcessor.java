@@ -34,7 +34,34 @@ public class PgpSignatureProcessor implements SignatureProcessor {
 
     private final EncryptionStream signingStream;
 
+    /**
+     * Signature Processor using a non-protected signing key.
+     *
+     * @param signingKey signing key
+     */
+    public PgpSignatureProcessor(final PGPSecretKeyRing signingKey) {
+        this(signingKey, SecretKeyRingProtector.unprotectedKeys());
+    }
+
+    /**
+     * Signature Processor using a PGP signing key that can be unlocked by the protector.
+     *
+     * @param signingKey signing key
+     * @param protector protector to unlock the signing key
+     */
     public PgpSignatureProcessor(final PGPSecretKeyRing signingKey, final SecretKeyRingProtector protector) {
+        this(signingKey, protector, 0);
+    }
+
+    /**
+     * Signature Processor using a PGP signing key that can be unlocked by the protector.
+     * The signing key to use is determined by the given key-id. If the id is 0, the signing subkey is auto-detected.
+     *
+     * @param signingKey signing key
+     * @param protector protector to unlock the signing key
+     * @param keyId id of the signing subkey (or 0 for autodetect)
+     */
+    public PgpSignatureProcessor(final PGPSecretKeyRing signingKey, final SecretKeyRingProtector protector, long keyId) {
         OutputStream sink = new OutputStream() {
             @Override
             public void write(int i) throws IOException {
@@ -43,14 +70,15 @@ public class PgpSignatureProcessor implements SignatureProcessor {
         };
 
         try {
+            SigningOptions signingOptions = SigningOptions.get();
+            if (keyId != 0) {
+                signingOptions.addDetachedSignature(protector, signingKey, keyId);
+            } else {
+                signingOptions.addDetachedSignature(protector, signingKey, DocumentSignatureType.BINARY_DOCUMENT);
+            }
             this.signingStream = PGPainless.encryptAndOrSign()
                 .onOutputStream(sink)
-                .withOptions(
-                    ProducerOptions.sign(
-                        SigningOptions.get()
-                            .addDetachedSignature(protector, signingKey, DocumentSignatureType.BINARY_DOCUMENT)
-                    )
-                );
+                .withOptions(ProducerOptions.sign(signingOptions));
         } catch (PGPException | IOException e) {
             throw new RuntimeException(e);
         }

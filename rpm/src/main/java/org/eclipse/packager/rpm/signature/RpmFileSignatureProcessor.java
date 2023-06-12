@@ -12,6 +12,18 @@
  ********************************************************************************/
 package org.eclipse.packager.rpm.signature;
 
+import org.apache.commons.compress.utils.IOUtils;
+import org.bouncycastle.openpgp.PGPSecretKeyRing;
+import org.eclipse.packager.rpm.RpmSignatureTag;
+import org.eclipse.packager.rpm.Rpms;
+import org.eclipse.packager.rpm.header.Header;
+import org.eclipse.packager.rpm.header.Headers;
+import org.eclipse.packager.rpm.info.RpmInformation;
+import org.eclipse.packager.rpm.info.RpmInformations;
+import org.eclipse.packager.rpm.parse.RpmInputStream;
+import org.eclipse.packager.security.pgp.PgpHelper;
+import org.pgpainless.key.protection.SecretKeyRingProtector;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,26 +34,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.compress.utils.IOUtils;
-import org.bouncycastle.bcpg.ArmoredInputStream;
-import org.bouncycastle.openpgp.PGPException;
-import org.bouncycastle.openpgp.PGPPrivateKey;
-import org.bouncycastle.openpgp.PGPSecretKey;
-import org.bouncycastle.openpgp.PGPSecretKeyRing;
-import org.bouncycastle.openpgp.bc.BcPGPSecretKeyRing;
-import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
-import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
-import org.eclipse.packager.rpm.RpmSignatureTag;
-import org.eclipse.packager.rpm.Rpms;
-import org.eclipse.packager.rpm.header.Header;
-import org.eclipse.packager.rpm.header.Headers;
-import org.eclipse.packager.rpm.info.RpmInformation;
-import org.eclipse.packager.rpm.info.RpmInformations;
-import org.eclipse.packager.rpm.parse.RpmInputStream;
-import org.pgpainless.PGPainless;
-import org.pgpainless.key.protection.SecretKeyRingProtector;
-import org.pgpainless.util.Passphrase;
 
 /**
  * Sign existing RPM file by calling
@@ -82,9 +74,8 @@ public class RpmFileSignatureProcessor {
             throw new IOException("The file " + rpm.getName() + " does not exist");
         }
 
-        PGPSecretKeyRing secretKeys = PGPainless.readKeyRing().secretKeyRing(privateKeyIn);
-        SecretKeyRingProtector protector = passphrase == null ? SecretKeyRingProtector.unprotectedKeys() :
-            SecretKeyRingProtector.unlockAnyKeyWith(Passphrase.fromPassword(passphrase));
+        PGPSecretKeyRing secretKeys = PgpHelper.loadSecretKeyRing(privateKeyIn);
+        SecretKeyRingProtector protector = PgpHelper.protectorFromPassword(passphrase);
 
         // Get the information of the RPM
         try (RpmInputStream rpmIn = new RpmInputStream(new FileInputStream(rpm))) {
@@ -198,25 +189,5 @@ public class RpmFileSignatureProcessor {
         signatureProcessors.add(SignatureProcessors.payloadSize());
         signatureProcessors.add(new PgpSignatureProcessor(secretKeys, protector));
         return signatureProcessors;
-    }
-
-    /**
-     * <p>
-     * Decrypt and retrieve the private key
-     * </p>
-     *
-     * @param privateKeyIn : InputStream containing the encrypted private key
-     * @param passphrase : passphrase to decrypt private key
-     * @return private key as {@link PGPPrivateKey}
-     * @throws PGPException : if the private key cannot be extrated
-     * @throws IOException : if error happened with InputStream
-     */
-    private static PGPPrivateKey getPrivateKey(InputStream privateKeyIn, String passphrase)
-        throws PGPException, IOException {
-        ArmoredInputStream armor = new ArmoredInputStream(privateKeyIn);
-        PGPSecretKeyRing secretKeyRing = new BcPGPSecretKeyRing(armor);
-        PGPSecretKey secretKey = secretKeyRing.getSecretKey();
-        return secretKey.extractPrivateKey(new BcPBESecretKeyDecryptorBuilder(new BcPGPDigestCalculatorProvider())
-            .build(passphrase.toCharArray()));
     }
 }

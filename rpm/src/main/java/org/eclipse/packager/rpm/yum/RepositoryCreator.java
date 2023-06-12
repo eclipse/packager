@@ -52,6 +52,7 @@ import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 import org.eclipse.packager.rpm.info.RpmInformation;
 import org.eclipse.packager.rpm.info.RpmInformation.Changelog;
 import org.eclipse.packager.rpm.info.RpmInformation.Dependency;
+import org.eclipse.packager.security.pgp.PgpHelper;
 import org.eclipse.packager.security.pgp.SigningStream;
 import org.eclipse.packager.security.pgp.SigningStream2;
 import org.pgpainless.PGPainless;
@@ -500,8 +501,20 @@ public class RepositoryCreator {
          * @return builder
          */
         public Builder setSigning(final PGPSecretKeyRing secretKeys, SecretKeyRingProtector protector) {
+            return setSigning(secretKeys, protector, 0);
+        }
+
+        /**
+         * Enable signing using a PGP secret key.
+         *
+         * @param secretKeys secret key
+         * @param protector protector to unlock the secret key
+         * @param keyId ID of the signing subkey, or 0 if the signing subkey is auto-detected
+         * @return builder
+         */
+        public Builder setSigning(final PGPSecretKeyRing secretKeys, SecretKeyRingProtector protector, long keyId) {
             if (secretKeys != null) {
-                return setSigning(output -> new SigningStream2(output, secretKeys, protector, false));
+                return setSigning(output -> new SigningStream2(output, secretKeys, protector, keyId, false));
             } else {
                 this.signingStreamCreator = null;
             }
@@ -528,10 +541,27 @@ public class RepositoryCreator {
          * @return builder
          * @throws IOException if the key cannot be parsed
          */
-        public Builder setSigning(final InputStream keyInputStream, SecretKeyRingProtector keyProtector)
+        public Builder setSigning(final InputStream keyInputStream,
+                                  final SecretKeyRingProtector keyProtector)
             throws IOException {
-            PGPSecretKeyRing secretKeys = PGPainless.readKeyRing().secretKeyRing(keyInputStream);
-            return setSigning(secretKeys, keyProtector);
+            return setSigning(keyInputStream, keyProtector, 0);
+        }
+
+        /**
+         * Enable signing using a PGP secret key.
+         *
+         * @param keyInputStream input stream containing the secret key.
+         * @param keyProtector protector to unlock the secret key.
+         * @param keyId ID of the signing subkey, or 0 for auto-detect
+         * @return builder
+         * @throws IOException if the key cannot be parsed
+         */
+        public Builder setSigning(final InputStream keyInputStream,
+                                  final SecretKeyRingProtector keyProtector,
+                                  final long keyId)
+            throws IOException {
+            PGPSecretKeyRing secretKeys = PgpHelper.loadSecretKeyRing(keyInputStream);
+            return setSigning(secretKeys, keyProtector, keyId);
         }
 
         /**
