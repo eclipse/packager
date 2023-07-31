@@ -13,7 +13,23 @@
 
 package org.eclipse.packager.rpm;
 
-import static java.util.EnumSet.of;
+import org.bouncycastle.openpgp.PGPException;
+import org.eclipse.packager.rpm.app.Dumper;
+import org.eclipse.packager.rpm.build.BuilderContext;
+import org.eclipse.packager.rpm.build.LeadBuilder;
+import org.eclipse.packager.rpm.build.PayloadRecorder;
+import org.eclipse.packager.rpm.build.RpmBuilder;
+import org.eclipse.packager.rpm.build.RpmBuilder.PackageInformation;
+import org.eclipse.packager.rpm.build.RpmWriter;
+import org.eclipse.packager.rpm.deps.Dependencies;
+import org.eclipse.packager.rpm.deps.Dependency;
+import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
+import org.eclipse.packager.rpm.header.Header;
+import org.eclipse.packager.rpm.parse.RpmInputStream;
+import org.eclipse.packager.rpm.signature.PgpHeaderSignatureProcessor;
+import org.eclipse.packager.security.pgp.PgpHelper;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -28,23 +44,7 @@ import java.time.ZoneOffset;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.bouncycastle.openpgp.PGPException;
-import org.eclipse.packager.rpm.app.Dumper;
-import org.eclipse.packager.rpm.build.BuilderContext;
-import org.eclipse.packager.rpm.build.LeadBuilder;
-import org.eclipse.packager.rpm.build.PayloadRecorder;
-import org.eclipse.packager.rpm.build.RpmBuilder;
-import org.eclipse.packager.rpm.build.RpmBuilder.PackageInformation;
-import org.eclipse.packager.rpm.build.RpmWriter;
-import org.eclipse.packager.rpm.deps.Dependencies;
-import org.eclipse.packager.rpm.deps.Dependency;
-import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
-import org.eclipse.packager.rpm.header.Header;
-import org.eclipse.packager.rpm.parse.RpmInputStream;
-import org.eclipse.packager.rpm.signature.RsaHeaderSignatureProcessor;
-import org.eclipse.packager.security.pgp.PgpHelper;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import static java.util.EnumSet.of;
 
 public class WriterTest {
     private static final Path OUT_BASE = Paths.get("target", "data", "out");
@@ -194,7 +194,10 @@ public class WriterTest {
 
             if (keyId != null && keyChain != null) {
                 try (InputStream stream = Files.newInputStream(Paths.get(keyChain))) {
-                    builder.addSignatureProcessor(new RsaHeaderSignatureProcessor(PgpHelper.loadPrivateKey(stream, keyId, keyPassphrase), HashAlgorithm.from(System.getProperty("writerTest.hashAlgo"))));
+                    builder.addSignatureProcessor(new PgpHeaderSignatureProcessor(
+                        PgpHelper.loadSecretKeyRing(stream),
+                        PgpHelper.protectorFromPassword(keyPassphrase),
+                        PgpHelper.parseKeyId(keyId)));
                 }
             }
 
