@@ -95,7 +95,7 @@ public class DebianPackageWriter implements AutoCloseable, BinaryPackageBuilder 
         this.ar.write(this.binaryHeader);
         this.ar.closeArchiveEntry();
 
-        this.dataTemp = File.createTempFile("data", null);
+        this.dataTemp = Files.createTempFile("data", null).toFile();
 
         this.dataStream = new TarArchiveOutputStream(new GZIPOutputStream(new FileOutputStream(this.dataTemp)));
         this.dataStream.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
@@ -264,7 +264,7 @@ public class DebianPackageWriter implements AutoCloseable, BinaryPackageBuilder 
     }
 
     private void buildAndAddControlFile(final Supplier<Instant> timestampSupplier) throws IOException, FileNotFoundException {
-        final File controlFile = File.createTempFile("control", null);
+        final File controlFile = Files.createTempFile("control", null).toFile();
         try {
             try (GZIPOutputStream gout = new GZIPOutputStream(new FileOutputStream(controlFile));
                     TarArchiveOutputStream tout = new TarArchiveOutputStream(gout)) {
