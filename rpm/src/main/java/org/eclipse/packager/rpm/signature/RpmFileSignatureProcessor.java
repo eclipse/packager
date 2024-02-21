@@ -23,7 +23,7 @@ import java.nio.channels.FileChannel;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.compress.utils.IOUtils;
+import org.apache.commons.io.IOUtils;
 import org.bouncycastle.bcpg.ArmoredInputStream;
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPPrivateKey;
@@ -114,7 +114,7 @@ public class RpmFileSignatureProcessor {
 
         // Write to the OutputStream
         try (FileInputStream in = new FileInputStream(rpm)) {
-            IOUtils.copyRange(in, leadLength, out);
+            IOUtils.copyLarge(in, out, 0, leadLength);
             IOUtils.skip(in, signatureHeaderLength);
             out.write(signatureHeader);
             IOUtils.copy(in, out);
