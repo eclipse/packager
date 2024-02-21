@@ -33,8 +33,8 @@ public class BinaryPackageTest {
     @SuppressWarnings("deprecation")
     @Test
     public void test1() throws IOException, InterruptedException {
-        final File file1 = File.createTempFile("test-1-", ".deb");
-        final File file2 = File.createTempFile("test-2-", ".deb");
+        final File file1 = Files.createTempFile("test-1-", ".deb").toFile();
+        final File file2 = Files.createTempFile("test-2-", ".deb").toFile();
 
         final Instant now = Instant.now();
         final Supplier<Instant> timestampProvider = () -> now;
