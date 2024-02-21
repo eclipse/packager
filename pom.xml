@@ -71,15 +71,16 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <java.release>8</java.release>
-        <java.source>1.8</java.source>
+        <java.release>11</java.release>
+        <java.source>11</java.source>
 
-        <bouncycastle.version>1.71</bouncycastle.version>
-        <commons-compress.version>1.21</commons-compress.version>
-        <guava.version>31.1-jre</guava.version>
+        <bouncycastle.version>1.77</bouncycastle.version>
+        <commons-compress.version>1.26.0</commons-compress.version>
+        <commons-codec.version>1.16.1</commons-codec.version>
+        <guava.version>33.0.0-jre</guava.version>
         <junit.jupiter.version>5.8.2</junit.jupiter.version>
-        <logback.version>1.2.11</logback.version>
-        <slf4j.version>1.7.36</slf4j.version>
+        <logback.version>1.5.0</logback.version>
+        <slf4j.version>2.0.12</slf4j.version>
         <xz.version>1.9</xz.version>
 
         <mavenVersion>3.2.5</mavenVersion>
@@ -138,6 +139,11 @@
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-compress</artifactId>
                 <version>${commons-compress.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-codec</groupId>
+                <artifactId>commons-codec</artifactId>
+                <version>${commons-codec.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.google.guava</groupId>
