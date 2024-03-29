@@ -18,7 +18,9 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Objects;
 
+import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
+import org.bouncycastle.openpgp.PGPSignature;
 import org.eclipse.packager.rpm.RpmSignatureTag;
 import org.eclipse.packager.rpm.header.Header;
 import org.pgpainless.PGPainless;
@@ -42,6 +44,8 @@ public class PgpHeaderSignatureProcessor implements SignatureProcessor {
     private final SecretKeyRingProtector protector;
 
     private final long keyId;
+
+    private PGPSignature signature;
 
     private byte[] value;
 
@@ -91,7 +95,8 @@ public class PgpHeaderSignatureProcessor implements SignatureProcessor {
             signingStream.close();
             EncryptionResult result = signingStream.getResult();
 
-            this.value = result.getDetachedSignatures().flatten().iterator().next().getEncoded();
+            this.signature = result.getDetachedSignatures().flatten().iterator().next();
+            this.value = signature.getEncoded();
             logger.info("RSA HEADER: {}", this.value);
         } catch (final Exception e) {
             throw new RuntimeException(e);
@@ -105,6 +110,24 @@ public class PgpHeaderSignatureProcessor implements SignatureProcessor {
 
     @Override
     public void finish(final Header<RpmSignatureTag> signature) {
-        signature.putBlob(RpmSignatureTag.RSAHEADER, this.value);
+        switch (this.signature.getKeyAlgorithm()) {
+        // RSA
+        case PublicKeyAlgorithmTags.RSA_GENERAL:
+        case PublicKeyAlgorithmTags.RSA_ENCRYPT:
+        case PublicKeyAlgorithmTags.RSA_SIGN:
+            signature.putBlob(RpmSignatureTag.RSAHEADER, this.value);
+            break;
+
+        // DSA
+        case PublicKeyAlgorithmTags.DSA:
+        case PublicKeyAlgorithmTags.ECDSA:
+        case PublicKeyAlgorithmTags.EDDSA_LEGACY:
+            signature.putBlob(RpmSignatureTag.DSAHEADER, this.value);
+            break;
+
+        default:
+            throw new RuntimeException("Unsupported public key algorithm id: " + this.signature.getKeyAlgorithm());
+        }
+
     }
 }
