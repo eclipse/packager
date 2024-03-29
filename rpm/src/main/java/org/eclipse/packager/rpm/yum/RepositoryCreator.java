@@ -55,7 +55,6 @@ import org.eclipse.packager.rpm.info.RpmInformation.Dependency;
 import org.eclipse.packager.security.pgp.PgpHelper;
 import org.eclipse.packager.security.pgp.SigningStream;
 import org.eclipse.packager.security.pgp.SigningStream2;
-import org.pgpainless.PGPainless;
 import org.pgpainless.key.protection.SecretKeyRingProtector;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -471,7 +470,8 @@ public class RepositoryCreator {
          * @param privateKey unlocked PGP private key
          * @param digestAlgorithm digest algorithm to be used in the signature
          * @return builder
-         * @deprecated use {@link #setSigning(PGPSecretKeyRing, SecretKeyRingProtector)} instead.
+         * @deprecated use {@link #setSigning(PGPSecretKeyRing, SecretKeyRingProtector)}
+         *             instead.
          */
         @Deprecated
         public Builder setSigning(final PGPPrivateKey privateKey, final int digestAlgorithm) {
@@ -509,7 +509,8 @@ public class RepositoryCreator {
          *
          * @param secretKeys secret key
          * @param protector protector to unlock the secret key
-         * @param keyId ID of the signing subkey, or 0 if the signing subkey is auto-detected
+         * @param keyId ID of the signing subkey, or 0 if the signing subkey is
+         *            auto-detected
          * @return builder
          */
         public Builder setSigning(final PGPSecretKeyRing secretKeys, SecretKeyRingProtector protector, long keyId) {
@@ -529,7 +530,7 @@ public class RepositoryCreator {
          * @throws IOException if the key cannot be parsed
          */
         public Builder setSigning(final InputStream keyInputStream)
-            throws IOException {
+                throws IOException {
             return setSigning(keyInputStream, SecretKeyRingProtector.unprotectedKeys());
         }
 
@@ -542,8 +543,8 @@ public class RepositoryCreator {
          * @throws IOException if the key cannot be parsed
          */
         public Builder setSigning(final InputStream keyInputStream,
-                                  final SecretKeyRingProtector keyProtector)
-            throws IOException {
+                final SecretKeyRingProtector keyProtector)
+                throws IOException {
             return setSigning(keyInputStream, keyProtector, 0);
         }
 
@@ -557,9 +558,9 @@ public class RepositoryCreator {
          * @throws IOException if the key cannot be parsed
          */
         public Builder setSigning(final InputStream keyInputStream,
-                                  final SecretKeyRingProtector keyProtector,
-                                  final long keyId)
-            throws IOException {
+                final SecretKeyRingProtector keyProtector,
+                final long keyId)
+                throws IOException {
             PGPSecretKeyRing secretKeys = PgpHelper.loadSecretKeyRing(keyInputStream);
             return setSigning(secretKeys, keyProtector, keyId);
         }
@@ -567,7 +568,8 @@ public class RepositoryCreator {
         /**
          * Apply PGP signing to the data stream.
          *
-         * @param signingStreamCreator function that wraps the output stream into a signing stream.
+         * @param signingStreamCreator function that wraps the output stream into a
+         *            signing stream.
          * @return builder
          */
         public Builder setSigning(final Function<OutputStream, OutputStream> signingStreamCreator) {

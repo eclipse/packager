@@ -13,6 +13,11 @@
 
 package org.eclipse.packager.security.pgp;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.List;
+import java.util.Objects;
+
 import org.bouncycastle.bcpg.ArmoredOutputStream;
 import org.bouncycastle.bcpg.BCPGOutputStream;
 import org.bouncycastle.openpgp.PGPException;
@@ -27,11 +32,6 @@ import org.pgpainless.encryption_signing.ProducerOptions;
 import org.pgpainless.encryption_signing.SigningOptions;
 import org.pgpainless.key.protection.SecretKeyRingProtector;
 import org.pgpainless.util.ArmoredOutputStreamFactory;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.List;
-import java.util.Objects;
 
 public class SigningStream2 extends OutputStream {
     private final OutputStream stream;
@@ -58,11 +58,11 @@ public class SigningStream2 extends OutputStream {
      * @param version the optional version which will be in the signature comment
      */
     public SigningStream2(final OutputStream stream,
-                          final PGPSecretKeyRing secretKeys,
-                          final SecretKeyRingProtector protector,
-                          final long keyId,
-                          final boolean inline,
-                          final String version) {
+            final PGPSecretKeyRing secretKeys,
+            final SecretKeyRingProtector protector,
+            final long keyId,
+            final boolean inline,
+            final String version) {
         this.stream = stream;
         this.secretKeys = secretKeys;
         this.protector = protector;
@@ -81,10 +81,10 @@ public class SigningStream2 extends OutputStream {
      * @param inline whether to sign inline or just write the signature
      */
     public SigningStream2(final OutputStream stream,
-                          final PGPSecretKeyRing secretKeys,
-                          final SecretKeyRingProtector protector,
-                          final long keyId,
-                          final boolean inline) {
+            final PGPSecretKeyRing secretKeys,
+            final SecretKeyRingProtector protector,
+            final long keyId,
+            final boolean inline) {
         this(stream, secretKeys, protector, keyId, inline, null);
     }
 
@@ -115,11 +115,11 @@ public class SigningStream2 extends OutputStream {
                     signingOptions.addInlineSignature(protector, secretKeys, DocumentSignatureType.BINARY_DOCUMENT);
                 }
                 ProducerOptions producerOptions = ProducerOptions.sign(signingOptions)
-                    .setCleartextSigned();
+                        .setCleartextSigned();
 
                 signingStream = PGPainless.encryptAndOrSign()
-                    .onOutputStream(stream) // write data and sig to the output stream
-                    .withOptions(producerOptions);
+                        .onOutputStream(stream) // write data and sig to the output stream
+                        .withOptions(producerOptions);
 
             } else {
 
@@ -132,14 +132,15 @@ public class SigningStream2 extends OutputStream {
                 ProducerOptions producerOptions = ProducerOptions.sign(signingOptions);
 
                 signingStream = PGPainless.encryptAndOrSign()
-                    .onOutputStream(
-                        // do not output the plaintext data, just emit the signature in close()
-                        new OutputStream() {
-                            @Override
-                            public void write(int i) throws IOException {
-                                // Ignore data
-                            }
-                        }).withOptions(producerOptions);
+                        .onOutputStream(
+                                // do not output the plaintext data, just emit the signature in close()
+                                new OutputStream() {
+                                    @Override
+                                    public void write(int i) throws IOException {
+                                        // Ignore data
+                                    }
+                                })
+                        .withOptions(producerOptions);
             }
         } catch (final PGPException e) {
             throw new IOException(e);

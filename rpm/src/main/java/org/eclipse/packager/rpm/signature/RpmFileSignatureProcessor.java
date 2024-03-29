@@ -8,9 +8,20 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *   mat1e, Groupe EDF - initial API and implementation
+ * mat1e, Groupe EDF - initial API and implementation
  ********************************************************************************/
 package org.eclipse.packager.rpm.signature;
+
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.compress.utils.IOUtils;
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
@@ -23,17 +34,6 @@ import org.eclipse.packager.rpm.info.RpmInformations;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 import org.eclipse.packager.security.pgp.PgpHelper;
 import org.pgpainless.key.protection.SecretKeyRingProtector;
-
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileChannel;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Sign existing RPM file by calling
@@ -58,7 +58,7 @@ public class RpmFileSignatureProcessor {
      * @throws IOException
      */
     public static void perform(File rpm, InputStream privateKeyIn, String passphrase, OutputStream out)
-        throws IOException {
+            throws IOException {
 
         final long leadLength = 96;
         long signatureHeaderStart = 0L;
@@ -89,7 +89,7 @@ public class RpmFileSignatureProcessor {
         }
 
         if (signatureHeaderStart == 0L || signatureHeaderLength == 0L || payloadHeaderStart == 0L
-            || payloadHeaderLength == 0L || payloadStart == 0L || archiveSize == 0L) {
+                || payloadHeaderLength == 0L || payloadStart == 0L || archiveSize == 0L) {
             throw new IOException("Unable to read " + rpm.getName() + " informations.");
         }
 
@@ -129,7 +129,7 @@ public class RpmFileSignatureProcessor {
      * @throws IOException
      */
     private static byte[] getSignature(PGPSecretKeyRing secretKeys, SecretKeyRingProtector protector, ByteBuffer payloadHeader, ByteBuffer payload,
-        long archiveSize) throws IOException {
+            long archiveSize) throws IOException {
         Header<RpmSignatureTag> signatureHeader = new Header<>();
         List<SignatureProcessor> signatureProcessors = getSignatureProcessors(secretKeys, protector);
         payloadHeader.flip();

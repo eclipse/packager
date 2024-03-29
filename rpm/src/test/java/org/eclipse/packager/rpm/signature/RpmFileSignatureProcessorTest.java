@@ -8,8 +8,8 @@
  * SPDX-License-Identifier: EPL-2.0
  *
  * Contributors:
- *   mat1e, Groupe EDF - initial API and implementation
- *   Jens Reimann, Red Hat, Inc
+ * mat1e, Groupe EDF - initial API and implementation
+ * Jens Reimann, Red Hat, Inc
  ********************************************************************************/
 package org.eclipse.packager.rpm.signature;
 
@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.bouncycastle.openpgp.PGPException;
-import org.eclipse.packager.rpm.HashAlgorithm;
 import org.eclipse.packager.rpm.RpmSignatureTag;
 import org.eclipse.packager.rpm.Rpms;
 import org.eclipse.packager.rpm.parse.InputHeader;
@@ -74,7 +73,7 @@ public class RpmFileSignatureProcessorTest {
         signedRpm.createNewFile();
 
         try (FileOutputStream resultOut = new FileOutputStream(signedRpm);
-            InputStream privateKeyStream = new FileInputStream(private_key)) {
+                InputStream privateKeyStream = new FileInputStream(private_key)) {
             // Sign the RPM
             RpmFileSignatureProcessor.perform(rpm, privateKeyStream, passPhrase, resultOut);
 
@@ -130,7 +129,8 @@ public class RpmFileSignatureProcessorTest {
         String publicKeyName = publicKey.getName();
         String rpmFileName = signedRpm.getName();
 
-        // prepare the script for validating the signature, this includes importing the key and running a verbose check
+        // prepare the script for validating the signature, this includes importing the
+        // key and running a verbose check
         String script = String.format("rpm --import /%s && rpm --verbose --checksig /%s", publicKeyName, rpmFileName);
 
         // SElinux labeling
@@ -142,14 +142,14 @@ public class RpmFileSignatureProcessorTest {
             }
         });
 
-
-        // create the actual command, which we run inside a container, to not mess up the host systems RPM configuration and
+        // create the actual command, which we run inside a container, to not mess up
+        // the host systems RPM configuration and
         // because this gives us a predictable RPM version.
         String[] command = new String[] {
-            CONTAINER, "run", "-tiq", "--rm",
-            "-v", publicKey + ":/" + publicKeyName + mountSuffix,
-            "-v", signedRpm + ":/" + rpmFileName + mountSuffix,
-            "registry.access.redhat.com/ubi9/ubi-minimal:latest", "bash", "-c", script
+                CONTAINER, "run", "-tiq", "--rm",
+                "-v", publicKey + ":/" + publicKeyName + mountSuffix,
+                "-v", signedRpm + ":/" + rpmFileName + mountSuffix,
+                "registry.access.redhat.com/ubi9/ubi-minimal:latest", "bash", "-c", script
         };
 
         // dump command for local testing
@@ -176,7 +176,7 @@ public class RpmFileSignatureProcessorTest {
 
     private static String run(String... command) throws IOException, InterruptedException {
         Process process = new ProcessBuilder(command)
-            .start();
+                .start();
         String stdout = new String(ByteStreams.toByteArray(process.getInputStream()));
         process.waitFor();
         return stdout;

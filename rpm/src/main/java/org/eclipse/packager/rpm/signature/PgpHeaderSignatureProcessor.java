@@ -13,6 +13,11 @@
 
 package org.eclipse.packager.rpm.signature;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.util.Objects;
+
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.eclipse.packager.rpm.RpmSignatureTag;
 import org.eclipse.packager.rpm.header.Header;
@@ -26,11 +31,6 @@ import org.pgpainless.key.protection.SecretKeyRingProtector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.Objects;
-
 /**
  * An RSA signature processor for the header section only.
  */
@@ -38,13 +38,16 @@ public class PgpHeaderSignatureProcessor implements SignatureProcessor {
     private final static Logger logger = LoggerFactory.getLogger(PgpHeaderSignatureProcessor.class);
 
     private final PGPSecretKeyRing secretKeys;
+
     private final SecretKeyRingProtector protector;
+
     private final long keyId;
+
     private byte[] value;
 
     public PgpHeaderSignatureProcessor(final PGPSecretKeyRing secretKeys,
-                                       final SecretKeyRingProtector protector,
-                                       final long keyId) {
+            final SecretKeyRingProtector protector,
+            final long keyId) {
         this.secretKeys = Objects.requireNonNull(secretKeys);
         this.protector = Objects.requireNonNull(protector);
         this.keyId = keyId;
@@ -74,8 +77,8 @@ public class PgpHeaderSignatureProcessor implements SignatureProcessor {
                 signingOptions.addDetachedSignature(protector, secretKeys, keyId);
             }
             EncryptionStream signingStream = PGPainless.encryptAndOrSign()
-                .onOutputStream(sink)
-                .withOptions(ProducerOptions.sign(signingOptions));
+                    .onOutputStream(sink)
+                    .withOptions(ProducerOptions.sign(signingOptions));
 
             if (header.hasArray()) {
                 signingStream.write(header.array(), header.position(), header.remaining());

@@ -139,7 +139,7 @@ public final class PgpHelper {
     }
 
     public static PGPSecretKeyRing loadSecretKeyRing(InputStream inputStream)
-        throws IOException {
+            throws IOException {
         return PGPainless.readKeyRing().secretKeyRing(inputStream);
     }
 

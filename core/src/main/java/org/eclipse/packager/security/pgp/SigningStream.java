@@ -28,6 +28,7 @@ import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
 
 /**
  * Signing Stream.
+ *
  * @deprecated use {@link SigningStream2} instead.
  */
 @Deprecated

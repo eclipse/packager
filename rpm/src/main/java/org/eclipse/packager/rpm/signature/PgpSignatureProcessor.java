@@ -13,6 +13,10 @@
 
 package org.eclipse.packager.rpm.signature;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+
 import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.bouncycastle.openpgp.PGPSignature;
@@ -25,10 +29,6 @@ import org.pgpainless.encryption_signing.EncryptionStream;
 import org.pgpainless.encryption_signing.ProducerOptions;
 import org.pgpainless.encryption_signing.SigningOptions;
 import org.pgpainless.key.protection.SecretKeyRingProtector;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
 
 public class PgpSignatureProcessor implements SignatureProcessor {
 
@@ -44,7 +44,8 @@ public class PgpSignatureProcessor implements SignatureProcessor {
     }
 
     /**
-     * Signature Processor using a PGP signing key that can be unlocked by the protector.
+     * Signature Processor using a PGP signing key that can be unlocked by the
+     * protector.
      *
      * @param signingKey signing key
      * @param protector protector to unlock the signing key
@@ -54,8 +55,10 @@ public class PgpSignatureProcessor implements SignatureProcessor {
     }
 
     /**
-     * Signature Processor using a PGP signing key that can be unlocked by the protector.
-     * The signing key to use is determined by the given key-id. If the id is 0, the signing subkey is auto-detected.
+     * Signature Processor using a PGP signing key that can be unlocked by the
+     * protector.
+     * The signing key to use is determined by the given key-id. If the id is 0, the
+     * signing subkey is auto-detected.
      *
      * @param signingKey signing key
      * @param protector protector to unlock the signing key
@@ -77,8 +80,8 @@ public class PgpSignatureProcessor implements SignatureProcessor {
                 signingOptions.addDetachedSignature(protector, signingKey, DocumentSignatureType.BINARY_DOCUMENT);
             }
             this.signingStream = PGPainless.encryptAndOrSign()
-                .onOutputStream(sink)
-                .withOptions(ProducerOptions.sign(signingOptions));
+                    .onOutputStream(sink)
+                    .withOptions(ProducerOptions.sign(signingOptions));
         } catch (PGPException | IOException e) {
             throw new RuntimeException(e);
         }

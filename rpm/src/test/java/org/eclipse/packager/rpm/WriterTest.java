@@ -13,6 +13,21 @@
 
 package org.eclipse.packager.rpm;
 
+import static java.util.EnumSet.of;
+
+import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.util.LinkedList;
+import java.util.List;
+
 import org.bouncycastle.openpgp.PGPException;
 import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.build.BuilderContext;
@@ -30,21 +45,6 @@ import org.eclipse.packager.rpm.signature.PgpHeaderSignatureProcessor;
 import org.eclipse.packager.security.pgp.PgpHelper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-import java.util.LinkedList;
-import java.util.List;
-
-import static java.util.EnumSet.of;
 
 public class WriterTest {
     private static final Path OUT_BASE = Paths.get("target", "data", "out");
@@ -195,9 +195,9 @@ public class WriterTest {
             if (keyId != null && keyChain != null) {
                 try (InputStream stream = Files.newInputStream(Paths.get(keyChain))) {
                     builder.addSignatureProcessor(new PgpHeaderSignatureProcessor(
-                        PgpHelper.loadSecretKeyRing(stream),
-                        PgpHelper.protectorFromPassword(keyPassphrase),
-                        PgpHelper.parseKeyId(keyId)));
+                            PgpHelper.loadSecretKeyRing(stream),
+                            PgpHelper.protectorFromPassword(keyPassphrase),
+                            PgpHelper.parseKeyId(keyId)));
                 }
             }
 
