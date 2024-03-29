@@ -90,10 +90,12 @@ public class SigningStream extends OutputStream {
             this.signatureGenerator = new PGPSignatureGenerator(new BcPGPContentSignerBuilder(this.privateKey.getPublicKeyPacket().getAlgorithm(), this.digestAlgorithm));
             this.signatureGenerator.init(PGPSignature.BINARY_DOCUMENT, this.privateKey);
 
-            this.armoredOutput = new ArmoredOutputStream(this.stream);
+            final ArmoredOutputStream.Builder builder = ArmoredOutputStream.builder();
             if (this.version != null) {
-                this.armoredOutput.setHeader("Version", this.version);
+                builder.setVersion(this.version);
             }
+
+            this.armoredOutput = builder.build(this.stream);
 
             if (this.inline) {
                 this.armoredOutput.beginClearText(this.digestAlgorithm);

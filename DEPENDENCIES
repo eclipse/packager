@@ -1,0 +1,7 @@
+maven/mavencentral/com.google.guava/guava/31.1-jre, Apache-2.0, approved, clearlydefined
+maven/mavencentral/org.apache.commons/commons-compress/1.21, Apache-2.0 AND BSD-3-Clause AND bzip2-1.0.6 AND LicenseRef-Public-Domain, approved, CQ23710
+maven/mavencentral/org.bouncycastle/bcpg-jdk18on/1.71, Apache-2.0, approved, #3326
+maven/mavencentral/org.bouncycastle/bcprov-jdk18on/1.71, MIT, approved, #3475
+maven/mavencentral/org.eclipse.packager/packager-core/0.19.1-SNAPSHOT, EPL-2.0, approved, technology.packager
+maven/mavencentral/org.slf4j/slf4j-api/1.7.36, MIT, approved, CQ13368
+maven/mavencentral/org.tukaani/xz/1.9, LicenseRef-Public-Domain, approved, CQ23498

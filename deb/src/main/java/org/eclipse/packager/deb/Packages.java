@@ -45,7 +45,7 @@ public final class Packages {
                 }
                 try (final TarArchiveInputStream inputStream = new TarArchiveInputStream(new GZIPInputStream(in))) {
                     TarArchiveEntry te;
-                    while ((te = inputStream.getNextTarEntry()) != null) {
+                    while ((te = inputStream.getNextEntry()) != null) {
                         String name = te.getName();
                         if (name.startsWith("./")) {
                             name = name.substring(2);

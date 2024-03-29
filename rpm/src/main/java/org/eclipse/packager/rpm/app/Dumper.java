@@ -81,7 +81,7 @@ public class Dumper {
         if (!SKIP_PAYLOAD) {
             final CpioArchiveInputStream cpio = in.getCpioStream();
             CpioArchiveEntry entry;
-            while ((entry = cpio.getNextCPIOEntry()) != null) {
+            while ((entry = cpio.getNextEntry()) != null) {
                 dumpEntry(entry);
             }
         }

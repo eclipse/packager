@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -81,7 +82,7 @@ public final class RpmInformations {
                 changes.add(new RpmInformation.Changelog(ts[i], authors[i], texts[i]));
             }
 
-            Collections.sort(changes, (o1, o2) -> Long.compare(o1.getTimestamp(), o2.getTimestamp()));
+            Collections.sort(changes, Comparator.comparingLong(RpmInformation.Changelog::getTimestamp));
 
             result.setChangelog(changes);
         }
@@ -97,7 +98,7 @@ public final class RpmInformations {
 
         final CpioArchiveInputStream cpio = in.getCpioStream();
         CpioArchiveEntry cpioEntry;
-        while ((cpioEntry = cpio.getNextCPIOEntry()) != null) {
+        while ((cpioEntry = cpio.getNextEntry()) != null) {
             final String name = normalize(cpioEntry.getName());
 
             if (cpioEntry.isRegularFile()) {

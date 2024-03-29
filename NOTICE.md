@@ -21,6 +21,8 @@ listed source code repository logs.
 
 ## Third-party Content
 
+See: [DEPENDENCIES](DEPENDENCIES)
+
 ## Trademarks
 
 Eclipse Packager is a trademark of the Eclipse Foundation.

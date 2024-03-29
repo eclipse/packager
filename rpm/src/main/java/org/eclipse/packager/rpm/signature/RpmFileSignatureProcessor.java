@@ -107,7 +107,7 @@ public class RpmFileSignatureProcessor {
 
         // Write to the OutputStream
         try (FileInputStream in = new FileInputStream(rpm)) {
-            IOUtils.copyRange(in, leadLength, out);
+            IOUtils.copyLarge(in, out, 0, leadLength);
             IOUtils.skip(in, signatureHeaderLength);
             out.write(signatureHeader);
             IOUtils.copy(in, out);
