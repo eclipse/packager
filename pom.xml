@@ -121,7 +121,7 @@
             <dependency>
                 <groupId>org.pgpainless</groupId>
                 <artifactId>pgpainless-core</artifactId>
-                <version>1.5.3</version>
+                <version>1.6.7</version>
             </dependency>
 
             <dependency>
