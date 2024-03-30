@@ -112,16 +112,13 @@ public class PgpHeaderSignatureProcessor implements SignatureProcessor {
     public void finish(final Header<RpmSignatureTag> signature) {
         switch (this.signature.getKeyAlgorithm()) {
         // RSA
-        case PublicKeyAlgorithmTags.RSA_GENERAL:
-        case PublicKeyAlgorithmTags.RSA_ENCRYPT:
-        case PublicKeyAlgorithmTags.RSA_SIGN:
+        case PublicKeyAlgorithmTags.RSA_GENERAL:    // 1
             signature.putBlob(RpmSignatureTag.RSAHEADER, this.value);
             break;
 
         // DSA
-        case PublicKeyAlgorithmTags.DSA:
-        case PublicKeyAlgorithmTags.ECDSA:
-        case PublicKeyAlgorithmTags.EDDSA_LEGACY:
+        case PublicKeyAlgorithmTags.DSA:            // 17
+        case PublicKeyAlgorithmTags.EDDSA_LEGACY:   // 22
             signature.putBlob(RpmSignatureTag.DSAHEADER, this.value);
             break;
 
