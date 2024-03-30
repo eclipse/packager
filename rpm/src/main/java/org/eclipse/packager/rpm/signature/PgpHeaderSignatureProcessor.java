@@ -97,7 +97,6 @@ public class PgpHeaderSignatureProcessor implements SignatureProcessor {
 
             this.signature = result.getDetachedSignatures().flatten().iterator().next();
             this.value = signature.getEncoded();
-            logger.info("RSA HEADER: {}", this.value);
         } catch (final Exception e) {
             throw new RuntimeException(e);
         }
@@ -112,13 +111,15 @@ public class PgpHeaderSignatureProcessor implements SignatureProcessor {
     public void finish(final Header<RpmSignatureTag> signature) {
         switch (this.signature.getKeyAlgorithm()) {
         // RSA
-        case PublicKeyAlgorithmTags.RSA_GENERAL:    // 1
+        case PublicKeyAlgorithmTags.RSA_GENERAL: // 1
+            logger.info("RSA HEADER: {}", this.value);
             signature.putBlob(RpmSignatureTag.RSAHEADER, this.value);
             break;
 
         // DSA
-        case PublicKeyAlgorithmTags.DSA:            // 17
-        case PublicKeyAlgorithmTags.EDDSA_LEGACY:   // 22
+        case PublicKeyAlgorithmTags.DSA: // 17
+        case PublicKeyAlgorithmTags.EDDSA_LEGACY: // 22
+            logger.info("DSA HEADER: {}", this.value);
             signature.putBlob(RpmSignatureTag.DSAHEADER, this.value);
             break;
 
