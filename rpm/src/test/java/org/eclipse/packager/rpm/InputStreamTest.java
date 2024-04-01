@@ -14,9 +14,9 @@
 package org.eclipse.packager.rpm;
 
 import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
@@ -27,7 +27,7 @@ public class InputStreamTest {
 
     @Test
     public void test1() throws IOException {
-        try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(new FileInputStream(new File("src/test/resources/data/org.eclipse.scada-0.2.1-1.noarch.rpm"))))) {
+        try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(Path.of("src/test/resources/data/org.eclipse.scada-0.2.1-1.noarch.rpm"))))) {
             Dumper.dumpAll(in);
 
             Assertions.assertEquals(280, in.getPayloadHeader().getStart());
@@ -61,7 +61,7 @@ public class InputStreamTest {
 
     @Test
     public void test2() throws IOException {
-        try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(new FileInputStream(new File("src/test/resources/data/org.eclipse.scada-centos6-0.2.1-1.noarch.rpm"))))) {
+        try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(Path.of("src/test/resources/data/org.eclipse.scada-centos6-0.2.1-1.noarch.rpm"))))) {
             Dumper.dumpAll(in);
         }
     }

@@ -17,7 +17,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.bouncycastle.openpgp.PGPException;
 import org.eclipse.packager.rpm.app.Dumper;
@@ -28,7 +27,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class EmptyWriterTest {
-    private static final Path OUT_BASE = Paths.get("target", "data", "out.empty");
+    private static final Path OUT_BASE = Path.of("target", "data", "out.empty");
 
     @BeforeAll
     public static void setup() throws IOException {

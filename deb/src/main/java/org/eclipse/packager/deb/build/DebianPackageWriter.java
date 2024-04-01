@@ -13,14 +13,14 @@
 package org.eclipse.packager.deb.build;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.util.HashMap;
@@ -46,7 +46,7 @@ import org.eclipse.packager.deb.internal.ChecksumInputStream;
 import com.google.common.io.ByteStreams;
 
 public class DebianPackageWriter implements AutoCloseable, BinaryPackageBuilder {
-    public static final Charset CHARSET = Charset.forName("UTF-8");
+    public static final Charset CHARSET = StandardCharsets.UTF_8;
 
     private static final int AR_ARCHIVE_DEFAULT_MODE = 33188; // see ArArchive
 
@@ -56,7 +56,7 @@ public class DebianPackageWriter implements AutoCloseable, BinaryPackageBuilder 
 
     private final Supplier<Instant> timestampSupplier;
 
-    private final File dataTemp;
+    private final Path dataTemp;
 
     private final TarArchiveOutputStream dataStream;
 
@@ -95,19 +95,37 @@ public class DebianPackageWriter implements AutoCloseable, BinaryPackageBuilder 
         this.ar.write(this.binaryHeader);
         this.ar.closeArchiveEntry();
 
-        this.dataTemp = Files.createTempFile("data", null).toFile();
+        this.dataTemp = Files.createTempFile("data", null);
 
-        this.dataStream = new TarArchiveOutputStream(new GZIPOutputStream(new FileOutputStream(this.dataTemp)));
+        this.dataStream = new TarArchiveOutputStream(new GZIPOutputStream(Files.newOutputStream(this.dataTemp)));
         this.dataStream.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
     }
 
+    @Deprecated
     public void addFile(final File file, final String fileName, final EntryInformation entryInformation) throws IOException {
-        addFile(new FileContentProvider(file), fileName, entryInformation, Optional.of((Supplier<Instant>) () -> {
-            return file == null || !file.canRead() ? null : Instant.ofEpochMilli(file.lastModified());
+        addFile(file.toPath(), fileName, entryInformation);
+    }
+
+    public void addFile(final Path file, final String fileName, final EntryInformation entryInformation) throws IOException {
+        addFile(new FileContentProvider(file), fileName, entryInformation, Optional.of(() -> {
+            if (file == null || !Files.isReadable(file)) {
+                return null;
+            }
+
+            try {
+                return Files.getLastModifiedTime(file).toInstant();
+            } catch (IOException e) {
+                return null;
+            }
         }));
     }
 
+    @Deprecated
     public void addFile(final File file, final String fileName, final EntryInformation entryInformation, final Optional<Supplier<Instant>> timestampSupplier) throws IOException {
+        addFile(file.toPath(), fileName, entryInformation, timestampSupplier);
+    }
+
+    public void addFile(final Path file, final String fileName, final EntryInformation entryInformation, final Optional<Supplier<Instant>> timestampSupplier) throws IOException {
         addFile(new FileContentProvider(file), fileName, entryInformation, timestampSupplier);
     }
 
@@ -259,14 +277,14 @@ public class DebianPackageWriter implements AutoCloseable, BinaryPackageBuilder 
                 this.ar.close();
             }
         } finally {
-            this.dataTemp.delete();
+            Files.delete(this.dataTemp);
         }
     }
 
-    private void buildAndAddControlFile(final Supplier<Instant> timestampSupplier) throws IOException, FileNotFoundException {
-        final File controlFile = File.createTempFile("control", null);
+    private void buildAndAddControlFile(final Supplier<Instant> timestampSupplier) throws IOException {
+        final Path controlFile = Files.createTempFile("control", null);
         try {
-            try (GZIPOutputStream gout = new GZIPOutputStream(new FileOutputStream(controlFile));
+            try (GZIPOutputStream gout = new GZIPOutputStream(Files.newOutputStream(controlFile));
                     TarArchiveOutputStream tout = new TarArchiveOutputStream(gout)) {
                 tout.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
 
@@ -280,7 +298,7 @@ public class DebianPackageWriter implements AutoCloseable, BinaryPackageBuilder 
             }
             addArFile(controlFile, "control.tar.gz", timestampSupplier);
         } finally {
-            controlFile.delete();
+            Files.delete(controlFile);
         }
     }
 
@@ -352,11 +370,11 @@ public class DebianPackageWriter implements AutoCloseable, BinaryPackageBuilder 
         return new StaticContentProvider(sw.toString());
     }
 
-    private void addArFile(final File file, final String entryName, final Supplier<Instant> timestampSupplier) throws IOException {
-        final ArArchiveEntry entry = new ArArchiveEntry(entryName, file.length(), 0, 0, AR_ARCHIVE_DEFAULT_MODE, timestampSupplier.get().getEpochSecond());
+    private void addArFile(final Path file, final String entryName, final Supplier<Instant> timestampSupplier) throws IOException {
+        final ArArchiveEntry entry = new ArArchiveEntry(entryName, Files.size(file), 0, 0, AR_ARCHIVE_DEFAULT_MODE, timestampSupplier.get().getEpochSecond());
         this.ar.putArchiveEntry(entry);
 
-        Files.copy(file.toPath(), this.ar);
+        Files.copy(file, this.ar);
 
         this.ar.closeArchiveEntry();
     }

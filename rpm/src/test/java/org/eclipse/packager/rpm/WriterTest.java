@@ -22,7 +22,6 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.LinkedList;
@@ -47,9 +46,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class WriterTest {
-    private static final Path OUT_BASE = Paths.get("target", "data", "out");
+    private static final Path OUT_BASE = Path.of("target", "data", "out");
 
-    private static final Path IN_BASE = Paths.get("src", "test", "resources", "data", "in");
+    private static final Path IN_BASE = Path.of("src", "test", "resources", "data", "in");
 
     @BeforeAll
     public static void setup() throws IOException {
@@ -193,7 +192,7 @@ public class WriterTest {
             final String keyPassphrase = System.getProperty("writerTest.keyPassphrase");
 
             if (keyId != null && keyChain != null) {
-                try (InputStream stream = Files.newInputStream(Paths.get(keyChain))) {
+                try (InputStream stream = Files.newInputStream(Path.of(keyChain))) {
                     builder.addSignatureProcessor(new RsaHeaderSignatureProcessor(PgpHelper.loadPrivateKey(stream, keyId, keyPassphrase), HashAlgorithm.from(System.getProperty("writerTest.hashAlgo"))));
                 }
             }

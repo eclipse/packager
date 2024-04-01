@@ -14,6 +14,7 @@ package org.eclipse.packager.deb.control;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -136,10 +137,6 @@ public class BinaryPackageControlFile extends GenericControlFile {
 
     public String makeFileName() {
         final String name = String.format("%s_%s_%s.deb", getPackage(), getVersion(), getArchitecture());
-        try {
-            return URLEncoder.encode(name, "UTF-8");
-        } catch (final UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+        return URLEncoder.encode(name, StandardCharsets.UTF_8);
     }
 }

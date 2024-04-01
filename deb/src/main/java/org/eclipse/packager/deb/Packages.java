@@ -13,11 +13,12 @@
 package org.eclipse.packager.deb;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -36,8 +37,13 @@ public final class Packages {
     private Packages() {
     }
 
+    @Deprecated
     public static Map<String, String> parseControlFile(final File packageFile) throws IOException, ParserException {
-        try (final ArArchiveInputStream in = new ArArchiveInputStream(new FileInputStream(packageFile))) {
+        return parseControlFile(packageFile.toPath());
+    }
+
+    public static Map<String, String> parseControlFile(final Path packageFile) throws IOException, ParserException {
+        try (final ArArchiveInputStream in = new ArArchiveInputStream(Files.newInputStream(packageFile))) {
             ArchiveEntry ar;
             while ((ar = in.getNextEntry()) != null) {
                 if (!ar.getName().equals("control.tar.gz")) {

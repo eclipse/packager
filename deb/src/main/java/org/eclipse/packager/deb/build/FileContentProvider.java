@@ -13,21 +13,31 @@
 package org.eclipse.packager.deb.build;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class FileContentProvider implements ContentProvider {
 
-    private final File file;
+    private final Path file;
 
+    @Deprecated
     public FileContentProvider(final File file) {
+        this(file.toPath());
+    }
+
+    public FileContentProvider(final Path file) {
         this.file = file;
     }
 
     @Override
     public long getSize() {
-        return this.file.length();
+        try {
+            return Files.size(this.file);
+        } catch (final IOException e) {
+            return 0L;
+        }
     }
 
     @Override
@@ -36,7 +46,7 @@ public class FileContentProvider implements ContentProvider {
             return null;
         }
 
-        return new FileInputStream(this.file);
+        return Files.newInputStream(this.file);
     }
 
     @Override
