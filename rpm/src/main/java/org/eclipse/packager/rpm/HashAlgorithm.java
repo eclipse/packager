@@ -42,7 +42,7 @@ public enum HashAlgorithm {
      * <p>
      * This method will return the hash algorithm as specified by the
      * parameter "name". If this parameter is {@code null} or an empty
-     * string, then the default algorithm {@link #SHA1} will be returned. If
+     * string, then the default algorithm {@link #SHA256} will be returned. If
      * algorithm is an invalid name, then an exception is thrown.
      * </p>
      *
@@ -52,7 +52,7 @@ public enum HashAlgorithm {
      */
     public static HashAlgorithm from(final String name) {
         if (name == null || name.isEmpty()) {
-            return SHA1;
+            return SHA256;
         }
 
         return HashAlgorithm.valueOf(name);
