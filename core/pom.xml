@@ -13,12 +13,8 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcpg-jdk18on</artifactId>
+            <groupId>org.pgpainless</groupId>
+            <artifactId>pgpainless-core</artifactId>
         </dependency>
     </dependencies>
 

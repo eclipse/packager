@@ -29,7 +29,10 @@ import org.slf4j.LoggerFactory;
 
 /**
  * An RSA signature processor for both header and payload.
+ *
+ * @deprecated use {@link PgpSignatureProcessor} instead.
  */
+@Deprecated
 public class RsaSignatureProcessor implements SignatureProcessor {
     private final static Logger logger = LoggerFactory.getLogger(RsaSignatureProcessor.class);
 

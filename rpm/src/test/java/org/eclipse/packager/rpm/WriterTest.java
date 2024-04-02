@@ -41,7 +41,7 @@ import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 import org.eclipse.packager.rpm.header.Header;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
-import org.eclipse.packager.rpm.signature.RsaHeaderSignatureProcessor;
+import org.eclipse.packager.rpm.signature.PgpHeaderSignatureProcessor;
 import org.eclipse.packager.security.pgp.PgpHelper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -194,7 +194,10 @@ public class WriterTest {
 
             if (keyId != null && keyChain != null) {
                 try (InputStream stream = Files.newInputStream(Paths.get(keyChain))) {
-                    builder.addSignatureProcessor(new RsaHeaderSignatureProcessor(PgpHelper.loadPrivateKey(stream, keyId, keyPassphrase), HashAlgorithm.from(System.getProperty("writerTest.hashAlgo"))));
+                    builder.addSignatureProcessor(new PgpHeaderSignatureProcessor(
+                            PgpHelper.loadSecretKeyRing(stream),
+                            PgpHelper.protectorFromPassword(keyPassphrase),
+                            PgpHelper.parseKeyId(keyId)));
                 }
             }
 

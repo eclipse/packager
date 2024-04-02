@@ -26,6 +26,12 @@ import org.bouncycastle.openpgp.PGPSignature;
 import org.bouncycastle.openpgp.PGPSignatureGenerator;
 import org.bouncycastle.openpgp.operator.bc.BcPGPContentSignerBuilder;
 
+/**
+ * Signing Stream.
+ *
+ * @deprecated use {@link SigningStream2} instead.
+ */
+@Deprecated
 public class SigningStream extends OutputStream {
     private final OutputStream stream;
 

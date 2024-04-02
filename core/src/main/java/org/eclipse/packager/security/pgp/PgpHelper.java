@@ -33,6 +33,10 @@ import org.bouncycastle.openpgp.PGPUtil;
 import org.bouncycastle.openpgp.bc.BcPGPSecretKeyRingCollection;
 import org.bouncycastle.openpgp.operator.bc.BcPBESecretKeyDecryptorBuilder;
 import org.bouncycastle.openpgp.operator.bc.BcPGPDigestCalculatorProvider;
+import org.pgpainless.PGPainless;
+import org.pgpainless.key.protection.SecretKeyRingProtector;
+import org.pgpainless.key.util.KeyIdUtil;
+import org.pgpainless.util.Passphrase;
 
 public final class PgpHelper {
     private PgpHelper() {
@@ -132,5 +136,24 @@ public final class PgpHelper {
         }
 
         return null;
+    }
+
+    public static PGPSecretKeyRing loadSecretKeyRing(InputStream inputStream)
+            throws IOException {
+        return PGPainless.readKeyRing().secretKeyRing(inputStream);
+    }
+
+    public static long parseKeyId(String keyId) {
+        if (keyId == null) {
+            return 0L;
+        }
+        return KeyIdUtil.fromLongKeyId(keyId);
+    }
+
+    public static SecretKeyRingProtector protectorFromPassword(String password) {
+        if (password == null || password.isEmpty()) {
+            return SecretKeyRingProtector.unprotectedKeys();
+        }
+        return SecretKeyRingProtector.unlockAnyKeyWith(Passphrase.fromPassword(password));
     }
 }
