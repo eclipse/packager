@@ -440,7 +440,7 @@ public class RepositoryCreator {
         }
 
         public Builder setSigning(final PGPPrivateKey privateKey) {
-            return setSigning(privateKey, HashAlgorithmTags.SHA1);
+            return setSigning(privateKey, HashAlgorithmTags.SHA256);
         }
 
         public Builder setSigning(final PGPPrivateKey privateKey, final HashAlgorithm hashAlgorithm) {
