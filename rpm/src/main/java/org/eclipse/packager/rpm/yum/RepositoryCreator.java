@@ -50,7 +50,8 @@ import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 import org.eclipse.packager.rpm.info.RpmInformation;
 import org.eclipse.packager.rpm.info.RpmInformation.Changelog;
 import org.eclipse.packager.rpm.info.RpmInformation.Dependency;
-import org.eclipse.packager.security.pgp.SigningStream;
+import org.eclipse.packager.security.pgp.BcPgpSignerFactory;
+import org.eclipse.packager.security.pgp.PgpSignerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -439,21 +440,23 @@ public class RepositoryCreator {
             return this;
         }
 
+        public Builder setSigning(PgpSignerFactory signingFactory) {
+            return setSigning(signingFactory.createSigningStream());
+        }
+
+        @Deprecated
         public Builder setSigning(final PGPPrivateKey privateKey) {
             return setSigning(privateKey, HashAlgorithmTags.SHA1);
         }
 
+        @Deprecated
         public Builder setSigning(final PGPPrivateKey privateKey, final HashAlgorithm hashAlgorithm) {
             return setSigning(privateKey, hashAlgorithm.getValue());
         }
 
+        @Deprecated
         public Builder setSigning(final PGPPrivateKey privateKey, final int digestAlgorithm) {
-            if (privateKey != null) {
-                this.signingStreamCreator = output -> new SigningStream(output, privateKey, digestAlgorithm, false);
-            } else {
-                this.signingStreamCreator = null;
-            }
-            return this;
+            return setSigning(new BcPgpSignerFactory(privateKey, digestAlgorithm, false));
         }
 
         public RepositoryCreator build() {
