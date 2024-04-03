@@ -75,12 +75,13 @@
         <java.source>11</java.source>
 
         <bouncycastle.version>1.77</bouncycastle.version>
-        <commons-compress.version>1.26.0</commons-compress.version>
+        <commons-compress.version>1.26.1</commons-compress.version>
         <commons-codec.version>1.16.1</commons-codec.version>
         <guava.version>33.0.0-jre</guava.version>
         <junit.jupiter.version>5.8.2</junit.jupiter.version>
         <logback.version>1.5.0</logback.version>
         <slf4j.version>2.0.12</slf4j.version>
+        <testcontainers.version>1.19.7</testcontainers.version>
         <xz.version>1.9</xz.version>
 
         <mavenVersion>3.2.5</mavenVersion>
@@ -200,6 +201,22 @@
                 <version>${junit.jupiter.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${testcontainers.version}</version>
+                <scope>test</scope>
+                <exclusions>
+                    <exclusion>
+                        <groupId>commons-codec</groupId>
+                        <artifactId>commons-codec</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.commons</groupId>
+                        <artifactId>commons-compress</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
 
         </dependencies>
