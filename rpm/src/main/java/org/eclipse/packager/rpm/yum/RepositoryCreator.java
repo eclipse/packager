@@ -50,8 +50,8 @@ import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 import org.eclipse.packager.rpm.info.RpmInformation;
 import org.eclipse.packager.rpm.info.RpmInformation.Changelog;
 import org.eclipse.packager.rpm.info.RpmInformation.Dependency;
-import org.eclipse.packager.security.pgp.BcPgpSignerFactory;
-import org.eclipse.packager.security.pgp.PgpSignerFactory;
+import org.eclipse.packager.security.pgp.BcPgpSignerCreator;
+import org.eclipse.packager.security.pgp.PgpSignerCreator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -440,7 +440,7 @@ public class RepositoryCreator {
             return this;
         }
 
-        public Builder setSigning(PgpSignerFactory signingFactory) {
+        public Builder setSigning(PgpSignerCreator signingFactory) {
             return setSigning(signingFactory.createSigningStream());
         }
 
@@ -456,7 +456,7 @@ public class RepositoryCreator {
 
         @Deprecated
         public Builder setSigning(final PGPPrivateKey privateKey, final int digestAlgorithm) {
-            return setSigning(new BcPgpSignerFactory(privateKey, digestAlgorithm, false));
+            return setSigning(new BcPgpSignerCreator(privateKey, digestAlgorithm, false));
         }
 
         public RepositoryCreator build() {
