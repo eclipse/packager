@@ -12,7 +12,6 @@
  */
 package org.eclipse.packager.deb;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -35,11 +34,6 @@ import com.google.common.io.BaseEncoding;
 
 public final class Packages {
     private Packages() {
-    }
-
-    @Deprecated
-    public static Map<String, String> parseControlFile(final File packageFile) throws IOException, ParserException {
-        return parseControlFile(packageFile.toPath());
     }
 
     public static Map<String, String> parseControlFile(final Path packageFile) throws IOException, ParserException {

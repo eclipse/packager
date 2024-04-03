@@ -13,7 +13,6 @@
 package org.eclipse.packager.deb.build;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -22,11 +21,6 @@ import java.nio.file.Path;
 
 public class TextFileContentProvider implements ContentProvider {
     private final byte[] data;
-
-    @Deprecated
-    public TextFileContentProvider(final File file) throws IOException {
-        this(file.toPath());
-    }
 
     public TextFileContentProvider(final Path file) throws IOException {
         if (file != null) {
@@ -54,7 +48,7 @@ public class TextFileContentProvider implements ContentProvider {
     }
 
     @Override
-    public InputStream createInputStream() throws IOException {
+    public InputStream createInputStream() {
         if (this.data != null) {
             return new ByteArrayInputStream(this.data);
         } else {

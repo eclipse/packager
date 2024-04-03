@@ -12,7 +12,6 @@
  */
 package org.eclipse.packager.deb.build;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -101,11 +100,6 @@ public class DebianPackageWriter implements AutoCloseable, BinaryPackageBuilder 
         this.dataStream.setLongFileMode(TarArchiveOutputStream.LONGFILE_GNU);
     }
 
-    @Deprecated
-    public void addFile(final File file, final String fileName, final EntryInformation entryInformation) throws IOException {
-        addFile(file.toPath(), fileName, entryInformation);
-    }
-
     public void addFile(final Path file, final String fileName, final EntryInformation entryInformation) throws IOException {
         addFile(new FileContentProvider(file), fileName, entryInformation, Optional.of(() -> {
             if (file == null || !Files.isReadable(file)) {
@@ -118,11 +112,6 @@ public class DebianPackageWriter implements AutoCloseable, BinaryPackageBuilder 
                 return null;
             }
         }));
-    }
-
-    @Deprecated
-    public void addFile(final File file, final String fileName, final EntryInformation entryInformation, final Optional<Supplier<Instant>> timestampSupplier) throws IOException {
-        addFile(file.toPath(), fileName, entryInformation, timestampSupplier);
     }
 
     public void addFile(final Path file, final String fileName, final EntryInformation entryInformation, final Optional<Supplier<Instant>> timestampSupplier) throws IOException {

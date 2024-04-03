@@ -13,7 +13,6 @@
 package org.eclipse.packager.rpm.signature;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -47,15 +46,8 @@ import org.eclipse.packager.rpm.parse.RpmInputStream;
  * {@link #perform(Path, InputStream, String, OutputStream, HashAlgorithm)}
  */
 public class RpmFileSignatureProcessor {
-
     private RpmFileSignatureProcessor() {
         // Hide default constructor because of the static context
-    }
-
-    @Deprecated
-    public static void perform(File rpm, InputStream privateKeyIn, String passphrase, OutputStream out, HashAlgorithm hashAlgorithm)
-        throws IOException, PGPException {
-        perform(rpm.toPath(), privateKeyIn, passphrase, out, hashAlgorithm);
     }
 
     /**

@@ -12,20 +12,13 @@
  */
 package org.eclipse.packager.deb.build;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class FileContentProvider implements ContentProvider {
-
     private final Path file;
-
-    @Deprecated
-    public FileContentProvider(final File file) {
-        this(file.toPath());
-    }
 
     public FileContentProvider(final Path file) {
         this.file = file;
