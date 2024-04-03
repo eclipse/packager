@@ -19,24 +19,28 @@ import java.io.OutputStream;
 import java.util.function.Function;
 
 /**
- * Implementation of {@link PgpSignerFactory} that depends on Bouncy Castle directly.
+ * Implementation of {@link PgpSignerCreator} that depends on Bouncy Castle directly.
  * Here, the user needs to pass in the {@link PGPPrivateKey} and digest algorithm they want to use
  * for signing explicitly.
  */
-public class BcPgpSignerFactory extends PgpSignerFactory {
+public class BcPgpSignerCreator extends PgpSignerCreator {
 
     private final PGPPrivateKey privateKey;
-    private int hashAlgorithm;
+    private final int hashAlgorithm;
 
-    public BcPgpSignerFactory(PGPPrivateKey privateKey, int hashAlgorithmId, boolean inlineSigned) {
+    /**
+     * Construct a {@link PgpSignerCreator} that uses Bouncy Castle classes directly and signs
+     * using a {@link SigningStream}.
+     *
+     * @param privateKey private signing key
+     * @param hashAlgorithmId OpenPGP hash algorithm ID of the digest algorithm to use for signing
+     * @param inlineSigned if true, use the cleartext signature framework to sign data inline.
+     *                    Otherwise, sign using detached signatures.
+     */
+    public BcPgpSignerCreator(PGPPrivateKey privateKey, int hashAlgorithmId, boolean inlineSigned) {
         super(inlineSigned);
-        this.setHashAlgorithm(hashAlgorithmId);
+        this.hashAlgorithm = hashAlgorithmId;
         this.privateKey = privateKey;
-    }
-
-    @Override
-    public void setHashAlgorithm(int hashAlgorithm) {
-        this.hashAlgorithm = hashAlgorithm;
     }
 
     @Override

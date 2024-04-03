@@ -17,25 +17,20 @@ import java.io.OutputStream;
 import java.util.function.Function;
 
 /**
- * Factory for signing streams.
+ * Factory for creating signing streams.
  */
-public abstract class PgpSignerFactory {
+public abstract class PgpSignerCreator {
 
     protected final boolean inlineSigned;
 
-    public PgpSignerFactory(boolean inlineSigned) {
+    public PgpSignerCreator(boolean inlineSigned) {
         this.inlineSigned = inlineSigned;
     }
 
     /**
-     * Decide, which hash algorithm to use.
-     *
-     * @param hashAlgorithm algorithm ID of the signature digest algorithm
-     */
-    public abstract void setHashAlgorithm(int hashAlgorithm);
-
-    /**
      * Return a {@link Function} that wraps an {@link OutputStream} into a signing stream.
+     * This method has no arguments (key, algorithms etc.) to be implementation agnostic.
+     * Subclasses shall pass those details as constructor arguments.
      *
      * @return transforming function
      */
