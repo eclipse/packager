@@ -25,8 +25,9 @@ public enum RpmSignatureTag implements RpmBaseTag {
     SHA256HEADER(273),
 
     SIZE(1000),
-    PGP(1002),
+    PGP(1002), // RSA
     MD5(1004),
+    GPG(1005), // EcDSA and DSA, see https://rpm-software-management.github.io/rpm/manual/format_v4.html
     PAYLOAD_SIZE(1007),
     LONGSIZE(5009);
 
