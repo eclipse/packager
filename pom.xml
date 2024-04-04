@@ -77,44 +77,31 @@
         <bouncycastle.version>1.77</bouncycastle.version>
         <commons-compress.version>1.26.1</commons-compress.version>
         <commons-codec.version>1.16.1</commons-codec.version>
-        <guava.version>33.0.0-jre</guava.version>
-        <junit.jupiter.version>5.8.2</junit.jupiter.version>
-        <logback.version>1.5.0</logback.version>
+        <guava.version>33.1.0-jre</guava.version>
+        <junit.jupiter.version>5.10.2</junit.jupiter.version>
+        <logback.version>1.5.3</logback.version>
         <slf4j.version>2.0.12</slf4j.version>
         <testcontainers.version>1.19.7</testcontainers.version>
         <xz.version>1.9</xz.version>
 
-        <mavenVersion>3.2.5</mavenVersion>
-        <maven-bundle-plugin.version>5.1.6</maven-bundle-plugin.version>
-        <maven-clean-plugin.version>3.2.0</maven-clean-plugin.version>
-        <maven-compiler-plugin.version>3.10.1</maven-compiler-plugin.version>
-        <maven-deploy-plugin.version>3.0.0-M2</maven-deploy-plugin.version>
-        <maven-enforcer-plugin.version>3.1.0</maven-enforcer-plugin.version>
-        <maven-install-plugin.version>3.0.0-M1</maven-install-plugin.version>
-        <maven-jar-plugin.version>3.2.2</maven-jar-plugin.version>
-        <maven-javadoc-plugin.version>3.4.0</maven-javadoc-plugin.version>
-        <maven-project-info-reports-plugin.version>3.3.0</maven-project-info-reports-plugin.version>
-        <maven-release-plugin.version>3.0.0-M6</maven-release-plugin.version>
-        <maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>
-        <maven-site-plugin.version>4.0.0-M2</maven-site-plugin.version>
-        <maven-source-plugin.version>3.2.1</maven-source-plugin.version>
-        <maven-surefire-plugin.version>3.0.0-M7</maven-surefire-plugin.version>
-        <spotless-maven-plugin.version>2.4.1</spotless-maven-plugin.version>
+        <mavenVersion>3.6.3</mavenVersion>
+        <maven-bundle-plugin.version>5.1.9</maven-bundle-plugin.version>
+        <maven-clean-plugin.version>3.3.2</maven-clean-plugin.version>
+        <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+        <maven-deploy-plugin.version>3.1.1</maven-deploy-plugin.version>
+        <maven-enforcer-plugin.version>3.4.1</maven-enforcer-plugin.version>
+        <maven-install-plugin.version>3.1.1</maven-install-plugin.version>
+        <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
+        <maven-javadoc-plugin.version>3.6.3</maven-javadoc-plugin.version>
+        <maven-project-info-reports-plugin.version>3.5.0</maven-project-info-reports-plugin.version>
+        <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
+        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+        <maven-site-plugin.version>4.0.0-M13</maven-site-plugin.version>
+        <maven-source-plugin.version>3.3.1</maven-source-plugin.version>
+        <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+        <spotless-maven-plugin.version>2.43.0</spotless-maven-plugin.version>
 
-        <!--
-        downgrade to 1.6 to fix gpg signing issue with pinentry:
-
-        gpg signing might require a pin-entry. The gpg plugin expects a pin provided through maven settings. If none is
-        present, but required, a dialog will pop up. Starting with version 3.0.1, this will be prevented (with an error)
-        in case the maven is running in non-interactive mode.
-
-        All good, however if you have a USB stick to sign, you might expect/want/require a manual pin entry, and not
-        write down your pin in a config file. Unfortunately, the maven release plugin runs the gpg sign plugin always
-        in non-interactive mode.
-
-        Downgrading to 1.6 fixes this issue, as the pin-entry is not forced to "error".
-        -->
-        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+        <maven-gpg-plugin.version>3.2.2</maven-gpg-plugin.version>
     </properties>
 
     <dependencyManagement>
