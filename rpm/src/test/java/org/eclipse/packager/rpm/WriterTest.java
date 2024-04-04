@@ -14,6 +14,9 @@
 package org.eclipse.packager.rpm;
 
 import static java.util.EnumSet.of;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.testcontainers.images.builder.Transferable.DEFAULT_FILE_MODE;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -42,22 +45,24 @@ import org.eclipse.packager.rpm.header.Header;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 import org.eclipse.packager.rpm.signature.RsaHeaderSignatureProcessor;
 import org.eclipse.packager.security.pgp.PgpHelper;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
+import org.testcontainers.containers.Container.ExecResult;
+import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.images.builder.Transferable;
+import org.testcontainers.utility.DockerImageName;
 
 public class WriterTest {
-    private static final Path OUT_BASE = Path.of("target", "data", "out");
-
     private static final Path IN_BASE = Path.of("src", "test", "resources", "data", "in");
 
-    @BeforeAll
-    public static void setup() throws IOException {
-        Files.createDirectories(OUT_BASE);
-    }
+    private static final String COMMAND = "sleep infinity";
+
+    @TempDir
+    Path outBase;
 
     @Test
     public void test1() throws IOException {
-        final Path rpm1 = OUT_BASE.resolve("test1-1.0.0.rpm");
+        final Path rpm1 = outBase.resolve("test1-1.0.0.rpm");
 
         final Header<RpmTag> header = new Header<>();
 
@@ -88,7 +93,7 @@ public class WriterTest {
         requirements.add(new Dependency("rpmlib(CompressedFileNames)", "3.0.4-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB));
         Dependencies.putRequirements(header, requirements);
 
-        try (PayloadRecorder.Finished finished = new PayloadRecorder().finish()) {
+        try (PayloadRecorder payloadRecorder = new PayloadRecorder(); PayloadRecorder.Finished finished = payloadRecorder.finish()) {
             try (RpmWriter writer = new RpmWriter(rpm1, new LeadBuilder("test1", new RpmVersion("1.0.0")), header)) {
                 writer.setPayload(finished);
             }
@@ -101,7 +106,7 @@ public class WriterTest {
 
     @Test
     public void test2() throws IOException {
-        final Path outFile = OUT_BASE.resolve("test2-1.0.0.1.rpm");
+        final Path outFile = outBase.resolve("test2-1.0.0.1.rpm");
 
         try (PayloadRecorder payload = new PayloadRecorder()) {
             final Header<RpmTag> header = new Header<>();
@@ -134,13 +139,12 @@ public class WriterTest {
             requirements.add(new Dependency("rpmlib(CompressedFileNames)", "3.0.4-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB));
             Dependencies.putRequirements(header, requirements);
 
-            int installedSize = 0;
-            installedSize += payload.addFile("/etc/test3/file1", IN_BASE.resolve("file1")).getSize();
+            int installedSize = (int) payload.addFile("/etc/test3/file1", IN_BASE.resolve("file1")).getSize();
 
             header.putInt(RpmTag.SIZE, installedSize);
 
             try (final PayloadRecorder.Finished finished = payload.finish();
-                    final RpmWriter writer = new RpmWriter(outFile, new LeadBuilder("test3", new RpmVersion("1.0.0", "1")), header);) {
+                    final RpmWriter writer = new RpmWriter(outFile, new LeadBuilder("test3", new RpmVersion("1.0.0", "1")), header)) {
                 writer.setPayload(finished);
             }
         }
@@ -154,7 +158,7 @@ public class WriterTest {
     public void test3() throws IOException, PGPException {
         Path outFile;
 
-        try (RpmBuilder builder = new RpmBuilder("test3", "1.0.0", "1", "noarch", OUT_BASE)) {
+        try (RpmBuilder builder = new RpmBuilder("test3", "1.0.0", "1", "noarch", outBase)) {
             final PackageInformation pinfo = builder.getInformation();
 
             pinfo.setLicense("EPL");
@@ -170,13 +174,9 @@ public class WriterTest {
             ctx.addDirectory("//etc/test3/b");
             ctx.addDirectory("/etc/");
 
-            ctx.addDirectory("/var/lib/test3", finfo -> {
-                finfo.setUser("");
-            });
+            ctx.addDirectory("/var/lib/test3", finfo -> finfo.setUser(""));
 
-            ctx.addFile("/etc/test3/file1", IN_BASE.resolve("file1"), BuilderContext.pathProvider().customize(finfo -> {
-                finfo.setFileFlags(of(FileFlags.CONFIGURATION));
-            }));
+            ctx.addFile("/etc/test3/file1", IN_BASE.resolve("file1"), BuilderContext.pathProvider().customize(finfo -> finfo.setFileFlags(of(FileFlags.CONFIGURATION))));
 
             ctx.addFile("/etc/test3/file2", new ByteArrayInputStream("foo".getBytes(StandardCharsets.UTF_8)), finfo -> {
                 finfo.setTimestamp(LocalDateTime.of(2014, 1, 1, 0, 0).toInstant(ZoneOffset.UTC));
@@ -213,7 +213,7 @@ public class WriterTest {
     public void test4() throws IOException, InterruptedException {
         final Path outFile;
 
-        try (RpmBuilder builder = new RpmBuilder("test4", "1.0.0", "1", "noarch", OUT_BASE)) {
+        try (RpmBuilder builder = new RpmBuilder("test4", "1.0.0", "1", "noarch", outBase)) {
             final PackageInformation pinfo = builder.getInformation();
 
             pinfo.setLicense("EPL");
@@ -247,9 +247,22 @@ public class WriterTest {
             Dumper.dumpAll(in);
         }
 
-        final ProcessBuilder pb = new ProcessBuilder("rpm", "-q", "--qf", "%{conflicts}\n%{requires}\n%{obsoletes}\n%{provides}\\n%{suggests}\\n%{recommends}\\n%{supplements}\\n%{enhances}", "-p", outFile.toAbsolutePath().toString());
-        pb.inheritIO();
-        pb.start().waitFor();
+        try (final GenericContainer<?> container = new GenericContainer<>(DockerImageName.parse("registry.access.redhat.com/ubi9/ubi-minimal:latest"))) {
+            container.setCommand(COMMAND);
+            container.withCopyToContainer(Transferable.of(Files.readAllBytes(outFile), DEFAULT_FILE_MODE), "/" + outFile.getFileName());
+            container.start();
+            final ExecResult rpmResult = container.execInContainer("rpm", "-q", "--qf", "%{conflicts}\n%{requires}\n%{obsoletes}\n%{provides}\\n%{suggests}\\n%{recommends}\\n%{supplements}\\n%{enhances}", "-p", "/" + outFile.getFileName());
+            assertEquals(0, rpmResult.getExitCode());
+            final String stdout = rpmResult.getStdout();
+            assertTrue(stdout.contains("name-conflicts"));
+            assertTrue(stdout.contains("name-requires"));
+            assertTrue(stdout.contains("name-obsoletes"));
+            assertTrue(stdout.contains("name-provides"));
+            assertTrue(stdout.contains("name-suggests"));
+            assertTrue(stdout.contains("name-recommends"));
+            assertTrue(stdout.contains("name-supplements"));
+            assertTrue(stdout.contains("name-enhances"));
+        }
     }
 
 }
