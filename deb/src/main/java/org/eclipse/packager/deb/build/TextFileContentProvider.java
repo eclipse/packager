@@ -13,20 +13,18 @@
 package org.eclipse.packager.deb.build;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-
-import com.google.common.io.Files;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 public class TextFileContentProvider implements ContentProvider {
     private final byte[] data;
 
-    public TextFileContentProvider(final File file) throws FileNotFoundException, IOException {
+    public TextFileContentProvider(final Path file) throws IOException {
         if (file != null) {
-            String data = Files.asCharSource(file, StandardCharsets.UTF_8).read();
+            String data = Files.readString(file);
             if (needFix()) {
                 data = fix(data);
             }
@@ -50,7 +48,7 @@ public class TextFileContentProvider implements ContentProvider {
     }
 
     @Override
-    public InputStream createInputStream() throws IOException {
+    public InputStream createInputStream() {
         if (this.data != null) {
             return new ByteArrayInputStream(this.data);
         } else {
@@ -62,5 +60,4 @@ public class TextFileContentProvider implements ContentProvider {
     public boolean hasContent() {
         return this.data != null;
     }
-
 }

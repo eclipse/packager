@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
@@ -150,7 +149,7 @@ public class Dumper {
 
     public static void main(final String[] args) throws IOException {
         for (final String file : args) {
-            dump(Paths.get(file));
+            dump(Path.of(file));
         }
     }
 

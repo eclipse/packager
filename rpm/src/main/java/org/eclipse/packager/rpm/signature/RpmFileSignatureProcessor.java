@@ -13,13 +13,13 @@
 package org.eclipse.packager.rpm.signature;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,10 +43,9 @@ import org.eclipse.packager.rpm.parse.RpmInputStream;
 
 /**
  * Sign existing RPM file by calling
- * {@link #perform(File, InputStream, String, OutputStream, HashAlgorithm)}
+ * {@link #perform(Path, InputStream, String, OutputStream, HashAlgorithm)}
  */
 public class RpmFileSignatureProcessor {
-
     private RpmFileSignatureProcessor() {
         // Hide default constructor because of the static context
     }
@@ -64,7 +63,7 @@ public class RpmFileSignatureProcessor {
      * @throws IOException
      * @throws PGPException
      */
-    public static void perform(File rpm, InputStream privateKeyIn, String passphrase, OutputStream out, HashAlgorithm hashAlgorithm)
+    public static void perform(Path rpm, InputStream privateKeyIn, String passphrase, OutputStream out, HashAlgorithm hashAlgorithm)
         throws IOException, PGPException {
 
         final long leadLength = 96;
@@ -77,15 +76,15 @@ public class RpmFileSignatureProcessor {
         long payloadSize = 0L;
         byte[] signatureHeader;
 
-        if (!rpm.exists()) {
-            throw new IOException("The file " + rpm.getName() + " does not exist");
+        if (!Files.exists(rpm)) {
+            throw new IOException("The file " + rpm.getFileName() + " does not exist");
         }
 
         // Extract private key
         PGPPrivateKey privateKey = getPrivateKey(privateKeyIn, passphrase);
 
         // Get the information of the RPM
-        try (RpmInputStream rpmIn = new RpmInputStream(new FileInputStream(rpm))) {
+        try (RpmInputStream rpmIn = new RpmInputStream(Files.newInputStream(rpm))) {
             signatureHeaderStart = rpmIn.getSignatureHeader().getStart();
             signatureHeaderLength = rpmIn.getSignatureHeader().getLength();
             payloadHeaderStart = rpmIn.getPayloadHeader().getStart();
@@ -97,12 +96,11 @@ public class RpmFileSignatureProcessor {
 
         if (signatureHeaderStart == 0L || signatureHeaderLength == 0L || payloadHeaderStart == 0L
             || payloadHeaderLength == 0L || payloadStart == 0L || archiveSize == 0L) {
-            throw new IOException("Unable to read " + rpm.getName() + " informations.");
+            throw new IOException("Unable to read " + rpm.getFileName() + " informations.");
         }
 
         // Build the signature header by digest payload header + payload
-        try (FileInputStream in = new FileInputStream(rpm)) {
-            FileChannel channelIn = in.getChannel();
+        try (FileChannel channelIn = FileChannel.open(rpm)) {
             payloadSize = channelIn.size() - payloadStart;
             channelIn.position(leadLength + signatureHeaderLength);
             ByteBuffer payloadHeaderBuff = ByteBuffer.allocate((int) payloadHeaderLength);
@@ -113,7 +111,7 @@ public class RpmFileSignatureProcessor {
         }
 
         // Write to the OutputStream
-        try (FileInputStream in = new FileInputStream(rpm)) {
+        try (InputStream in = Files.newInputStream(rpm)) {
             IOUtils.copyLarge(in, out, 0, leadLength);
             IOUtils.skip(in, signatureHeaderLength);
             out.write(signatureHeader);

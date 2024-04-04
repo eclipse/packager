@@ -19,7 +19,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.List;
 
@@ -32,7 +31,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class Issue130Test {
-    private static final Path OUT_BASE = Paths.get("target", "data", "out");
+    private static final Path OUT_BASE = Path.of("target", "data", "out");
 
     private static final List<String> PREFIXES = Arrays.asList("/opt", "/var/log");
 

@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.build.RpmBuilder;
@@ -33,7 +32,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 public class Issue136Test {
-    private static final Path OUT_BASE = Paths.get("target", "data", "out");
+    private static final Path OUT_BASE = Path.of("target", "data", "out");
 
     @BeforeAll
     public static void setup() throws IOException {

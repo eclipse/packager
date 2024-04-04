@@ -18,7 +18,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 
 import org.eclipse.packager.rpm.build.BuilderOptions;
 import org.eclipse.packager.rpm.build.RpmBuilder;
@@ -27,7 +26,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 public class Issue24Test {
-    private static final Path OUT_BASE = Paths.get("target", "data", "out");
+    private static final Path OUT_BASE = Path.of("target", "data", "out");
 
     @BeforeAll
     public static void setup() throws IOException {

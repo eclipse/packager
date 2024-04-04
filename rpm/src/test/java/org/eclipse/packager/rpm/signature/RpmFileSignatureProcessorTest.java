@@ -13,16 +13,17 @@
  ********************************************************************************/
 package org.eclipse.packager.rpm.signature;
 
+import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -62,30 +63,29 @@ public class RpmFileSignatureProcessorTest {
     public void testSigningExistingRpm() throws IOException, PGPException {
         // Read files
         final String passPhrase = "testkey"; // Do not change
-        File rpm = new File(SOURCE_FILE_PATH);
-        File private_key = new File(PRIVATE_KEY_PATH);
-        if (!rpm.exists() || !private_key.exists()) {
+        Path rpm = Path.of(SOURCE_FILE_PATH);
+        Path private_key = Path.of(PRIVATE_KEY_PATH);
+        if (!Files.exists(rpm) || !Files.exists(private_key)) {
             fail("Input files rpm or private_key does not exist");
         }
         // Init the signed RPM
-        File resultDirectory = new File(RESULT_DIR);
-        resultDirectory.mkdirs();
-        File signedRpm = new File(RESULT_FILE_PATH);
-        signedRpm.createNewFile();
+        Path resultDirectory = Path.of(RESULT_DIR);
+        Files.createDirectories(resultDirectory);
+        Path signedRpm = Path.of(RESULT_FILE_PATH);
 
-        try (FileOutputStream resultOut = new FileOutputStream(signedRpm);
-            InputStream privateKeyStream = new FileInputStream(private_key)) {
+        try (OutputStream resultOut = Files.newOutputStream(signedRpm, CREATE_NEW);
+            InputStream privateKeyStream = Files.newInputStream(private_key)) {
             // Sign the RPM
             RpmFileSignatureProcessor.perform(rpm, privateKeyStream, passPhrase, resultOut, HashAlgorithm.SHA256);
 
             // Read the initial (unsigned) rpm file
-            RpmInputStream initialRpm = new RpmInputStream(new FileInputStream(rpm));
+            RpmInputStream initialRpm = new RpmInputStream(Files.newInputStream(rpm));
             initialRpm.available();
             initialRpm.close();
             InputHeader<RpmSignatureTag> initialHeader = initialRpm.getSignatureHeader();
 
             // Read the signed rpm file
-            RpmInputStream rpmSigned = new RpmInputStream(new FileInputStream(signedRpm));
+            RpmInputStream rpmSigned = new RpmInputStream(Files.newInputStream(signedRpm));
             rpmSigned.available();
             rpmSigned.close();
             InputHeader<RpmSignatureTag> signedHeader = rpmSigned.getSignatureHeader();
@@ -118,17 +118,17 @@ public class RpmFileSignatureProcessorTest {
     @Order(2)
     public void verifyRpmSignature() throws Exception {
         // get the files, as absolute paths, as podman will need absolute paths
-        File publicKey = new File(PUBLIC_KEY_PATH).getAbsoluteFile();
-        File signedRpm = new File(RESULT_FILE_PATH).getAbsoluteFile();
+        Path publicKey = Path.of(PUBLIC_KEY_PATH).toAbsolutePath();
+        Path signedRpm = Path.of(RESULT_FILE_PATH).toAbsolutePath();
 
         // check if the output from the previous test is found
-        if (!publicKey.exists() || !signedRpm.exists()) {
+        if (!Files.exists(publicKey) || !Files.exists(signedRpm)) {
             fail("Input files signedRpm or publicKey does not exist");
         }
 
         // extract the plain file name
-        String publicKeyName = publicKey.getName();
-        String rpmFileName = signedRpm.getName();
+        String publicKeyName = publicKey.getFileName().toString();
+        String rpmFileName = signedRpm.getFileName().toString();
 
         // prepare the script for validating the signature, this includes importing the key and running a verbose check
         String script = String.format("rpm --import /%s && rpm --verbose --checksig /%s", publicKeyName, rpmFileName);
