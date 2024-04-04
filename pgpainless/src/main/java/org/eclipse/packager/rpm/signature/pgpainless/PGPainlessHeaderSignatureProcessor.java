@@ -26,6 +26,13 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+/**
+ * A {@link org.eclipse.packager.rpm.signature.SignatureProcessor} for signing headers, which uses PGPainless as
+ * backend for the signing operation.
+ * This processor can be used with RSA or EdDSA signing (sub-)keys and will produce RPMv4 header signatures
+ * which are emitted with either the {@link RpmSignatureTag#RSAHEADER} or {@link RpmSignatureTag#DSAHEADER}
+ * header tag.
+ */
 public class PGPainlessHeaderSignatureProcessor extends PGPainlessSignatureProcessor {
 
     private final Logger logger = LoggerFactory.getLogger(PGPainlessHeaderSignatureProcessor.class);
