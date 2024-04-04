@@ -27,24 +27,20 @@ import org.eclipse.packager.rpm.build.RpmBuilder;
 import org.eclipse.packager.rpm.build.RpmBuilder.PackageInformation;
 import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-public class Issue130Test {
-    private static final Path OUT_BASE = Path.of("target", "data", "out");
-
+class Issue130Test {
     private static final List<String> PREFIXES = Arrays.asList("/opt", "/var/log");
 
-    @BeforeAll
-    public static void setup() throws IOException {
-        Files.createDirectories(OUT_BASE);
-    }
+    @TempDir
+    private Path outBase;
 
     @Test
-    public void test() throws IOException {
-        Path outFile;
+    void test() throws IOException {
+        final Path outFile;
 
-        try (RpmBuilder builder = new RpmBuilder("prefixes-test", "1.0.0", "1", "noarch", OUT_BASE)) {
+        try (final RpmBuilder builder = new RpmBuilder("prefixes-test", "1.0.0", "1", "noarch", outBase)) {
             final PackageInformation pinfo = builder.getInformation();
 
             pinfo.setPrefixes(PREFIXES);
