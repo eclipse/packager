@@ -43,9 +43,4 @@ public class PGPainlessSignatureProcessorFactory extends PgpSignatureProcessorFa
             return new PGPainlessHeaderSignatureProcessor(key, keyProtector);
         }
     }
-
-    @Override
-    public SignatureProcessor createSignatureProcessor() {
-        return new PGPainlessSignatureProcessor(key, keyProtector, hashAlgorithm);
-    }
 }

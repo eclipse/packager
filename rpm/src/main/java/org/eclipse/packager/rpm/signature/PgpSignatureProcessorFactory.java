@@ -26,11 +26,4 @@ public abstract class PgpSignatureProcessorFactory {
      * @return header signature processor
      */
     public abstract SignatureProcessor createHeaderSignatureProcessor();
-
-    /**
-     * Create a {@link SignatureProcessor} for signing both header and data.
-     *
-     * @return signature processor
-     */
-    public abstract SignatureProcessor createSignatureProcessor();
 }

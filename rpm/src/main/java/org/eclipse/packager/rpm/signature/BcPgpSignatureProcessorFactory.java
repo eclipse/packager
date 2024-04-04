@@ -43,9 +43,4 @@ public class BcPgpSignatureProcessorFactory extends PgpSignatureProcessorFactory
     public SignatureProcessor createHeaderSignatureProcessor() {
         return new RsaHeaderSignatureProcessor(privateKey, hashAlgorithm);
     }
-
-    @Override
-    public SignatureProcessor createSignatureProcessor() {
-        return new RsaSignatureProcessor(privateKey, hashAlgorithm);
-    }
 }

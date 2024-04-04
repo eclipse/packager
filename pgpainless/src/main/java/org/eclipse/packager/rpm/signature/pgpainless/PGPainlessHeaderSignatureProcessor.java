@@ -14,16 +14,25 @@
 package org.eclipse.packager.rpm.signature.pgpainless;
 
 import org.bouncycastle.bcpg.PublicKeyAlgorithmTags;
+import org.bouncycastle.openpgp.PGPException;
 import org.bouncycastle.openpgp.PGPSecretKeyRing;
 import org.bouncycastle.openpgp.PGPSignature;
 import org.eclipse.packager.rpm.RpmSignatureTag;
 import org.eclipse.packager.rpm.header.Header;
+import org.eclipse.packager.rpm.signature.SignatureProcessor;
+import org.pgpainless.PGPainless;
+import org.pgpainless.algorithm.CompressionAlgorithm;
+import org.pgpainless.algorithm.HashAlgorithm;
 import org.pgpainless.encryption_signing.EncryptionResult;
+import org.pgpainless.encryption_signing.EncryptionStream;
+import org.pgpainless.encryption_signing.ProducerOptions;
+import org.pgpainless.encryption_signing.SigningOptions;
 import org.pgpainless.key.protection.SecretKeyRingProtector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
 
 /**
@@ -33,26 +42,67 @@ import java.nio.ByteBuffer;
  * which are emitted with either the {@link RpmSignatureTag#RSAHEADER} or {@link RpmSignatureTag#DSAHEADER}
  * header tag.
  */
-public class PGPainlessHeaderSignatureProcessor extends PGPainlessSignatureProcessor {
+public class PGPainlessHeaderSignatureProcessor implements SignatureProcessor {
 
     private final Logger logger = LoggerFactory.getLogger(PGPainlessHeaderSignatureProcessor.class);
+
+    private final EncryptionStream signingStream;
 
     public PGPainlessHeaderSignatureProcessor(PGPSecretKeyRing key, SecretKeyRingProtector keyProtector) {
         this(key, keyProtector, 0);
     }
 
     public PGPainlessHeaderSignatureProcessor(PGPSecretKeyRing key, SecretKeyRingProtector keyProtector, int hashAlgorithm) {
-        super(key, keyProtector, hashAlgorithm);
+        OutputStream sink = new OutputStream() {
+            @Override
+            public void write(int i) {
+                // Discard plaintext
+            }
+        };
+        SigningOptions signingOptions = SigningOptions.get();
+        if (hashAlgorithm != 0) {
+            signingOptions.overrideHashAlgorithm(HashAlgorithm.requireFromId(hashAlgorithm));
+        }
+        try {
+            signingStream = PGPainless.encryptAndOrSign()
+                .onOutputStream(sink)
+                .withOptions(
+                    ProducerOptions.sign(
+                            signingOptions.addDetachedSignature(keyProtector, key)
+                        ).setAsciiArmor(false)
+                        .overrideCompressionAlgorithm(CompressionAlgorithm.UNCOMPRESSED)
+                );
+        } catch (PGPException | IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    @Override
     public Logger getLogger() {
         return logger;
     }
 
     @Override
+    public void feedHeader(ByteBuffer header) {
+        feedData(header);
+    }
+
+    @Override
     public void feedPayloadData(ByteBuffer data) {
         // We only work on header data
+    }
+
+    private void feedData(ByteBuffer data) {
+        try {
+            if (data.hasArray()) {
+                signingStream.write(data.array(), data.position(), data.remaining());
+            } else {
+                final byte[] buffer = new byte[data.remaining()];
+                data.get(buffer);
+                signingStream.write(buffer);
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
