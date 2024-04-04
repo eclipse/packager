@@ -65,6 +65,7 @@
         <module>core</module>
         <module>deb</module>
         <module>rpm</module>
+        <module>pgpainless</module>
     </modules>
 
     <properties>
@@ -80,6 +81,7 @@
         <guava.version>33.0.0-jre</guava.version>
         <junit.jupiter.version>5.8.2</junit.jupiter.version>
         <logback.version>1.5.0</logback.version>
+        <pgpainless.version>1.6.7</pgpainless.version>
         <slf4j.version>2.0.12</slf4j.version>
         <testcontainers.version>1.19.7</testcontainers.version>
         <xz.version>1.9</xz.version>
@@ -131,6 +133,11 @@
                 <version>${bouncycastle.version}</version>
             </dependency>
 
+            <dependency>
+                <groupId>org.pgpainless</groupId>
+                <artifactId>pgpainless-core</artifactId>
+                <version>${pgpainless.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>

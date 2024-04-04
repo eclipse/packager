@@ -133,4 +133,34 @@ public final class PgpHelper {
 
         return null;
     }
+
+    public static PGPSecretKeyRing loadSecretKeyRing(final InputStream input, final String keyId) throws IOException, PGPException {
+        final long keyIdNum = Long.parseUnsignedLong(keyId, 16);
+
+        final BcPGPSecretKeyRingCollection keyrings = new BcPGPSecretKeyRingCollection(PGPUtil.getDecoderStream(input));
+
+        final Iterator<?> keyRingIter = keyrings.getKeyRings();
+        while (keyRingIter.hasNext()) {
+            final PGPSecretKeyRing secretKeyRing = (PGPSecretKeyRing) keyRingIter.next();
+
+            final Iterator<?> secretKeyIterator = secretKeyRing.getSecretKeys();
+            while (secretKeyIterator.hasNext()) {
+                final PGPSecretKey key = (PGPSecretKey) secretKeyIterator.next();
+
+                if (!key.isSigningKey()) {
+                    continue;
+                }
+
+                final long shortId = key.getKeyID() & 0xFFFFFFFFL;
+
+                if (key.getKeyID() != keyIdNum && shortId != keyIdNum) {
+                    continue;
+                }
+
+                return secretKeyRing;
+            }
+        }
+
+        return null;
+    }
 }
