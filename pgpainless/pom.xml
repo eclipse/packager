@@ -7,7 +7,7 @@
         <version>0.20.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>packager-pgpainless_signer</artifactId>
+    <artifactId>packager-pgpainless</artifactId>
     <name>Eclipse Packager :: PGPainless Signer</name>
 
     <dependencies>

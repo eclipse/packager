@@ -65,7 +65,7 @@
         <module>core</module>
         <module>deb</module>
         <module>rpm</module>
-        <module>pgpainless_signer</module>
+        <module>pgpainless</module>
     </modules>
 
     <properties>
