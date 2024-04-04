@@ -47,14 +47,16 @@ public class PGPainlessSignatureProcessor implements SignatureProcessor {
                 // Discard plaintext
             }
         };
+        SigningOptions signingOptions = SigningOptions.get();
+        if (hashAlgorithm != 0) {
+            signingOptions.overrideHashAlgorithm(HashAlgorithm.requireFromId(hashAlgorithm));
+        }
         try {
             signingStream = PGPainless.encryptAndOrSign()
                 .onOutputStream(sink)
                 .withOptions(
                     ProducerOptions.sign(
-                        SigningOptions.get()
-                            .overrideHashAlgorithm(HashAlgorithm.requireFromId(hashAlgorithm))
-                            .addDetachedSignature(keyProtector, key)
+                        signingOptions.addDetachedSignature(keyProtector, key)
                     ).setAsciiArmor(false)
                         .overrideCompressionAlgorithm(CompressionAlgorithm.UNCOMPRESSED)
                 );

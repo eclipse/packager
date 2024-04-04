@@ -53,7 +53,9 @@ public class PGPainlessSignerCreator extends PgpSignerCreator {
      */
     public PGPainlessSignerCreator(PGPSecretKeyRing key, SecretKeyRingProtector keyProtector, int hashAlgorithm, boolean inlineSigned) {
         super(inlineSigned);
-        signing.overrideHashAlgorithm(HashAlgorithm.requireFromId(hashAlgorithm));
+        if (hashAlgorithm != 0) {
+            signing.overrideHashAlgorithm(HashAlgorithm.requireFromId(hashAlgorithm));
+        }
         try {
             if (inlineSigned) {
                 signing.addInlineSignature(keyProtector, key, DocumentSignatureType.BINARY_DOCUMENT);

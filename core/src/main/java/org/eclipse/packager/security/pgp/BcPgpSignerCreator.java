@@ -13,6 +13,7 @@
 
 package org.eclipse.packager.security.pgp;
 
+import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 
 import java.io.OutputStream;
@@ -39,7 +40,11 @@ public class BcPgpSignerCreator extends PgpSignerCreator {
      */
     public BcPgpSignerCreator(PGPPrivateKey privateKey, int hashAlgorithmId, boolean inlineSigned) {
         super(inlineSigned);
-        this.hashAlgorithm = hashAlgorithmId;
+        if (hashAlgorithmId != 0) {
+            this.hashAlgorithm = hashAlgorithmId;
+        } else {
+            this.hashAlgorithm = HashAlgorithmTags.SHA256;
+        }
         this.privateKey = privateKey;
     }
 

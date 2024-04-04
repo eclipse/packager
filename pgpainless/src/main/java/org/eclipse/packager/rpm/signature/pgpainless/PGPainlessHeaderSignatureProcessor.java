@@ -37,6 +37,10 @@ public class PGPainlessHeaderSignatureProcessor extends PGPainlessSignatureProce
 
     private final Logger logger = LoggerFactory.getLogger(PGPainlessHeaderSignatureProcessor.class);
 
+    public PGPainlessHeaderSignatureProcessor(PGPSecretKeyRing key, SecretKeyRingProtector keyProtector) {
+        this(key, keyProtector, 0);
+    }
+
     public PGPainlessHeaderSignatureProcessor(PGPSecretKeyRing key, SecretKeyRingProtector keyProtector, int hashAlgorithm) {
         super(key, keyProtector, hashAlgorithm);
     }

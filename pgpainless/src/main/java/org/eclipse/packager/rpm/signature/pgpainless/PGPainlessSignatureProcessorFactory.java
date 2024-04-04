@@ -25,6 +25,10 @@ public class PGPainlessSignatureProcessorFactory extends PgpSignatureProcessorFa
     private final SecretKeyRingProtector keyProtector;
     private final int hashAlgorithm;
 
+    public PGPainlessSignatureProcessorFactory(PGPSecretKeyRing key, char[] passphrase) {
+        this(key, passphrase, 0); // Leave hash algorithm up to the signing backend to choose.
+    }
+
     public PGPainlessSignatureProcessorFactory(PGPSecretKeyRing key, char[] passphrase, int hashAlgorithm) {
         this.key = key;
         this.keyProtector = SecretKeyRingProtector.unlockAnyKeyWith(new Passphrase(passphrase));
@@ -33,7 +37,11 @@ public class PGPainlessSignatureProcessorFactory extends PgpSignatureProcessorFa
 
     @Override
     public SignatureProcessor createHeaderSignatureProcessor() {
-        return new PGPainlessHeaderSignatureProcessor(key, keyProtector, hashAlgorithm);
+        if (hashAlgorithm != 0) {
+            return new PGPainlessHeaderSignatureProcessor(key, keyProtector, hashAlgorithm);
+        } else {
+            return new PGPainlessHeaderSignatureProcessor(key, keyProtector);
+        }
     }
 
     @Override

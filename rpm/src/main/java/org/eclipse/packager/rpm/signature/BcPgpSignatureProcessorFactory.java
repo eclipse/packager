@@ -13,6 +13,7 @@
 
 package org.eclipse.packager.rpm.signature;
 
+import org.bouncycastle.bcpg.HashAlgorithmTags;
 import org.bouncycastle.openpgp.PGPPrivateKey;
 
 /**
@@ -22,6 +23,10 @@ public class BcPgpSignatureProcessorFactory extends PgpSignatureProcessorFactory
 
     private final PGPPrivateKey privateKey;
     private final int hashAlgorithm;
+
+    public BcPgpSignatureProcessorFactory(PGPPrivateKey privateKey) {
+        this(privateKey, HashAlgorithmTags.SHA256);
+    }
 
     /**
      * Create a new factory.
