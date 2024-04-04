@@ -16,33 +16,28 @@ package org.eclipse.packager.rpm;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 
 import org.eclipse.packager.rpm.build.BuilderOptions;
 import org.eclipse.packager.rpm.build.RpmBuilder;
 import org.eclipse.packager.rpm.build.RpmFileNameProvider;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-public class Issue24Test {
-    private static final Path OUT_BASE = Path.of("target", "data", "out");
-
-    @BeforeAll
-    public static void setup() throws IOException {
-        Files.createDirectories(OUT_BASE);
-    }
+class Issue24Test {
+    @TempDir
+    private Path outBase;
 
     @Test
-    public void test() throws IOException {
+    void test() throws IOException {
         final String name = "issue-24-test";
         final String version = "1.0.0";
         final String release = "1";
         final String architecture = "noarch";
-        BuilderOptions options = new BuilderOptions();
+        final BuilderOptions options = new BuilderOptions();
         options.setFileNameProvider(RpmFileNameProvider.DEFAULT_FILENAME_PROVIDER);
 
-        try (final RpmBuilder builder = new RpmBuilder(name, new RpmVersion(version, release), architecture, OUT_BASE, options)) {
+        try (final RpmBuilder builder = new RpmBuilder(name, new RpmVersion(version, release), architecture, outBase, options)) {
             final Path outFile = builder.getTargetFile();
 
             builder.build();
@@ -53,16 +48,16 @@ public class Issue24Test {
             assertEquals(expectedRpmFileName, outFile.getFileName().toString());
         }
 
-        options = new BuilderOptions();
-        options.setFileNameProvider(RpmFileNameProvider.LEGACY_FILENAME_PROVIDER);
+        final BuilderOptions options2 = new BuilderOptions();
+        options2.setFileNameProvider(RpmFileNameProvider.LEGACY_FILENAME_PROVIDER);
 
-        try (final RpmBuilder builder = new RpmBuilder(name, new RpmVersion(version, release), architecture, OUT_BASE, options)) {
+        try (final RpmBuilder builder = new RpmBuilder(name, new RpmVersion(version, release), architecture, outBase, options2)) {
             final Path outFile = builder.getTargetFile();
 
             builder.build();
 
             final String expectedRpmFileName = name + "-" + version + "-" + release + "-" + architecture + ".rpm";
-            final String rpmFileName = options.getFileNameProvider().getRpmFileName(builder.getName(), builder.getVersion(), builder.getArchitecture());
+            final String rpmFileName = options2.getFileNameProvider().getRpmFileName(builder.getName(), builder.getVersion(), builder.getArchitecture());
             assertEquals(expectedRpmFileName, rpmFileName);
             assertEquals(expectedRpmFileName, outFile.getFileName().toString());
         }

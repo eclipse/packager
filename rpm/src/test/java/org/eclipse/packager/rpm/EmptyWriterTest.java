@@ -23,22 +23,18 @@ import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.build.RpmBuilder;
 import org.eclipse.packager.rpm.build.RpmBuilder.PackageInformation;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
-public class EmptyWriterTest {
-    private static final Path OUT_BASE = Path.of("target", "data", "out.empty");
-
-    @BeforeAll
-    public static void setup() throws IOException {
-        Files.createDirectories(OUT_BASE);
-    }
+class EmptyWriterTest {
+    @TempDir
+    private Path outBase;
 
     @Test
-    public void test3() throws IOException, PGPException {
+    void test3() throws IOException, PGPException {
         Path outFile;
 
-        try (RpmBuilder builder = new RpmBuilder("testEmpty", "1.0.0", "1", "noarch", OUT_BASE)) {
+        try (RpmBuilder builder = new RpmBuilder("testEmpty", "1.0.0", "1", "noarch", outBase)) {
             final PackageInformation pinfo = builder.getInformation();
 
             pinfo.setLicense("EPL");

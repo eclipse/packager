@@ -29,8 +29,8 @@ import org.eclipse.packager.rpm.build.FileInformation;
 import org.eclipse.packager.rpm.build.RpmBuilder;
 import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,18 +40,14 @@ import org.slf4j.LoggerFactory;
 class SetVerifyFlagsTest {
     private final static Logger LOGGER = LoggerFactory.getLogger(SetVerifyFlagsTest.class);
 
-    private static final Path OUT_BASE = Path.of("target", "data", "out");
-
-    @BeforeAll
-    static void setup() throws IOException {
-        Files.createDirectories(OUT_BASE);
-    }
-
     private static final String DIRNAME = "/opt/testing/";
 
     private static final String NAME_myconf = "my.conf";
 
     private static final String NAME_myreadme = "readme.txt";
+
+    @TempDir
+    private Path outBase;
 
     /**
      * Firstly, writes a RPM file with two file entries having different type flags
@@ -61,7 +57,7 @@ class SetVerifyFlagsTest {
     @Test
     void writeRpmWithVerifyFlags() throws IOException {
         final Path outFile;
-        try (RpmBuilder builder = new RpmBuilder("vflag0-test", "1.0.0", "1", "noarch", OUT_BASE)) {
+        try (RpmBuilder builder = new RpmBuilder("vflag0-test", "1.0.0", "1", "noarch", outBase)) {
             final String content_myconf = "Hallo, myconf!";
             builder.newContext().addFile(DIRNAME + NAME_myconf, content_myconf.getBytes(), (targetName, object, type) -> {
                 if ((DIRNAME + NAME_myconf).equals(targetName)) {

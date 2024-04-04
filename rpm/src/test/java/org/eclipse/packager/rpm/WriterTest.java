@@ -52,16 +52,16 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.images.builder.Transferable;
 import org.testcontainers.utility.DockerImageName;
 
-public class WriterTest {
+class WriterTest {
     private static final Path IN_BASE = Path.of("src", "test", "resources", "data", "in");
 
     private static final String COMMAND = "sleep infinity";
 
     @TempDir
-    Path outBase;
+    private Path outBase;
 
     @Test
-    public void test1() throws IOException {
+    void test1() throws IOException {
         final Path rpm1 = outBase.resolve("test1-1.0.0.rpm");
 
         final Header<RpmTag> header = new Header<>();
@@ -93,8 +93,8 @@ public class WriterTest {
         requirements.add(new Dependency("rpmlib(CompressedFileNames)", "3.0.4-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB));
         Dependencies.putRequirements(header, requirements);
 
-        try (PayloadRecorder payloadRecorder = new PayloadRecorder(); PayloadRecorder.Finished finished = payloadRecorder.finish()) {
-            try (RpmWriter writer = new RpmWriter(rpm1, new LeadBuilder("test1", new RpmVersion("1.0.0")), header)) {
+        try (final PayloadRecorder.Finished finished = new PayloadRecorder().finish()) {
+            try (final RpmWriter writer = new RpmWriter(rpm1, new LeadBuilder("test1", new RpmVersion("1.0.0")), header)) {
                 writer.setPayload(finished);
             }
         }
@@ -105,10 +105,10 @@ public class WriterTest {
     }
 
     @Test
-    public void test2() throws IOException {
+    void test2() throws IOException {
         final Path outFile = outBase.resolve("test2-1.0.0.1.rpm");
 
-        try (PayloadRecorder payload = new PayloadRecorder()) {
+        try (final PayloadRecorder payload = new PayloadRecorder()) {
             final Header<RpmTag> header = new Header<>();
 
             header.putString(RpmTag.PAYLOAD_FORMAT, "cpio");
@@ -155,10 +155,10 @@ public class WriterTest {
     }
 
     @Test
-    public void test3() throws IOException, PGPException {
+    void test3() throws IOException, PGPException {
         Path outFile;
 
-        try (RpmBuilder builder = new RpmBuilder("test3", "1.0.0", "1", "noarch", outBase)) {
+        try (final RpmBuilder builder = new RpmBuilder("test3", "1.0.0", "1", "noarch", outBase)) {
             final PackageInformation pinfo = builder.getInformation();
 
             pinfo.setLicense("EPL");
@@ -210,10 +210,10 @@ public class WriterTest {
     }
 
     @Test
-    public void test4() throws IOException, InterruptedException {
+    void test4() throws IOException, InterruptedException {
         final Path outFile;
 
-        try (RpmBuilder builder = new RpmBuilder("test4", "1.0.0", "1", "noarch", outBase)) {
+        try (final RpmBuilder builder = new RpmBuilder("test4", "1.0.0", "1", "noarch", outBase)) {
             final PackageInformation pinfo = builder.getInformation();
 
             pinfo.setLicense("EPL");
@@ -264,5 +264,4 @@ public class WriterTest {
             assertTrue(stdout.contains("name-enhances"));
         }
     }
-
 }
