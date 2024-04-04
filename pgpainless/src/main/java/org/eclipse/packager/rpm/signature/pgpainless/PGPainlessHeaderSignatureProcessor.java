@@ -59,6 +59,8 @@ public class PGPainlessHeaderSignatureProcessor extends PGPainlessSignatureProce
                     break;
 
                 // DSA
+                // https://rpm-software-management.github.io/rpm/manual/format_v4.html is talking about "EcDSA",
+                //  which is probably a typo.
                 case PublicKeyAlgorithmTags.DSA: // 17
                 case PublicKeyAlgorithmTags.EDDSA_LEGACY: // 22
                     getLogger().info("DSA HEADER: {}", value);
