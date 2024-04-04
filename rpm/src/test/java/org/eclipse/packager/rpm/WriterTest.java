@@ -93,7 +93,7 @@ class WriterTest {
         requirements.add(new Dependency("rpmlib(CompressedFileNames)", "3.0.4-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB));
         Dependencies.putRequirements(header, requirements);
 
-        try (final PayloadRecorder.Finished finished = new PayloadRecorder().finish()) {
+        try (final PayloadRecorder payloadRecorder = new PayloadRecorder(); final PayloadRecorder.Finished finished = payloadRecorder.finish()) {
             try (final RpmWriter writer = new RpmWriter(rpm1, new LeadBuilder("test1", new RpmVersion("1.0.0")), header)) {
                 writer.setPayload(finished);
             }

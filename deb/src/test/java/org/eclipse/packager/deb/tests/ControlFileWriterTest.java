@@ -46,12 +46,12 @@ public class ControlFileWriterTest {
     }
 
     private void testField(final ControlFieldDefinition field, final String value, final String expectedResult) throws Exception {
-        final StringWriter sw = new StringWriter();
-        final ControlFileWriter writer = new ControlFileWriter(sw);
-        writer.writeEntry(field.name, value, Optional.ofNullable(field.formatter));
-        sw.close();
-        final String result = sw.toString();
-        System.out.println("Actual: '" + result + "'");
-        Assertions.assertEquals(expectedResult, result);
+        try (final StringWriter sw = new StringWriter()) {
+            final ControlFileWriter writer = new ControlFileWriter(sw);
+            writer.writeEntry(field.name, value, Optional.ofNullable(field.formatter));
+            final String result = sw.toString();
+            System.out.println("Actual: '" + result + "'");
+            Assertions.assertEquals(expectedResult, result);
+        }
     }
 }
