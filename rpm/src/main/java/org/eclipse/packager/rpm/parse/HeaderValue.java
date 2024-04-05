@@ -13,28 +13,49 @@
 
 package org.eclipse.packager.rpm.parse;
 
+import static com.google.common.io.BaseEncoding.base16;
+import static org.eclipse.packager.rpm.header.Type.UNKNOWN;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.function.Function;
 
 import org.eclipse.packager.rpm.Rpms;
+import org.eclipse.packager.rpm.header.Type;
 
 public class HeaderValue {
-    private static final class Unknown {
+   static final class Unknown {
+        private final int type;
+
+        private final byte[] value;
+
+        public Unknown(int type, byte[] value) {
+            this.type = type;
+            this.value = value;
+        }
+
+        public int getType() {
+            return this.type;
+        }
+
+        public byte[] getValue() {
+            return this.value;
+        }
+
         @Override
         public String toString() {
-            return "UNKNOWN";
+            return "UNKNOWN: type: " + this.type + ", data: " + base16().encode(this.value);
         }
     }
-
-    public static final Unknown UNKNOWN = new Unknown();
 
     private final int tag;
 
     private Object value;
 
-    private final int type;
+    private final int originalType;
+
+    private final Type type;
 
     private final int index;
 
@@ -42,7 +63,8 @@ public class HeaderValue {
 
     public HeaderValue(final int tag, final int type, final int index, final int count) {
         this.tag = tag;
-        this.type = type;
+        this.originalType = type;
+        this.type = Type.fromType(type);
         this.index = index;
         this.count = count;
     }
@@ -55,7 +77,7 @@ public class HeaderValue {
         return this.value;
     }
 
-    public int getType() {
+    public Type getType() {
         return this.type;
     }
 
@@ -69,48 +91,50 @@ public class HeaderValue {
 
     void fillFromStore(final ByteBuffer storeData) throws IOException {
         switch (this.type) {
-        case 0: // null value
+        case NULL:
             break;
-        case 1: // character
-            this.value = getFromStore(storeData, true, buf -> (char) storeData.get(), size -> new Character[size]);
+        case CHAR:
+            this.value = getFromStore(storeData, true, buf -> (char) storeData.get(), Character[]::new);
             break;
-        case 2: // byte
-            this.value = getFromStore(storeData, true, buf -> buf.get(), size -> new Byte[size]);
+        case BYTE:
+            this.value = getFromStore(storeData, true, ByteBuffer::get, Byte[]::new);
             break;
-        case 3: // 16bit integer
-            this.value = getFromStore(storeData, true, buf -> buf.getShort(), size -> new Short[size]);
+        case SHORT:
+            this.value = getFromStore(storeData, true, ByteBuffer::getShort, Short[]::new);
             break;
-        case 4: // 32bit integer
-            this.value = getFromStore(storeData, true, buf -> buf.getInt(), size -> new Integer[size]);
+        case INT:
+            this.value = getFromStore(storeData, true, ByteBuffer::getInt, Integer[]::new);
             break;
-        case 5: // 64bit integer
-            this.value = getFromStore(storeData, true, buf -> buf.getLong(), size -> new Long[size]);
+        case LONG:
+            this.value = getFromStore(storeData, true, ByteBuffer::getLong, Long[]::new);
             break;
-        case 6: // one string
+        case STRING:
         {
             // only one allowed
             storeData.position(this.index);
             this.value = makeString(storeData);
         }
             break;
-        case 7: // blob
+        case BLOB:
         {
-            final byte[] data = new byte[this.count];
-            storeData.position(this.index);
-            storeData.get(data);
-            this.value = data;
+            this.value = getBlob(storeData);
         }
             break;
-        case 8: // string array
-            this.value = getFromStore(storeData, false, buf -> makeString(buf), size -> new String[size]);
+        case STRING_ARRAY:
+        case I18N_STRING:
+                this.value = getFromStore(storeData, false, HeaderValue::makeString, String[]::new);
             break;
-        case 9: // i18n string array
-            this.value = getFromStore(storeData, false, buf -> makeString(buf), size -> new String[size]);
-            break;
-        default:
-            this.value = UNKNOWN;
+        case UNKNOWN:
+            this.value = new Unknown(this.originalType, getBlob(storeData));
             break;
         }
+    }
+
+    private byte[] getBlob(ByteBuffer storeData) {
+        final byte[] data = new byte[this.count];
+        storeData.position(this.index);
+        storeData.get(data);
+        return data;
     }
 
     @FunctionalInterface
@@ -158,10 +182,10 @@ public class HeaderValue {
         sb.append(" - ").append(this.type).append(" = ");
 
         if (this.value != null) {
-            if (this.value != UNKNOWN) {
-                sb.append(this.value.getClass().getName());
-            } else {
+            if (this.type == UNKNOWN) {
                 sb.append(this.type);
+            } else {
+                sb.append(this.value.getClass().getName());
             }
         } else {
             sb.append("NULL");
