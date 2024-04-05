@@ -13,18 +13,21 @@
 
 package org.eclipse.packager.rpm;
 
-import static java.util.Optional.of;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.packager.rpm.Architecture.ARM;
+import static org.eclipse.packager.rpm.Architecture.NOARCH;
+import static org.eclipse.packager.rpm.OperatingSystem.AIX;
+import static org.eclipse.packager.rpm.OperatingSystem.UNKNOWN;
 
 import java.util.Optional;
 
 import org.eclipse.packager.rpm.build.LeadBuilder;
 import org.eclipse.packager.rpm.header.Header;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class LeadTest {
+class LeadTest {
     @Test
-    public void testArch1() {
+    void testArch1() {
         testArch(Architecture.INTEL, "i386");
         testArch(Architecture.INTEL, "INTEL");
         testArch(Architecture.INTEL, "X86_64");
@@ -32,18 +35,14 @@ public class LeadTest {
 
     private void testArch(final Architecture expected, final String provided) {
         final Optional<Architecture> arch = Architecture.fromAlias(provided);
-        if (expected == null) {
-            Assertions.assertFalse(arch.isPresent());
-        } else {
-            Assertions.assertEquals(expected, arch.orElse(null));
-        }
+            assertThat(arch).hasValue(expected);
     }
 
     /**
      * Test the mappers for arch and os.
      */
     @Test
-    public void testMapper1() {
+    void testMapper1() {
         final LeadBuilder lead = new LeadBuilder();
         final Header<RpmTag> header = new Header<>();
 
@@ -52,12 +51,12 @@ public class LeadTest {
 
         lead.fillFlagsFromHeader(header);
 
-        Assertions.assertEquals(Architecture.NOARCH.getValue(), lead.getArchitecture());
-        Assertions.assertEquals(OperatingSystem.UNKNOWN.getValue(), lead.getOperatingSystem());
+        assertThat(Architecture.fromValue(lead.getArchitecture())).hasValue(NOARCH);
+        assertThat(OperatingSystem.fromValue(lead.getOperatingSystem())).hasValue(UNKNOWN);
 
-        lead.fillFlagsFromHeader(header, s -> of(Architecture.ARM), s -> of(OperatingSystem.AIX));
+        lead.fillFlagsFromHeader(header, s -> Optional.of(ARM), s -> Optional.of(AIX));
 
-        Assertions.assertEquals(Architecture.ARM.getValue(), lead.getArchitecture());
-        Assertions.assertEquals(OperatingSystem.AIX.getValue(), lead.getOperatingSystem());
+        assertThat(Architecture.fromValue(lead.getArchitecture())).hasValue(ARM);
+        assertThat(OperatingSystem.fromValue(lead.getOperatingSystem())).hasValue(AIX);
     }
 }

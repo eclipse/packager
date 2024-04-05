@@ -13,6 +13,8 @@
 
 package org.eclipse.packager.rpm;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -20,22 +22,17 @@ import java.io.DataOutput;
 import java.io.DataOutputStream;
 import java.io.IOException;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class UnsignedTest {
+class UnsignedTest {
     @Test
-    public void test1() throws IOException {
+    void test1() throws IOException {
         final long value = 0xFFFFFFFFL;
         final ByteArrayOutputStream bos = new ByteArrayOutputStream();
         final DataOutput dos = new DataOutputStream(bos);
-
         dos.writeInt((int) value);
-
-        Assertions.assertEquals(4, bos.size());
-
+        assertThat(bos.size()).isEqualTo(4);
         final DataInputStream dis = new DataInputStream(new ByteArrayInputStream(bos.toByteArray()));
-
-        Assertions.assertEquals(value, dis.readInt() & 0xFFFFFFFFL);
+        assertThat(dis.readInt() & 0xFFFFFFFFL).isEqualTo(value);
     }
 }

@@ -13,54 +13,51 @@
 
 package org.eclipse.packager.rpm;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.packager.rpm.RpmTag.ARCH;
+import static org.eclipse.packager.rpm.RpmTag.DIRNAMES;
+import static org.eclipse.packager.rpm.RpmTag.LICENSE;
+import static org.eclipse.packager.rpm.RpmTag.NAME;
+import static org.eclipse.packager.rpm.RpmTag.OS;
+import static org.eclipse.packager.rpm.RpmTag.PAYLOAD_CODING;
+import static org.eclipse.packager.rpm.RpmTag.PAYLOAD_FORMAT;
+import static org.eclipse.packager.rpm.RpmTag.RELEASE;
+import static org.eclipse.packager.rpm.RpmTag.VERSION;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
+import java.util.List;
 import org.eclipse.packager.rpm.app.Dumper;
+import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class InputStreamTest {
+class InputStreamTest {
+    private static final List<String> EXPECTED_DIRNAMES = List.of("/etc/", "/etc/eclipsescada/", "/etc/profile.d/", "/usr/bin/", "/usr/", "/usr/share/", "/usr/share/eclipsescada/", "/usr/share/eclipsescada/sql/", "/var/log/", "/var/run/");
 
     @Test
-    public void test1() throws IOException {
+    void test1() throws IOException {
         try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(Path.of("src/test/resources/data/org.eclipse.scada-0.2.1-1.noarch.rpm"))))) {
             Dumper.dumpAll(in);
-
-            Assertions.assertEquals(280, in.getPayloadHeader().getStart());
-            Assertions.assertEquals(3501, in.getPayloadHeader().getLength());
-
-            Assertions.assertEquals("cpio", in.getPayloadHeader().getTag(RpmTag.PAYLOAD_FORMAT));
-            Assertions.assertEquals("lzma", in.getPayloadHeader().getTag(RpmTag.PAYLOAD_CODING));
-
-            Assertions.assertEquals("org.eclipse.scada", in.getPayloadHeader().getTag(RpmTag.NAME));
-            Assertions.assertEquals("0.2.1", in.getPayloadHeader().getTag(RpmTag.VERSION));
-            Assertions.assertEquals("1", in.getPayloadHeader().getTag(RpmTag.RELEASE));
-
-            Assertions.assertEquals("noarch", in.getPayloadHeader().getTag(RpmTag.ARCH));
-            Assertions.assertEquals("linux", in.getPayloadHeader().getTag(RpmTag.OS));
-            Assertions.assertEquals("EPL", in.getPayloadHeader().getTag(RpmTag.LICENSE));
-
-            Assertions.assertArrayEquals(new String[] { //
-                    "/etc/", //
-                    "/etc/eclipsescada/", //
-                    "/etc/profile.d/", //
-                    "/usr/bin/", //
-                    "/usr/", //
-                    "/usr/share/", //
-                    "/usr/share/eclipsescada/", //
-                    "/usr/share/eclipsescada/sql/", //
-                    "/var/log/", //
-                    "/var/run/", //
-            }, (String[]) in.getPayloadHeader().getTag(RpmTag.DIRNAMES));
+            final InputHeader<RpmTag> header = in.getPayloadHeader();
+            assertThat(header).extracting("start").isEqualTo(280L);
+            assertThat(header).extracting("length").isEqualTo(3501L);
+            assertThat(header.getTag(PAYLOAD_FORMAT)).isEqualTo("cpio");
+            assertThat(header.getTag(PAYLOAD_CODING)).isEqualTo("lzma");
+            assertThat(header.getTag(NAME)).isEqualTo("org.eclipse.scada");
+            assertThat(header.getTag(VERSION)).isEqualTo("0.2.1");
+            assertThat(header.getTag(RELEASE)).isEqualTo( "1");
+            assertThat(header.getTag(ARCH)).isEqualTo( "noarch");
+            assertThat(header.getTag(OS)).isEqualTo("linux");
+            assertThat(header.getTag(LICENSE)).isEqualTo("EPL");
+            assertThat(List.of((String[]) header.getTag(DIRNAMES))).containsExactlyElementsOf(EXPECTED_DIRNAMES);
         }
     }
 
     @Test
-    public void test2() throws IOException {
+    void test2() throws IOException {
         try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(Path.of("src/test/resources/data/org.eclipse.scada-centos6-0.2.1-1.noarch.rpm"))))) {
             Dumper.dumpAll(in);
         }

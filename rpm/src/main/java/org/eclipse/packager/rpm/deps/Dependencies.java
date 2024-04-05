@@ -16,10 +16,10 @@ package org.eclipse.packager.rpm.deps;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.packager.rpm.ReadableHeader;
 import org.eclipse.packager.rpm.RpmTag;
@@ -136,7 +136,7 @@ public final class Dependencies {
                 for (int i = 0; i < names.length; i++) {
                     final String name = names[i];
                     final String version = versions[i];
-                    final EnumSet<RpmDependencyFlags> flagSet = RpmDependencyFlags.parse(flags[i]);
+                    final Set<RpmDependencyFlags> flagSet = RpmDependencyFlags.parse(flags[i]);
                     result.add(new Dependency(name, version, flagSet));
                 }
                 return result;

@@ -13,25 +13,23 @@
 
 package org.eclipse.packager.rpm;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.List;
 
 import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.build.RpmBuilder;
 import org.eclipse.packager.rpm.build.RpmBuilder.PackageInformation;
-import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 class Issue130Test {
-    private static final List<String> PREFIXES = Arrays.asList("/opt", "/var/log");
+    private static final List<String> PREFIXES = List.of("/opt", "/var/log");
 
     @TempDir
     private Path outBase;
@@ -42,21 +40,14 @@ class Issue130Test {
 
         try (final RpmBuilder builder = new RpmBuilder("prefixes-test", "1.0.0", "1", "noarch", outBase)) {
             final PackageInformation pinfo = builder.getInformation();
-
             pinfo.setPrefixes(PREFIXES);
-
             outFile = builder.getTargetFile();
-
             builder.build();
         }
 
         try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(outFile)))) {
             Dumper.dumpAll(in);
-
-            final InputHeader<RpmTag> header = in.getPayloadHeader();
-            final List<String> prefixes = Arrays.asList(new RpmTagValue(header.getTag(RpmTag.PREFIXES)).asStringArray().orElse(null));
-
-            assertEquals(PREFIXES, prefixes);
+            assertThat(List.of((String[]) in.getPayloadHeader().getTag(RpmTag.PREFIXES))).containsExactlyElementsOf(PREFIXES);
         }
     }
 

@@ -12,6 +12,7 @@
  ********************************************************************************/
 package org.eclipse.packager.rpm.signature;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -84,7 +85,7 @@ public class RpmFileSignatureProcessor {
         PGPPrivateKey privateKey = getPrivateKey(privateKeyIn, passphrase);
 
         // Get the information of the RPM
-        try (RpmInputStream rpmIn = new RpmInputStream(Files.newInputStream(rpm))) {
+        try (RpmInputStream rpmIn = new RpmInputStream(new BufferedInputStream(Files.newInputStream(rpm)))) {
             signatureHeaderStart = rpmIn.getSignatureHeader().getStart();
             signatureHeaderLength = rpmIn.getSignatureHeader().getLength();
             payloadHeaderStart = rpmIn.getPayloadHeader().getStart();

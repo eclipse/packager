@@ -13,29 +13,29 @@
 
 package org.eclipse.packager.rpm.info;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import org.junit.jupiter.api.Test;
 
-public class RpmInformationTest {
+class RpmInformationTest {
     @Test
-    public void testVersionEquals() {
+    void testVersionEquals() {
         RpmInformation.Version version1 = new RpmInformation.Version("1.0.0", "1", null);
         RpmInformation.Version version2 = new RpmInformation.Version("1.0.0", "1", null);
-        assertEquals(version1, version2);
+        assertThat(version2).isEqualTo(version1);
     }
 
     @Test
-    public void testChangelogEquals() {
+    void testChangelogEquals() {
         RpmInformation.Changelog changelog1 = new RpmInformation.Changelog(0L, "", "");
         RpmInformation.Changelog changelog2 = new RpmInformation.Changelog(0L, "", "");
-        assertEquals(changelog1, changelog2);
+        assertThat(changelog2).isEqualTo(changelog1);
     }
 
     @Test
-    public void testDependencyEquals() {
+    void testDependencyEquals() {
         RpmInformation.Dependency dependency1 = new RpmInformation.Dependency("", "", 0L);
         RpmInformation.Dependency dependency2 = new RpmInformation.Dependency("", "", 0L);
-        assertEquals(dependency1, dependency2);
+        assertThat(dependency2).isEqualTo(dependency1);
     }
 }

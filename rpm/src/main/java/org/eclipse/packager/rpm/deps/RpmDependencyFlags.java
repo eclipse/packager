@@ -53,7 +53,7 @@ public enum RpmDependencyFlags {
         return value;
     }
 
-    public static EnumSet<RpmDependencyFlags> parse(final Long flags) {
+    public static Set<RpmDependencyFlags> parse(final Long flags) {
         if (flags == null) {
             return null;
         }
@@ -61,7 +61,7 @@ public enum RpmDependencyFlags {
         return parse(flags.intValue());
     }
 
-    public static EnumSet<RpmDependencyFlags> parse(final int flags) {
+    public static Set<RpmDependencyFlags> parse(final int flags) {
         final EnumSet<RpmDependencyFlags> result = EnumSet.noneOf(RpmDependencyFlags.class);
 
         for (final RpmDependencyFlags f : values()) {

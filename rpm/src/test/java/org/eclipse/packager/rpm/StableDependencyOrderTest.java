@@ -13,22 +13,27 @@
 
 package org.eclipse.packager.rpm;
 
-import java.io.IOException;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.packager.rpm.RpmTag.REQUIRE_FLAGS;
+import static org.eclipse.packager.rpm.RpmTag.REQUIRE_NAME;
+import static org.eclipse.packager.rpm.RpmTag.REQUIRE_VERSION;
+
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.packager.rpm.deps.Dependencies;
 import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 import org.eclipse.packager.rpm.header.Header;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-public class StableDependencyOrderTest {
+class StableDependencyOrderTest {
     @Test
-    public void testStableRequirementSort() throws IOException {
-
+    void testStableRequirementSort() {
         final Header<RpmTag> header1 = new Header<>();
         final Header<RpmTag> header2 = new Header<>();
 
@@ -46,9 +51,12 @@ public class StableDependencyOrderTest {
         Collections.reverse(requirementsReverse);
         Dependencies.putRequirements(header2, requirementsReverse);
 
-        Assertions.assertArrayEquals((String[]) header1.get(RpmTag.REQUIRE_NAME), (String[]) header2.get(RpmTag.REQUIRE_NAME));
-        Assertions.assertArrayEquals((String[]) header1.get(RpmTag.REQUIRE_VERSION), (String[]) header2.get(RpmTag.REQUIRE_VERSION));
-        Assertions.assertArrayEquals((int[]) header1.get(RpmTag.REQUIRE_FLAGS), (int[]) header2.get(RpmTag.REQUIRE_FLAGS));
+        assertThat(header2.get(REQUIRE_NAME)).isEqualTo(header1.get(REQUIRE_NAME));
+        assertThat(header2.get(REQUIRE_VERSION)).isEqualTo(header1.get(REQUIRE_VERSION));
+        assertThat(getRequireFlags(header2)).isEqualTo(getRequireFlags(header1));
     }
 
+    private static List<Set<RpmDependencyFlags>> getRequireFlags(Header<RpmTag> header) {
+        return Arrays.stream((int[]) header.get(REQUIRE_FLAGS)).mapToObj(RpmDependencyFlags::parse).collect(Collectors.toUnmodifiableList());
+    }
 }
