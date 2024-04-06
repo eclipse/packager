@@ -53,7 +53,5 @@ class EmptyWriterTest {
         try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(outFile)))) {
             Dumper.dumpAll(in);
         }
-
-        System.out.println(outFile.toAbsolutePath());
     }
 }

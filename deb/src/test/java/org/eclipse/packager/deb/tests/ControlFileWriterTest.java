@@ -12,12 +12,13 @@
  */
 package org.eclipse.packager.deb.tests;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.io.StringWriter;
 import java.util.Optional;
 
 import org.eclipse.packager.deb.ControlFileWriter;
 import org.eclipse.packager.deb.FieldFormatter;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 public class ControlFileWriterTest {
@@ -49,9 +50,7 @@ public class ControlFileWriterTest {
         try (final StringWriter sw = new StringWriter()) {
             final ControlFileWriter writer = new ControlFileWriter(sw);
             writer.writeEntry(field.name, value, Optional.ofNullable(field.formatter));
-            final String result = sw.toString();
-            System.out.println("Actual: '" + result + "'");
-            Assertions.assertEquals(expectedResult, result);
+            assertThat(sw).hasToString(expectedResult);
         }
     }
 }

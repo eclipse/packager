@@ -12,11 +12,10 @@
  */
 package org.eclipse.packager.deb.tests;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -30,12 +29,9 @@ import org.eclipse.packager.deb.Packages;
 import org.eclipse.packager.deb.ParserException;
 import org.junit.jupiter.api.Test;
 
-import com.google.common.io.CharStreams;
-
-public class PackagesTest {
-
+class PackagesTest {
     @Test
-    public void test1FieldFormatters() throws IOException {
+    void test1FieldFormatters() throws IOException {
         testFieldFormatterValue(FieldFormatter.SINGLE, "foo", "foo");
         testFieldFormatter(FieldFormatter.SINGLE, "Foo", "bar", "Foo: bar");
 
@@ -48,7 +44,7 @@ public class PackagesTest {
     }
 
     @Test
-    public void test1FieldFormattersCornerCases() throws IOException {
+    void test1FieldFormattersCornerCases() throws IOException {
         testFieldFormatterValue(FieldFormatter.SINGLE, "foo\nbar", "foobar");
         testFieldFormatter(FieldFormatter.SINGLE, "Foo", "bar\nbar", "Foo: barbar");
 
@@ -68,83 +64,63 @@ public class PackagesTest {
     private void testFieldFormatter(final FieldFormatter formatter, final String key, final String input, final String expected) throws IOException {
         final StringBuilder sb = new StringBuilder();
         formatter.append(key, input, sb);
-        assertEquals(expected, formatter.format(key, input));
+        assertThat(formatter.format(key, input)).isEqualTo(expected);
     }
 
-    private void testFieldFormatterValue(final FieldFormatter formatter, final String input, final String expected) throws IOException {
+    void testFieldFormatterValue(final FieldFormatter formatter, final String input, final String expected) throws IOException {
         final StringBuilder sb = new StringBuilder();
         formatter.appendValue(input, sb);
-
-        /*
-         * System.out.println ( "Expected ->" );
-         * System.out.println ( expected );
-         * System.out.println ( "Actual ->" );
-         * System.out.println ( sb.toString () );
-         */
-
-        assertEquals(expected, formatter.formatValue(input));
+        assertThat(formatter.formatValue(input)).isEqualTo(expected);
     }
 
     @Test
-    public void test2() throws IOException, ParserException {
-        LinkedHashMap<String, String> control;
-        try (InputStream is = PackagesTest.class.getResourceAsStream("data/test1")) {
-            control = ControlFileParser.parse(is);
+    void test2() throws IOException, ParserException {
+        try (final InputStream is = PackagesTest.class.getResourceAsStream("data/test1")) {
+            final Map<String, String> control = ControlFileParser.parse(is);
+            assertThat(control).extractingByKey("Description").satisfies(s-> assertThat(Packages.makeDescriptionMd5(s)).isEqualTo("38d96b653196d5ef8c667efe23411a81"));
         }
-
-        final String md5 = Packages.makeDescriptionMd5(control.get("Description"));
-
-        assertEquals("38d96b653196d5ef8c667efe23411a81", md5);
     }
 
     @Test
-    public void test3() throws IOException, ParserException {
-        LinkedHashMap<String, String> control;
-        try (InputStream is = PackagesTest.class.getResourceAsStream("data/test2")) {
-            control = ControlFileParser.parse(is);
+    void test3() throws IOException, ParserException {
+        try (final InputStream is = PackagesTest.class.getResourceAsStream("data/test2")) {
+            final Map<String, String> control = ControlFileParser.parse(is);
+            assertThat(control).extractingByKey("Package").isEqualTo("org.eclipse.scada.base.p2-incubation");
+            assertThat(control).extractingByKey("Installed-Size").isEqualTo("1100");
+            assertThat(control).extractingByKey("Description").isEqualTo("Eclipse SCADA P2 Repository - org.eclipse.scada.base.p2-incubation");
+            assertThat(control).extractingByKey("Conffiles").isEqualTo("\n/file1 1234\n/file2 1234");
         }
-
-        assertEquals("org.eclipse.scada.base.p2-incubation", control.get("Package"));
-        assertEquals("1100", control.get("Installed-Size"));
-        assertEquals("Eclipse SCADA P2 Repository - org.eclipse.scada.base.p2-incubation", control.get("Description"));
-        assertEquals("\n/file1 1234\n/file2 1234", control.get("Conffiles"));
     }
 
     @Test
-    public void test4() throws IOException, ParserException {
+    void test4() throws IOException, ParserException {
         encodeDecodeTest("data/test1");
         encodeDecodeTest("data/test2");
     }
 
     private void encodeDecodeTest(final String resourceName) throws IOException, ParserException {
-        LinkedHashMap<String, String> control;
-        try (InputStream is = PackagesTest.class.getResourceAsStream(resourceName)) {
-            control = ControlFileParser.parse(is);
-        }
-
         final StringBuilder sb = new StringBuilder();
-        final Map<String, FieldFormatter> map = new HashMap<>();
-        map.put("Description", FieldFormatter.MULTI);
-        map.put("Conffiles", FieldFormatter.MULTI);
-        new ControlFileWriter(sb, map).writeEntries(control);
 
-        String data;
-        try (InputStream is = PackagesTest.class.getResourceAsStream(resourceName)) {
-            data = CharStreams.toString(new InputStreamReader(is, StandardCharsets.UTF_8));
+        try (final InputStream is = PackagesTest.class.getResourceAsStream(resourceName)) {
+            final LinkedHashMap<String, String> control = ControlFileParser.parse(is);
+            final Map<String, FieldFormatter> map = new HashMap<>();
+            map.put("Description", FieldFormatter.MULTI);
+            map.put("Conffiles", FieldFormatter.MULTI);
+            new ControlFileWriter(sb, map).writeEntries(control);
         }
 
-        System.out.println(sb.toString());
-
-        assertEquals(data, sb.toString());
+        try (final InputStream is = PackagesTest.class.getResourceAsStream(resourceName)) {
+            assertThat(is).isNotNull();
+            final String data = new String(is.readAllBytes(), StandardCharsets.UTF_8);
+            assertThat(sb).hasToString(data);
+        }
     }
 
     @Test
-    public void testMultiFile1() throws IOException, ParserException {
-        List<Map<String, String>> result;
-        try (InputStream is = PackagesTest.class.getResourceAsStream("data/test3")) {
-            result = Packages.parseStatusFile(is);
+    void testMultiFile1() throws IOException, ParserException {
+        try (final InputStream is = PackagesTest.class.getResourceAsStream("data/test3")) {
+            final List<Map<String, String>> result = Packages.parseStatusFile(is);
+            assertThat(result).hasSize(2);
         }
-
-        assertEquals(2, result.size());
     }
 }

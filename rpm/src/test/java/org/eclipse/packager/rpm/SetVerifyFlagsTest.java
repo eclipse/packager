@@ -13,7 +13,7 @@
 
 package org.eclipse.packager.rpm;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import org.eclipse.packager.rpm.app.Dumper;
@@ -70,7 +71,7 @@ class SetVerifyFlagsTest {
                     final Set<VerifyFlags> verifyFlags = new HashSet<>(
                             Arrays.asList(VerifyFlags.USER, VerifyFlags.GROUP));
                     ret.setVerifyFlags(verifyFlags);
-                    LOGGER.info("file info for {}: {}", targetName, ret);
+                    LOGGER.debug("file info for {}: {}", targetName, ret);
                     return ret;
                 }
                 throw new IllegalArgumentException("unexpected target name: " + targetName);
@@ -81,27 +82,23 @@ class SetVerifyFlagsTest {
                     final FileInformation ret = new FileInformation();
                     final Set<FileFlags> fileFlags = new HashSet<>(Collections.singletonList(FileFlags.README));
                     ret.setFileFlags(fileFlags);
-                    LOGGER.info("file info for {}: {}", targetName, ret);
+                    LOGGER.debug("file info for {}: {}", targetName, ret);
                     return ret;
                 }
                 throw new IllegalArgumentException("unexpected target name: " + targetName);
             });
             outFile = builder.getTargetFile();
             builder.build();
-            LOGGER.info("Written: {}", outFile);
+            LOGGER.debug("Written: {}", outFile);
         }
 
         try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(outFile)))) {
             Dumper.dumpAll(in);
             final InputHeader<RpmTag> header = in.getPayloadHeader();
-            final String[] dirNames = (String[]) header.getTag(RpmTag.DIRNAMES);
-            assertArrayEquals(new String[] { DIRNAME }, dirNames);
-            final String[] baseNames = (String[]) header.getTag(RpmTag.BASENAMES);
-            assertArrayEquals(new String[] { NAME_myconf, NAME_myreadme }, baseNames);
-            final Integer[] fileFlags = (Integer[]) header.getTag(RpmTag.FILE_FLAGS);
-            assertArrayEquals(new Integer[] { 17, 256 }, fileFlags); // 17: CONFIGURATION|NOREPLACE, 256: README
-            final Integer[] fileVerifyFlags = (Integer[]) header.getTag(RpmTag.FILE_VERIFYFLAGS);
-            assertArrayEquals(new Integer[] { 24, -1 }, fileVerifyFlags); // 24: USER|GROUP, -1: <default>
+            assertThat(List.of((String[]) header.getTag(RpmTag.DIRNAMES))).containsExactly(DIRNAME);
+            assertThat(List.of((String[]) header.getTag(RpmTag.BASENAMES))).containsExactly(NAME_myconf, NAME_myreadme);
+            assertThat(List.of((Integer[]) header.getTag(RpmTag.FILE_FLAGS))).containsExactly(17, 256);
+            assertThat((Integer[]) header.getTag(RpmTag.FILE_VERIFYFLAGS)).containsExactly(24, -1);
         }
     }
 }

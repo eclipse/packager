@@ -13,7 +13,7 @@
 
 package org.eclipse.packager.rpm;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -39,13 +39,11 @@ class Issue24Test {
 
         try (final RpmBuilder builder = new RpmBuilder(name, new RpmVersion(version, release), architecture, outBase, options)) {
             final Path outFile = builder.getTargetFile();
-
             builder.build();
-
             final String expectedRpmFileName = name + "-" + version + "-" + release + "." + architecture + ".rpm";
             final String rpmFileName = options.getFileNameProvider().getRpmFileName(builder.getName(), builder.getVersion(), builder.getArchitecture());
-            assertEquals(expectedRpmFileName, rpmFileName);
-            assertEquals(expectedRpmFileName, outFile.getFileName().toString());
+            assertThat(rpmFileName).isEqualTo(expectedRpmFileName);
+            assertThat(outFile.getFileName()).hasToString(expectedRpmFileName);
         }
 
         final BuilderOptions options2 = new BuilderOptions();
@@ -53,13 +51,11 @@ class Issue24Test {
 
         try (final RpmBuilder builder = new RpmBuilder(name, new RpmVersion(version, release), architecture, outBase, options2)) {
             final Path outFile = builder.getTargetFile();
-
             builder.build();
-
             final String expectedRpmFileName = name + "-" + version + "-" + release + "-" + architecture + ".rpm";
             final String rpmFileName = options2.getFileNameProvider().getRpmFileName(builder.getName(), builder.getVersion(), builder.getArchitecture());
-            assertEquals(expectedRpmFileName, rpmFileName);
-            assertEquals(expectedRpmFileName, outFile.getFileName().toString());
+            assertThat(rpmFileName).isEqualTo(expectedRpmFileName);
+            assertThat(outFile.getFileName()).hasToString(expectedRpmFileName);
         }
     }
 }

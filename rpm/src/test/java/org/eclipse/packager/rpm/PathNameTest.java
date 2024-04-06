@@ -13,48 +13,17 @@
 
 package org.eclipse.packager.rpm;
 
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 public class PathNameTest {
-    @Test
-    public void test1() {
-        assertPath("/", "", "");
-    }
-
-    @Test
-    public void test2() {
-        assertPath("/foo", "", "foo");
-    }
-
-    @Test
-    public void test3() {
-        assertPath("/foo/bar", "foo", "bar");
-    }
-
-    @Test
-    public void test4() {
-        assertPath("/foo/bar/baz", "foo/bar", "baz");
-    }
-
-    @Test
-    public void test4a() {
-        assertPath("/foo//bar/baz", "foo/bar", "baz");
-    }
-
-    @Test
-    public void test4b() {
-        assertPath("/foo//bar/baz/", "foo/bar", "baz");
-    }
-
-    @Test
-    public void test4c() {
-        assertPath("foo//bar/baz/", "foo/bar", "baz");
-    }
-
-    private void assertPath(final String pathName, final String dirname, final String basename) {
+    @ParameterizedTest
+    @CsvSource(value = {"/,'',''", "/foo,'',foo", "/foo/bar,foo,bar", "/foo/bar/baz,foo/bar,baz", "/foo//bar/baz,foo/bar,baz", "/foo//bar/baz/,foo/bar,baz"})
+    void assertPath(final String pathName, final String dirname, final String basename) {
         final PathName result = PathName.parse(pathName);
-        Assertions.assertEquals(dirname, result.getDirname());
-        Assertions.assertEquals(basename, result.getBasename());
+        assertThat(result).extracting("dirname").isEqualTo(dirname);
+        assertThat(result).extracting("basename").isEqualTo(basename);
     }
 }
