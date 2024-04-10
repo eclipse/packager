@@ -24,7 +24,7 @@ public enum Type {
     BLOB(7, 1), //
     STRING_ARRAY(8, 1), //
     I18N_STRING(9, 1), //
-    ;
+    UNKNOWN(Integer.MAX_VALUE, 0);
 
     private final int type;
 
@@ -41,5 +41,15 @@ public enum Type {
 
     public int align() {
         return this.align;
+    }
+
+    public static Type fromType(final int type) {
+        for (final Type t : values()) {
+            if (t.type == type) {
+                return t;
+            }
+        }
+
+        return UNKNOWN;
     }
 }
