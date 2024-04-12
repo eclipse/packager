@@ -13,6 +13,11 @@
 
 package org.eclipse.packager.rpm;
 
+import org.apache.commons.codec.binary.Hex;
+
+import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 public class RpmTagValue {
@@ -118,8 +123,12 @@ public class RpmTagValue {
             return Optional.empty();
         }
 
+        if (this.value instanceof Integer) {
+            return Optional.of((Integer.toUnsignedLong((Integer) this.value)));
+        }
+
         if (this.value instanceof Long) {
-            return Optional.of(((Long) this.value).longValue());
+            return Optional.of((Long) this.value);
         }
 
         if (this.value instanceof Long[]) {
@@ -132,5 +141,33 @@ public class RpmTagValue {
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public String toString() {
+        if (this.value instanceof byte[]) {
+            return Hex.encodeHexString((byte[]) this.value);
+        }
+
+        if (this.value instanceof ByteBuffer) {
+            ByteBuffer buffer = (ByteBuffer) this.value;
+            byte[] data;
+
+            if (buffer.hasArray()) {
+                data = buffer.array();
+            } else {
+                data = new byte[buffer.remaining()];
+                buffer.get(data);
+            }
+
+            return Hex.encodeHexString(data);
+        }
+
+        if (this.value instanceof Object[]) {
+            final Object[] array = (Object[]) this.value;
+            return array.length == 1 ? Objects.toString(array[0]) : Arrays.toString((Object[]) this.value);
+        }
+
+        return Objects.toString(this.value);
     }
 }

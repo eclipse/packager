@@ -21,6 +21,7 @@ import org.eclipse.packager.rpm.Architecture;
 import org.eclipse.packager.rpm.OperatingSystem;
 import org.eclipse.packager.rpm.RpmLead;
 import org.eclipse.packager.rpm.RpmTag;
+import org.eclipse.packager.rpm.RpmTagValue;
 import org.eclipse.packager.rpm.RpmVersion;
 import org.eclipse.packager.rpm.Type;
 import org.eclipse.packager.rpm.header.Header;
@@ -73,8 +74,8 @@ public class LeadBuilder {
         Objects.requireNonNull(architectureMapper);
         Objects.requireNonNull(operatingSystemMapper);
 
-        final Object os = header.get(RpmTag.OS);
-        final Object arch = header.get(RpmTag.ARCH);
+        final Object os = ((RpmTagValue) header.get(RpmTag.OS)).getValue();
+        final Object arch = ((RpmTagValue) header.get(RpmTag.ARCH)).getValue();
 
         if (os instanceof String) {
             this.architecture = architectureMapper.apply((String) os).orElse(Architecture.NOARCH).getValue();

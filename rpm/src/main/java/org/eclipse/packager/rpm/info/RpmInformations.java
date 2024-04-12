@@ -26,6 +26,7 @@ import org.apache.commons.compress.archivers.cpio.CpioArchiveEntry;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream;
 import org.eclipse.packager.rpm.RpmSignatureTag;
 import org.eclipse.packager.rpm.RpmTag;
+import org.eclipse.packager.rpm.RpmTagValue;
 import org.eclipse.packager.rpm.info.RpmInformation.Dependency;
 import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
@@ -59,6 +60,7 @@ public final class RpmInformations {
 
         result.setInstalledSize(asLong(header.getTag(RpmTag.SIZE)));
         result.setArchiveSize(asLong(header.getTag(RpmTag.ARCHIVE_SIZE)));
+
         if (result.getArchiveSize() == null) {
             result.setArchiveSize(asLong(signature.getTag(RpmSignatureTag.PAYLOAD_SIZE)));
         }
@@ -192,18 +194,7 @@ public final class RpmInformations {
             return null;
         }
 
-        if (value instanceof String) {
-            return (String) value;
-        }
-        if (value instanceof String[]) {
-            final String[] values = (String[]) value;
-            if (values.length > 0) {
-                return values[0];
-            }
-            return null;
-        }
-
-        return value.toString();
+        return new RpmTagValue(value).asString().orElse(null);
     }
 
     public static Long asLong(final Object value) {
@@ -211,15 +202,6 @@ public final class RpmInformations {
             return null;
         }
 
-        if (value instanceof Number) {
-            return ((Number) value).longValue();
-        }
-
-        try {
-            return Long.parseLong(value.toString());
-        } catch (final NumberFormatException e) {
-            return null;
-        }
+        return new RpmTagValue(value).asLong().orElse(null);
     }
-
 }
