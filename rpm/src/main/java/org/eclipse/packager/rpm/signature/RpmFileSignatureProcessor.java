@@ -68,13 +68,13 @@ public class RpmFileSignatureProcessor {
         throws IOException, PGPException {
 
         final long leadLength = 96;
-        long signatureHeaderStart = 0L;
-        long signatureHeaderLength = 0L;
-        long payloadHeaderStart = 0L;
-        long payloadHeaderLength = 0L;
-        long payloadStart = 0L;
-        long archiveSize = 0L;
-        long payloadSize = 0L;
+        long signatureHeaderStart;
+        long signatureHeaderLength;
+        long payloadHeaderStart;
+        long payloadHeaderLength;
+        long payloadStart;
+        long archiveSize;
+        long payloadSize;
         byte[] signatureHeader;
 
         if (!Files.exists(rpm)) {

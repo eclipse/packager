@@ -55,9 +55,14 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
         public I18nString(final String value) {
             this.value = value;
         }
+
+        @Override
+        public String toString() {
+            return this.value;
+        }
     }
 
-    private final Map<Integer, Object> entries = new LinkedHashMap<>();
+    private final Map<Integer, HeaderEntry> entries = new LinkedHashMap<>();
 
     private final Charset charset;
 
@@ -103,61 +108,61 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
     public void putByte(final int tag, final byte... value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag, value);
+        this.entries.put(tag, makeEntry(tag, value));
     }
 
     public void putByte(final T tag, final byte... value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag.getValue(), value);
+        this.entries.put(tag.getValue(), makeEntry(tag.getValue(), value));
     }
 
     public void putShort(final int tag, final short... value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag, value);
+        this.entries.put(tag, makeEntry(tag, value));
     }
 
     public void putShort(final T tag, final short... value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag.getValue(), value);
+        this.entries.put(tag.getValue(), makeEntry(tag.getValue(), value));
     }
 
     public void putInt(final int tag, final int... value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag, value);
+        this.entries.put(tag, makeEntry(tag, value));
     }
 
     public void putInt(final T tag, final int... value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag.getValue(), value);
+        this.entries.put(tag.getValue(), makeEntry(tag.getValue(), value));
     }
 
     public void putLong(final int tag, final long... value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag, value);
+        this.entries.put(tag, makeEntry(tag, value));
     }
 
     public void putLong(final T tag, final long... value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag.getValue(), value);
+        this.entries.put(tag.getValue(), makeEntry(tag.getValue(), value));
     }
 
     public void putString(final int tag, final String value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag, value);
+        this.entries.put(tag, makeEntry(tag, value));
     }
 
     public void putString(final T tag, final String value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag.getValue(), value);
+        this.entries.put(tag.getValue(), makeEntry(tag.getValue(), value));
     }
 
     public void putStringOptional(final int tag, final String value) {
@@ -165,7 +170,7 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
             return;
         }
 
-        this.entries.put(tag, value);
+        this.entries.put(tag, makeEntry(tag, value));
     }
 
     public void putStringOptional(final T tag, final String value) {
@@ -173,55 +178,55 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
             return;
         }
 
-        this.entries.put(tag.getValue(), value);
+        this.entries.put(tag.getValue(), makeEntry(tag.getValue(), value));
     }
 
     public void putStringArray(final int tag, final String... value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag, value);
+        this.entries.put(tag, makeEntry(tag, value));
     }
 
     public void putStringArray(final T tag, final String... value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag.getValue(), value);
+        this.entries.put(tag.getValue(), makeEntry(tag.getValue(), value));
     }
 
     public void putI18nString(final int tag, final String... value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag, Arrays.stream(value).map(v -> new I18nString(v)).toArray(I18nString[]::new));
+        this.entries.put(tag, makeEntry(tag, Arrays.stream(value).map(I18nString::new).toArray(I18nString[]::new)));
     }
 
     public void putI18nString(final T tag, final String... value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag.getValue(), Arrays.stream(value).map(v -> new I18nString(v)).toArray(I18nString[]::new));
+        this.entries.put(tag.getValue(), makeEntry(tag.getValue(), Arrays.stream(value).map(I18nString::new).toArray(I18nString[]::new)));
     }
 
     public void putBlob(final int tag, final byte[] value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag, ByteBuffer.wrap(value));
+        this.entries.put(tag, makeEntry(tag, ByteBuffer.wrap(value)));
     }
 
     public void putBlob(final int tag, final ByteBuffer value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag, value);
+        this.entries.put(tag, makeEntry(tag, value));
     }
 
     public void putBlob(final T tag, final byte[] value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag.getValue(), ByteBuffer.wrap(value));
+        this.entries.put(tag.getValue(), makeEntry(tag.getValue(), ByteBuffer.wrap(value)));
     }
 
     public void putBlob(final T tag, final ByteBuffer value) {
         Objects.requireNonNull(value);
 
-        this.entries.put(tag.getValue(), value);
+        this.entries.put(tag.getValue(), makeEntry(tag.getValue(), value));
     }
 
     public void putSize(long value, final T intTag, final T longTag) {
@@ -252,11 +257,11 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
     }
 
     public Object get(final int tag) {
-        return this.entries.get(tag);
+        return this.entries.get(tag).getValue();
     }
 
     public Object get(final T tag) {
-        return this.entries.get(tag.getValue());
+        return this.entries.get(tag.getValue()).getValue();
     }
 
     @Override
@@ -278,11 +283,11 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
         if (charset == null) {
             throw new IllegalArgumentException("'charset' cannot be null");
         }
-        return this.entries.entrySet().stream().map(this::makeEntry).toArray(num -> new HeaderEntry[num]);
+        return this.entries.entrySet().stream().map(entry -> makeEntry(entry, charset)).toArray(HeaderEntry[]::new);
     }
 
-    private HeaderEntry makeEntry(final Map.Entry<Integer, Object> entry) {
-        return makeEntry(entry, charset);
+    private HeaderEntry makeEntry(final Map.Entry<Integer, HeaderEntry> entry) {
+        return makeEntry(entry, this.charset);
     }
 
     /**
@@ -298,18 +303,18 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
         return makeEntries(StandardCharsets.UTF_8);
     }
 
-    private static HeaderEntry makeEntry(final Map.Entry<Integer, Object> entry, final Charset charset) {
-        final Object val = entry.getValue();
-        final int tag = entry.getKey();
+    private static HeaderEntry makeEntry(final Map.Entry<Integer, HeaderEntry> entry, final Charset charset) {
+        return entry.getValue();
+    }
 
-        if (val instanceof HeaderEntry) {
-            return (HeaderEntry) val;
-        }
+    private static HeaderEntry makeEntry(int tag, Object val) {
+        return makeEntry(tag, val, StandardCharsets.UTF_8);
+    }
 
+    private static HeaderEntry makeEntry(int tag, Object val, Charset charset) {
         // NULL
-
         if (val == null) {
-            return new HeaderEntry(Type.NULL, tag, 0, null);
+            return new HeaderEntry(Type.NULL, tag, 0, null, val);
         }
 
         // FIXME: CHAR
@@ -318,7 +323,7 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
 
         if (val instanceof byte[]) {
             final byte[] value = (byte[]) val;
-            return new HeaderEntry(Type.BYTE, tag, value.length, value);
+            return new HeaderEntry(Type.BYTE, tag, value.length, value, val);
         }
 
         // SHORT
@@ -332,7 +337,7 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
                 buffer.putShort(v);
             }
 
-            return new HeaderEntry(Type.SHORT, tag, value.length, data);
+            return new HeaderEntry(Type.SHORT, tag, value.length, data, val);
         }
 
         // INT
@@ -346,7 +351,7 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
                 buffer.putInt(v);
             }
 
-            return new HeaderEntry(Type.INT, tag, value.length, data);
+            return new HeaderEntry(Type.INT, tag, value.length, data, val);
         }
 
         // LONG
@@ -360,7 +365,7 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
                 buffer.putLong(v);
             }
 
-            return new HeaderEntry(Type.LONG, tag, value.length, data);
+            return new HeaderEntry(Type.LONG, tag, value.length, data, val);
         }
 
         // STRING
@@ -368,7 +373,7 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
         if (val instanceof String) {
             final String value = (String) val;
 
-            return new HeaderEntry(Type.STRING, tag, 1, makeStringData(new ByteArrayOutputStream(), value, charset).toByteArray());
+            return new HeaderEntry(Type.STRING, tag, 1, makeStringData(new ByteArrayOutputStream(), value, charset).toByteArray(), val);
         }
 
         // BLOB
@@ -382,7 +387,7 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
                 data = new byte[value.remaining()];
                 value.get(data);
             }
-            return new HeaderEntry(Type.BLOB, tag, data.length, data);
+            return new HeaderEntry(Type.BLOB, tag, data.length, data, val);
         }
 
         // STRING_ARRAY
@@ -390,7 +395,7 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
         if (val instanceof String[]) {
             final String[] value = (String[]) val;
 
-            return new HeaderEntry(Type.STRING_ARRAY, tag, value.length, makeStringsData(new ByteArrayOutputStream(), value, charset).toByteArray());
+            return new HeaderEntry(Type.STRING_ARRAY, tag, value.length, makeStringsData(new ByteArrayOutputStream(), value, charset).toByteArray(), val);
         }
 
         // I18N_STRING
@@ -398,7 +403,7 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
         if (val instanceof I18nString[]) {
             final I18nString[] value = (I18nString[]) val;
 
-            return new HeaderEntry(Type.I18N_STRING, tag, value.length, makeStringsData(new ByteArrayOutputStream(), value, charset).toByteArray());
+            return new HeaderEntry(Type.I18N_STRING, tag, value.length, makeStringsData(new ByteArrayOutputStream(), value, charset).toByteArray(), val);
         }
 
         throw new IllegalArgumentException(String.format("Unable to process value type: %s", val.getClass()));
@@ -493,5 +498,4 @@ public class Header<T extends RpmBaseTag> implements ReadableHeader<T> {
 
         header.putLong(tag, values);
     }
-
 }

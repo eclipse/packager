@@ -51,12 +51,12 @@ class StableDependencyOrderTest {
         Collections.reverse(requirementsReverse);
         Dependencies.putRequirements(header2, requirementsReverse);
 
-        assertThat(header2.get(REQUIRE_NAME)).isEqualTo(header1.get(REQUIRE_NAME));
-        assertThat(header2.get(REQUIRE_VERSION)).isEqualTo(header1.get(REQUIRE_VERSION));
+        assertThat(((RpmTagValue) header2.get(REQUIRE_NAME)).getValue()).isEqualTo(((RpmTagValue) header1.get(REQUIRE_NAME)).getValue());
+        assertThat(((RpmTagValue) header2.get(REQUIRE_VERSION)).getValue()).isEqualTo(((RpmTagValue) header1.get(REQUIRE_VERSION)).getValue());
         assertThat(getRequireFlags(header2)).isEqualTo(getRequireFlags(header1));
     }
 
     private static List<Set<RpmDependencyFlags>> getRequireFlags(Header<RpmTag> header) {
-        return Arrays.stream((int[]) header.get(REQUIRE_FLAGS)).mapToObj(RpmDependencyFlags::parse).collect(Collectors.toUnmodifiableList());
+        return Arrays.stream((int[]) ((RpmTagValue) header.get(REQUIRE_FLAGS)).getValue()).mapToObj(RpmDependencyFlags::parse).collect(Collectors.toUnmodifiableList());
     }
 }
