@@ -14,6 +14,10 @@
 package org.eclipse.packager.rpm;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.packager.rpm.RpmTag.BASENAMES;
+import static org.eclipse.packager.rpm.RpmTag.DIRNAMES;
+import static org.eclipse.packager.rpm.RpmTag.FILE_FLAGS;
+import static org.eclipse.packager.rpm.RpmTag.FILE_VERIFYFLAGS;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -22,7 +26,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.packager.rpm.app.Dumper;
@@ -95,10 +98,10 @@ class SetVerifyFlagsTest {
         try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(outFile)))) {
             Dumper.dumpAll(in);
             final InputHeader<RpmTag> header = in.getPayloadHeader();
-            assertThat(List.of((String[]) header.getTag(RpmTag.DIRNAMES))).containsExactly(DIRNAME);
-            assertThat(List.of((String[]) header.getTag(RpmTag.BASENAMES))).containsExactly(NAME_myconf, NAME_myreadme);
-            assertThat(List.of((Integer[]) header.getTag(RpmTag.FILE_FLAGS))).containsExactly(17, 256);
-            assertThat((Integer[]) header.getTag(RpmTag.FILE_VERIFYFLAGS)).containsExactly(24, -1);
+            assertThat(header.getStringList(DIRNAMES)).containsExactly(DIRNAME);
+            assertThat(header.getStringList(BASENAMES)).containsExactly(NAME_myconf, NAME_myreadme);
+            assertThat(header.getIntegerList(FILE_FLAGS)).containsExactly(17, 256);
+            assertThat(header.getIntegerList(FILE_VERIFYFLAGS)).containsExactly(24, -1);
         }
     }
 }

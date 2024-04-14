@@ -13,24 +13,27 @@
 
 package org.eclipse.packager.rpm.parse;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import org.eclipse.packager.rpm.ReadableHeader;
 import org.eclipse.packager.rpm.RpmBaseTag;
+import org.eclipse.packager.rpm.RpmTagValue;
 
 public class InputHeader<T extends RpmBaseTag> implements ReadableHeader<T> {
-    private final Map<Integer, HeaderValue> entries;
+    private final Map<Integer, HeaderValue<?>> entries;
 
     private final long start;
 
     private final long length;
 
-    public InputHeader(final HeaderValue[] entries, final long start, final long length) {
-        final Map<Integer, HeaderValue> tags = new LinkedHashMap<>(entries.length);
-        for (final HeaderValue entry : entries) {
+    public InputHeader(final HeaderValue<?>[] entries, final long start, final long length) {
+        final Map<Integer, HeaderValue<?>> tags = new LinkedHashMap<>(entries.length);
+        for (final HeaderValue<?> entry : entries) {
             tags.put(entry.getTag(), entry);
         }
 
@@ -58,45 +61,111 @@ public class InputHeader<T extends RpmBaseTag> implements ReadableHeader<T> {
         return this.length;
     }
 
-    public Object getTag(final T tag) {
-        return getTagOrDefault(tag, null);
-    }
-
-    public Object getTag(final int tag) {
-        return getTagOrDefault(tag, null);
+    public <E> boolean hasTag(final int tag) {
+        return this.entries.containsKey(tag);
     }
 
     @Override
-    public Optional<Object> getValue(final T tag) {
-        return Optional.ofNullable(getTag(tag));
+    public boolean hasTag(final T tag) {
+        return hasTag(tag.getValue());
     }
 
-    public Optional<Object> getOptionalTag(final T tag) {
-        return getEntry(tag).map(HeaderValue::getValue);
+    public <E> E get(T tag) {
+        Optional<HeaderValue<E>> optHeaderValue = getOptionalTag(tag, tag.getDataType());
+        if (optHeaderValue.isPresent()) {
+            HeaderValue<E> headerValue = optHeaderValue.get();
+            RpmTagValue<E> rpmTagValue = headerValue.getValue();
+            return rpmTagValue.getValue();
+        }
+
+        return null;
     }
 
-    public Optional<Object> getOptionalTag(final int tag) {
-        return getEntry(tag).map(HeaderValue::getValue);
+    @Override
+    public String getString(T tag) {
+        if (!String.class.isAssignableFrom(tag.getDataType()) && !String[].class.isAssignableFrom(tag.getDataType())) {
+            throw new IllegalArgumentException("Tag " + tag  + " is not a string or array of strings");
+        }
+
+        if (String.class.isAssignableFrom(tag.getDataType())) {
+            return getOptionalTag(tag, String.class).flatMap(headerValue -> headerValue.getValue().asString()).orElse(null);
+        }
+
+        return getOptionalTag(tag, String[].class).flatMap(headerValue -> headerValue.getValue().asString()).orElse(null);
     }
 
-    public Optional<HeaderValue> getEntry(final T tag) {
-        return Optional.ofNullable(this.entries.get(tag.getValue()));
+    @Override
+    public Integer getInteger(T tag) {
+        if (!Integer.class.isAssignableFrom(tag.getDataType())) {
+            throw new IllegalArgumentException("Tag " + tag  + " is not an integer");
+        }
+
+        return getOptionalTag(tag, Integer.class).flatMap(headerValue -> headerValue.getValue().asInteger()).orElse(null);
     }
 
-    public Optional<HeaderValue> getEntry(final int tag) {
-        return Optional.ofNullable(this.entries.get(tag));
+    @Override
+    public Long getLong(T tag) {
+        if (!Long.class.isAssignableFrom(tag.getDataType())) {
+            throw new IllegalArgumentException("Tag " + tag  + " is not a long");
+        }
+
+        return getOptionalTag(tag, Long.class).flatMap(headerValue -> headerValue.getValue().asLong()).orElse(null);
     }
 
-    public Object getTagOrDefault(final T tag, final Object defaultValue) {
-        return getOptionalTag(tag).orElse(defaultValue);
+    @Override
+    public List<String> getStringList(T tag) {
+        if (!String[].class.isAssignableFrom(tag.getDataType())) {
+            throw new IllegalArgumentException("Tag " + tag  + " is not an array of strings");
+        }
+
+        return getOptionalTag(tag, String[].class).flatMap(headerValue -> headerValue.getValue().asStringArray().map(Arrays::asList)).orElse(null);
     }
 
-    public Object getTagOrDefault(final int tag, final Object defaultValue) {
-        return getOptionalTag(tag).orElse(defaultValue);
+    @Override
+    public List<Integer> getIntegerList(T tag) {
+        if (!Integer[].class.isAssignableFrom(tag.getDataType())) {
+            throw new IllegalArgumentException("Tag " + tag  + " is not an array of integers");
+        }
+
+        return getOptionalTag(tag, Integer[].class).flatMap(headerValue -> headerValue.getValue().asIntegerArray().map(Arrays::asList)).orElse(null);
     }
 
-    public Map<Integer, HeaderValue> getRawTags() {
+    @Override
+    public List<Long> getLongList(T tag) {
+        if (!Long[].class.isAssignableFrom(tag.getDataType())) {
+            throw new IllegalArgumentException("Tag " + tag  + " is not an array of longs");
+        }
+
+        return getOptionalTag(tag, Long[].class).flatMap(headerValue -> headerValue.getValue().asLongArray().map(Arrays::asList)).orElse(null);
+    }
+
+    @Override
+    public byte[] getByteArray(T tag) {
+        if (!byte[].class.isAssignableFrom(tag.getDataType())) {
+            throw new IllegalArgumentException("Tag " + tag  + " is not an array of bytes");
+        }
+
+        return getOptionalTag(tag, byte[].class).flatMap(headerValue -> headerValue.getValue().asByteArray()).orElse(null);
+    }
+
+    public <E> Optional<HeaderValue<E>> getOptionalTag(final int tag, Class<E> dataType) {
+        return getEntry(tag, dataType);
+    }
+
+    public <E> Optional<HeaderValue<E>> getOptionalTag(final T tag, Class<E> dataType) {
+        return getOptionalTag(tag.getValue(), dataType);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <E> Optional<HeaderValue<E>> getEntry(final int tag, Class<E> dataType) {
+        return Optional.ofNullable((HeaderValue<E>) this.entries.get(tag));
+    }
+
+    private <E> Optional<HeaderValue<E>> getEntry(final T tag, Class<E> dataType) {
+        return getEntry(tag.getValue(), dataType);
+    }
+
+    public Map<Integer, HeaderValue<?>> getRawTags() {
         return this.entries;
     }
-
 }

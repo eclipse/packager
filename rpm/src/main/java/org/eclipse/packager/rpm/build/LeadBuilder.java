@@ -74,15 +74,11 @@ public class LeadBuilder {
         Objects.requireNonNull(architectureMapper);
         Objects.requireNonNull(operatingSystemMapper);
 
-        final Object os = ((RpmTagValue) header.get(RpmTag.OS)).getValue();
-        final Object arch = ((RpmTagValue) header.get(RpmTag.ARCH)).getValue();
+        final String os = header.getString(RpmTag.OS);
+        final String arch = header.getString(RpmTag.ARCH);
 
-        if (os instanceof String) {
-            this.architecture = architectureMapper.apply((String) os).orElse(Architecture.NOARCH).getValue();
-        }
-        if (arch instanceof String) {
-            this.operatingSystem = operatingSystemMapper.apply((String) arch).orElse(OperatingSystem.UNKNOWN).getValue();
-        }
+        this.architecture = architectureMapper.apply(os).orElse(Architecture.NOARCH).getValue();
+        this.operatingSystem = operatingSystemMapper.apply(arch).orElse(OperatingSystem.UNKNOWN).getValue();
     }
 
     public void fillFlagsFromHeader(final Header<RpmTag> header) {

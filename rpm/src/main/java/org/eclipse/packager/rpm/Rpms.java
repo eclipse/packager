@@ -13,6 +13,8 @@
 
 package org.eclipse.packager.rpm;
 
+import org.eclipse.packager.rpm.parse.HeaderValue;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
@@ -65,9 +67,9 @@ public class Rpms {
         return sb.toString();
     }
 
-    public static String dumpValue(final Object value) {
+    public static String dumpValue(final HeaderValue<?> value) {
         final StringBuilder sb = new StringBuilder();
-        dumpValue(sb, value);
+        dumpValue(sb, value.getValue());
         return sb.toString();
     }
 
@@ -78,18 +80,8 @@ public class Rpms {
         }
     }
 
-    public static void dumpValue(final StringBuilder sb, final Object value) {
-        if (value != null) {
-            if (value instanceof byte[]) {
-                sb.append(toHex((byte[]) value, -1));
-            } else if (value.getClass().isArray()) {
-                sb.append(Arrays.toString((Object[]) value));
-            } else {
-                sb.append(value);
-            }
-        } else {
-            sb.append("null");
-        }
+    public static <T> void dumpValue(final StringBuilder sb, final RpmTagValue<T> value) {
+        sb.append(value);
     }
 
     public static int padding(final int offset) {
