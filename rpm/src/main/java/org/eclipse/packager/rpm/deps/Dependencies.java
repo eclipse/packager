@@ -77,22 +77,52 @@ public final class Dependencies {
         Header.putIntFields(header, deps, flagsTag, dep -> RpmDependencyFlags.encode(dep.getFlags()));
     }
 
+    /**
+     * <p><em>Note that since version 0.21.0 <code>IllegalArgumentException</code> is thrown if an error occurs while reading the RPM header.</em></p>
+     *
+     * @param header the RPM header
+     * @return the list of dependencies
+     */
     public static List<Dependency> getRequirements(final ReadableHeader<RpmTag> header) {
         return getDependencies(header, RpmTag.REQUIRE_NAME, RpmTag.REQUIRE_VERSION, RpmTag.REQUIRE_FLAGS);
     }
 
+    /**
+     * <p><em>Note that since version 0.21.0 <code>IllegalArgumentException</code> is thrown if an error occurs while reading the RPM header.</em></p>
+     *
+     * @param header the RPM header
+     * @return the list of dependencies
+     */
     public static List<Dependency> getProvides(final ReadableHeader<RpmTag> header) {
         return getDependencies(header, RpmTag.PROVIDE_NAME, RpmTag.PROVIDE_VERSION, RpmTag.PROVIDE_FLAGS);
     }
 
+    /**
+     * <p><em>Note that since version 0.21.0 <code>IllegalArgumentException</code> is thrown if an error occurs while reading the RPM header.</em></p>
+     *
+     * @param header the RPM header
+     * @return the list of dependencies
+     */
     public static List<Dependency> getConflicts(final ReadableHeader<RpmTag> header) {
         return getDependencies(header, RpmTag.CONFLICT_NAME, RpmTag.CONFLICT_VERSION, RpmTag.CONFLICT_FLAGS);
     }
 
+    /**
+     * <p><em>Note that since version 0.21.0 <code>IllegalArgumentException</code> is thrown if an error occurs while reading the RPM header.</em></p>
+     *
+     * @param header the RPM header
+     * @return the list of dependencies
+     */
     public static List<Dependency> getObsoletes(final ReadableHeader<RpmTag> header) {
         return getDependencies(header, RpmTag.OBSOLETE_NAME, RpmTag.OBSOLETE_VERSION, RpmTag.OBSOLETE_FLAGS);
     }
 
+    /**
+     * <p><em>Note that since version 0.21.0 <code>IllegalArgumentException</code> is thrown if an error occurs while reading the RPM header.</em></p>
+     *
+     * @param header the RPM header
+     * @return the list of dependencies
+     */
     public static List<Dependency> getSuggests(final ReadableHeader<RpmTag> header) {
         return getDependencies(header, RpmTag.SUGGEST_NAME, RpmTag.SUGGEST_VERSION, RpmTag.SUGGEST_FLAGS);
     }
@@ -105,6 +135,12 @@ public final class Dependencies {
         return getDependencies(header, RpmTag.SUPPLEMENT_NAME, RpmTag.SUPPLEMENT_VERSION, RpmTag.SUPPLEMENT_FLAGS);
     }
 
+    /**
+     * <p><em>Note that since version 0.21.0 <code>IllegalArgumentException</code> is thrown if an error occurs while reading the RPM header.</em></p>
+     *
+     * @param header the RPM header
+     * @return the list of dependencies
+     */
     public static List<Dependency> getEnhances(final ReadableHeader<RpmTag> header) {
         return getDependencies(header, RpmTag.ENHANCE_NAME, RpmTag.ENHANCE_VERSION, RpmTag.ENHANCE_FLAGS);
     }

@@ -123,16 +123,16 @@ public class Dumper {
         System.out.format(string + "%n");
         System.out.format("=================================%n");
 
-        Set<Entry<Integer, HeaderValue<?>>> data;
+        Set<Entry<Integer, HeaderValue>> data;
         if (sorted) {
             data = new TreeMap<>(header.getRawTags()).entrySet();
         } else {
             data = header.getRawTags().entrySet();
         }
 
-        for (final Map.Entry<Integer, HeaderValue<?>> entry : data) {
+        for (final Map.Entry<Integer, HeaderValue> entry : data) {
             final RpmBaseTag tag = func.apply(entry.getKey());
-            final HeaderValue<?> value = entry.getValue();
+            final HeaderValue value = entry.getValue();
             System.out.format("%20s - %s%n", tag != null ? tag : entry.getKey(), Rpms.dumpValue(value));
 
             if (entry.getKey() == IMMUTABLE_TAG_SIGNATURE || entry.getKey() == IMMUTABLE_TAG_HEADER) {

@@ -183,7 +183,7 @@ public class RpmInputStream extends InputStream {
         final int indexCount = this.in.readInt();
         final int storeSize = this.in.readInt();
 
-        final HeaderValue<?>[] entries = new HeaderValue[indexCount];
+        final HeaderValue[] entries = new HeaderValue[indexCount];
 
         for (int i = 0; i < indexCount; i++) {
             entries[i] = readEntry();
@@ -210,13 +210,13 @@ public class RpmInputStream extends InputStream {
         return new InputHeader<>(entries, start, end - start);
     }
 
-    private HeaderValue<?> readEntry() throws IOException {
+    private HeaderValue readEntry() throws IOException {
         final int tag = this.in.readInt();
         final int type = this.in.readInt();
         final int offset = this.in.readInt();
         final int count = this.in.readInt();
 
-        return new HeaderValue<>(tag, type, offset, count);
+        return new HeaderValue(tag, type, offset, count);
     }
 
     private byte[] readComplete(final int size) throws IOException {

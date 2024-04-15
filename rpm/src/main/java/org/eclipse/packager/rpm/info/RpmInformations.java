@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.compress.archivers.cpio.CpioArchiveEntry;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream;
@@ -69,6 +68,16 @@ public final class RpmInformations {
     private RpmInformations() {
     }
 
+    /**
+     * Returns the RPM information for the given RPM input stream.
+     *
+     * <p><em>Note that since version 0.21.0 <code>IllegalArgumentException</code> is thrown if an error occurs while reading the RPM header.</em></p>
+     *
+     * @param in the RPM input stream
+     * @return the RPM information for the given RPM input stream
+     * @throws IOException if an error occurs while reading from the given RPM input stream
+     * @throws IllegalArgumentException if there are any problems reading the headers
+     */
     public static RpmInformation makeInformation(final RpmInputStream in) throws IOException {
         final InputHeader<RpmTag> header = in.getPayloadHeader();
         final InputHeader<RpmSignatureTag> signature = in.getSignatureHeader();

@@ -67,7 +67,7 @@ public class Rpms {
         return sb.toString();
     }
 
-    public static String dumpValue(final HeaderValue<?> value) {
+    public static String dumpValue(final HeaderValue value) {
         final StringBuilder sb = new StringBuilder();
         dumpValue(sb, value.getValue());
         return sb.toString();

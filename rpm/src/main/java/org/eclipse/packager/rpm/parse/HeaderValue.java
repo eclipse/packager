@@ -23,10 +23,10 @@ import org.eclipse.packager.rpm.RpmTagValue;
 import org.eclipse.packager.rpm.Rpms;
 import org.eclipse.packager.rpm.header.Type;
 
-public class HeaderValue<T> {
+public class HeaderValue {
     private final int tag;
 
-    private RpmTagValue<T> value;
+    private RpmTagValue<?> value;
 
     private final int originalType;
 
@@ -48,7 +48,7 @@ public class HeaderValue<T> {
         return this.tag;
     }
 
-    public RpmTagValue<T> getValue() {
+    public RpmTagValue<?> getValue() {
         return this.value;
     }
 
@@ -75,30 +75,30 @@ public class HeaderValue<T> {
         case NULL:
             break;
         case CHAR:
-            this.value = (RpmTagValue<T>) new RpmTagValue<>(this.count == 1 ? Character.valueOf((char) storeData.get()) : IntStream.range(0, this.count).mapToObj(i -> (char) storeData.get()).toArray(Character[]::new));
+            this.value = new RpmTagValue<>(this.count == 1 ? Character.valueOf((char) storeData.get()) : IntStream.range(0, this.count).mapToObj(i -> (char) storeData.get()).toArray(Character[]::new));
             break;
         case BYTE:
         case UNKNOWN:
-            this.value = (RpmTagValue<T>) new RpmTagValue<>(this.count == 1 ? Byte.valueOf(storeData.get()) : IntStream.range(0, this.count).mapToObj(i -> storeData.get()).toArray(Byte[]::new));
+            this.value = new RpmTagValue<>(this.count == 1 ? Byte.valueOf(storeData.get()) : IntStream.range(0, this.count).mapToObj(i -> storeData.get()).toArray(Byte[]::new));
             break;
         case SHORT:
-            this.value = (RpmTagValue<T>) new RpmTagValue<>(this.count == 1 ? Short.valueOf(storeData.getShort()) : IntStream.range(0, this.count).mapToObj(i -> storeData.getShort()).toArray(Short[]::new));
+            this.value = new RpmTagValue<>(this.count == 1 ? Short.valueOf(storeData.getShort()) : IntStream.range(0, this.count).mapToObj(i -> storeData.getShort()).toArray(Short[]::new));
             break;
         case INT:
-            this.value = (RpmTagValue<T>) new RpmTagValue<>(this.count == 1 ? Integer.valueOf(storeData.getInt()) : IntStream.range(0, this.count).mapToObj(i -> storeData.getInt()).toArray(Integer[]::new));
+            this.value = new RpmTagValue<>(this.count == 1 ? Integer.valueOf(storeData.getInt()) : IntStream.range(0, this.count).mapToObj(i -> storeData.getInt()).toArray(Integer[]::new));
             break;
         case LONG:
-            this.value = (RpmTagValue<T>) new RpmTagValue<>(this.count == 1 ? Long.valueOf(storeData.getLong()) : IntStream.range(0, this.count).mapToObj(i -> storeData.getLong()).toArray(Long[]::new));
+            this.value = new RpmTagValue<>(this.count == 1 ? Long.valueOf(storeData.getLong()) : IntStream.range(0, this.count).mapToObj(i -> storeData.getLong()).toArray(Long[]::new));
             break;
         case STRING:
-            this.value = (RpmTagValue<T>) new RpmTagValue<>(makeString(storeData));
+            this.value = new RpmTagValue<>(makeString(storeData));
             break;
         case BLOB:
-            this.value = (RpmTagValue<T>) new RpmTagValue<>(makeBlob(storeData));
+            this.value = new RpmTagValue<>(makeBlob(storeData));
             break;
         case STRING_ARRAY:
         case I18N_STRING:
-            this.value = (RpmTagValue<T>) new RpmTagValue<>(IntStream.range(0, this.count).mapToObj(i -> makeString(storeData)).toArray(String[]::new));
+            this.value = new RpmTagValue<>(IntStream.range(0, this.count).mapToObj(i -> makeString(storeData)).toArray(String[]::new));
             break;
         }
     }

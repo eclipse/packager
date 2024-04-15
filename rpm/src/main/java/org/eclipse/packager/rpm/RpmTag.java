@@ -127,8 +127,8 @@ public enum RpmTag implements RpmBaseTag {
         return this.value;
     }
 
-    public <E> Class<E> getDataType() {
-        return (Class<E>) this.dataType;
+    public Class<?> getDataType() {
+        return this.dataType;
     }
 
     private final static Map<Integer, RpmTag> all = new HashMap<>(RpmTag.values().length);

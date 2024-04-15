@@ -45,8 +45,8 @@ public enum RpmSignatureTag implements RpmBaseTag {
     }
 
     @Override
-    public <E> Class<E> getDataType() {
-        return (Class<E>) this.dataType;
+    public Class<?> getDataType() {
+        return this.dataType;
     }
 
     private final static Map<Integer, RpmSignatureTag> all = new HashMap<>(RpmSignatureTag.values().length);

@@ -28,9 +28,8 @@ public interface RpmBaseTag {
     /**
      * Get the data type of the tag.
      *
-     * @param <E> the data type
      * @return the class representing the data type of this tag
      */
-    <E> Class<E> getDataType();
+    Class<?> getDataType();
 }
 

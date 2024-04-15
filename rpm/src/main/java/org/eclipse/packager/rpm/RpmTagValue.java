@@ -77,13 +77,13 @@ public class RpmTagValue<T> {
         }
 
         if (this.value instanceof String[]) {
-            final String[] array = (String[]) this.value;
+            final String[] arr = (String[]) this.value;
 
-            if (array.length == 1) {
-                return Optional.of(array[0]);
+            if (arr.length > 0) {
+                return Optional.of(arr[0]);
+            } else {
+                return Optional.empty();
             }
-
-            throw new IllegalArgumentException("Array contains more than one string value");
         }
 
         return Optional.empty();
@@ -139,13 +139,13 @@ public class RpmTagValue<T> {
         }
 
         if (this.value instanceof Integer[]) {
-            final Integer[] array = (Integer[]) this.value;
+            final Integer[] arr = (Integer[]) this.value;
 
-            if (array.length == 1) {
-                return Optional.of(array[0]);
+            if (arr.length > 0) {
+                return Optional.of(arr[0]);
+            } else {
+                return Optional.empty();
             }
-
-            throw new IllegalArgumentException("Array contains more than one integer value");
         }
 
         return Optional.empty();
@@ -161,13 +161,13 @@ public class RpmTagValue<T> {
         }
 
         if (this.value instanceof Integer[]) {
-            final Integer[] array = (Integer[]) this.value;
+            final Integer[] arr = (Integer[]) this.value;
 
-            if (array.length == 1) {
-                return Optional.of(toLong(array[0]));
+            if (arr.length > 0) {
+                return Optional.of(toLong(arr[0]));
+            } else {
+                return Optional.empty();
             }
-
-            throw new IllegalArgumentException("Array contains more than one integer value");
         }
 
         if (this.value instanceof Long) {
@@ -175,13 +175,13 @@ public class RpmTagValue<T> {
         }
 
         if (this.value instanceof Long[]) {
-            final Long[] array = (Long[]) this.value;
+            final Long[] arr = (Long[]) this.value;
 
-            if (array.length == 1) {
-                return Optional.of(array[0]);
+            if (arr.length > 0) {
+                return Optional.of(arr[0]);
+            } else {
+                return Optional.empty();
             }
-
-            throw new IllegalArgumentException("Array contains more than one long value");
         }
 
         return Optional.empty();
@@ -216,8 +216,8 @@ public class RpmTagValue<T> {
         }
 
         if (this.value instanceof Object[]) {
-            final Object[] array = (Object[]) this.value;
-            return array.length == 1 ? Objects.toString(array[0]) : Arrays.toString((Object[]) this.value);
+            final Object[] arr = (Object[]) this.value;
+            return arr.length == 1 ? Objects.toString(arr[0]) : Arrays.toString((Object[]) this.value);
         }
 
         return Objects.toString(this.value);
