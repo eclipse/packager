@@ -391,7 +391,7 @@ public class RpmBuilder implements AutoCloseable {
 
         private String vendor;
 
-        private String license = "unspecified";
+        private String license = "Unspecified";
 
         private String buildHost = "localhost";
 
@@ -765,7 +765,7 @@ public class RpmBuilder implements AutoCloseable {
                 this.header.putInt(RpmTag.FILE_DIGESTALGO, this.options.getFileDigestAlgorithm().getTag());
             }
 
-            final FileEntry[] files = this.files.values().toArray(new FileEntry[this.files.size()]);
+            final FileEntry[] files = this.files.values().toArray(new FileEntry[0]);
             Arrays.sort(files, comparing(FileEntry::getTargetName));
 
             final long installedSize = Arrays.stream(files).mapToLong(FileEntry::getTargetSize).sum();

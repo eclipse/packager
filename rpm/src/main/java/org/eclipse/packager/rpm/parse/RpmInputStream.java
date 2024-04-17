@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Optional;
 
 import org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream;
 import org.eclipse.packager.rpm.RpmBaseTag;
@@ -89,16 +88,7 @@ public class RpmInputStream extends InputStream {
     }
 
     private InputStream setupPayloadStream() throws IOException {
-
-        // payload format
-
-        final Object payloadFormatValue = this.payloadHeader.getTag(RpmTag.PAYLOAD_FORMAT);
-
-        if (payloadFormatValue != null && !(payloadFormatValue instanceof String)) {
-            throw new IOException("Payload format must be a single string");
-        }
-
-        String payloadFormat = (String) payloadFormatValue;
+        String payloadFormat = this.payloadHeader.getString(RpmTag.PAYLOAD_FORMAT);
 
         if (payloadFormat == null) {
             payloadFormat = "cpio";
@@ -110,17 +100,9 @@ public class RpmInputStream extends InputStream {
 
         // payload coding
 
-        final Optional<Object> payloadCodingHeader = this.payloadHeader.getOptionalTag(RpmTag.PAYLOAD_CODING);
+        final String payloadCoding = this.payloadHeader.getString(RpmTag.PAYLOAD_CODING);
 
-        if (!payloadCodingHeader.isPresent()) {
-            return this.in;
-        }
-
-        final Object payloadCodingValue = payloadCodingHeader.get();
-
-        final String payloadCoding = (String) payloadCodingValue;
-
-        if (payloadCodingValue != null && !(payloadCodingValue instanceof String)) {
+        if (payloadCoding == null) {
             throw new IOException("Payload coding must be a single string");
         }
 
@@ -191,6 +173,7 @@ public class RpmInputStream extends InputStream {
         }
 
         final byte version = this.in.readByte();
+
         if (version != 1) {
             throw new IOException(String.format("File corrupt: Invalid header entry version: %s (valid: 1)", version));
         }

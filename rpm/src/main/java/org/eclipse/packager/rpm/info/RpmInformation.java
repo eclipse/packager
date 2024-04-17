@@ -25,12 +25,12 @@ public class RpmInformation {
 
         private String release;
 
-        private String epoch;
+        private Integer epoch;
 
         public Version() {
         }
 
-        public Version(final String version, final String release, final String epoch) {
+        public Version(final String version, final String release, final Integer epoch) {
             this.version = version;
             this.release = release;
             this.epoch = epoch;
@@ -52,11 +52,11 @@ public class RpmInformation {
             this.release = release;
         }
 
-        public String getEpoch() {
+        public Integer getEpoch() {
             return this.epoch;
         }
 
-        public void setEpoch(final String epoch) {
+        public void setEpoch(final Integer epoch) {
             this.epoch = epoch;
         }
 

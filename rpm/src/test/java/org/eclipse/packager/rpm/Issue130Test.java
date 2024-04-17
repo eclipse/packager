@@ -47,7 +47,7 @@ class Issue130Test {
 
         try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(outFile)))) {
             Dumper.dumpAll(in);
-            assertThat(List.of((String[]) in.getPayloadHeader().getTag(RpmTag.PREFIXES))).containsExactlyElementsOf(PREFIXES);
+            assertThat(in.getPayloadHeader().getStringList(RpmTag.PREFIXES)).containsExactlyElementsOf(PREFIXES);
         }
     }
 
