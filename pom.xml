@@ -75,7 +75,7 @@
         <java.source>11</java.source>
 
         <assertj.version>3.25.3</assertj.version>
-        <bouncycastle.version>1.77</bouncycastle.version>
+        <bouncycastle.version>1.78</bouncycastle.version>
         <commons-compress.version>1.26.1</commons-compress.version>
         <commons-codec.version>1.16.1</commons-codec.version>
         <guava.version>33.1.0-jre</guava.version>
