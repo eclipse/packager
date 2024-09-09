@@ -20,6 +20,7 @@ public enum RpmDependencyFlags {
     LESS(1),
     GREATER(2),
     EQUAL(3),
+    POSTTRANS(5),
     PREREQ(6),
     PRETRANS(7),
     INTERPRETER(8),

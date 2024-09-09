@@ -1230,7 +1230,7 @@ public class RpmBuilder implements AutoCloseable {
     }
 
     public void setPreTransactionScript(final String interpreter, final String script) {
-        addInterpreterRequirement(interpreter, RpmDependencyFlags.SCRIPT_PREUN);
+        addInterpreterRequirement(interpreter, RpmDependencyFlags.PRETRANS);
         setScript(RpmTag.PRETRANSACTION_SCRIPT_PROG, RpmTag.PRETRANSACTION_SCRIPT, interpreter, script);
     }
 
@@ -1239,7 +1239,7 @@ public class RpmBuilder implements AutoCloseable {
     }
 
     public void setPostTransactionScript(final String interpreter, final String script) {
-        addInterpreterRequirement(interpreter, RpmDependencyFlags.SCRIPT_POSTUN);
+        addInterpreterRequirement(interpreter, RpmDependencyFlags.POSTTRANS);
         setScript(RpmTag.POSTTRANSACTION_SCRIPT_PROG, RpmTag.POSTTRANSACTION_SCRIPT, interpreter, script);
     }
 
