@@ -1260,7 +1260,7 @@ public class RpmBuilder implements AutoCloseable {
     private void addInterpreterRequirement(final String interpreter, RpmDependencyFlags scriptPhaseFlag) {
         if (isEmbeddedLuaInterpreter(interpreter)) {
             addRequirement(EMBEDDED_LUA_INTERPRETER_REQUIREMENT_NAME, EMBEDDED_LUA_INTERPRETER_REQUIREMENT_VERSION,
-                scriptPhaseFlag, RpmDependencyFlags.INTERPRETER, RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB);
+                RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB);
         } else {
             addRequirement(interpreter, null, scriptPhaseFlag, RpmDependencyFlags.INTERPRETER);
         }

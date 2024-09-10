@@ -71,8 +71,7 @@ public class ScriptletWriterTest {
         Path outFile;
 
         List<Dependency> expectedRequiredDependencies = List.of(
-            new Dependency("rpmlib(BuiltinLuaScripts)", "4.2.2-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB, RpmDependencyFlags.INTERPRETER, RpmDependencyFlags.SCRIPT_PRE),
-            new Dependency("rpmlib(BuiltinLuaScripts)", "4.2.2-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB, RpmDependencyFlags.INTERPRETER, RpmDependencyFlags.PRETRANS),
+            new Dependency("rpmlib(BuiltinLuaScripts)", "4.2.2-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB),
             new Dependency(customInterpreter, "", RpmDependencyFlags.INTERPRETER, RpmDependencyFlags.SCRIPT_POST),
             new Dependency(shellInterpreter, "", RpmDependencyFlags.INTERPRETER, RpmDependencyFlags.SCRIPT_POSTUN),
             new Dependency(shellInterpreter, "", RpmDependencyFlags.INTERPRETER, RpmDependencyFlags.POSTTRANS),
@@ -115,13 +114,13 @@ public class ScriptletWriterTest {
         final String shell = "/bin/sh";
         return Stream.of(
             // lua interpreter
-            Arguments.of((ScriptletConsumer) RpmBuilder::setPreInstallationScript, RpmTag.PREINSTALL_SCRIPT, RpmTag.PREINSTALL_SCRIPT_PROG, lua, "my preinstall script", simpleLuaDependencyFor(RpmDependencyFlags.SCRIPT_PRE)),
-            Arguments.of((ScriptletConsumer) RpmBuilder::setPostInstallationScript, RpmTag.POSTINSTALL_SCRIPT, RpmTag.POSTINSTALL_SCRIPT_PROG, lua, "my postinstall script", simpleLuaDependencyFor(RpmDependencyFlags.SCRIPT_POST)),
-            Arguments.of((ScriptletConsumer) RpmBuilder::setPreRemoveScript, RpmTag.PREREMOVE_SCRIPT, RpmTag.PREREMOVE_SCRIPT_PROG, lua, "my preremove script", simpleLuaDependencyFor(RpmDependencyFlags.SCRIPT_PREUN)),
-            Arguments.of((ScriptletConsumer) RpmBuilder::setPostRemoveScript, RpmTag.POSTREMOVE_SCRIPT, RpmTag.POSTREMOVE_SCRIPT_PROG, lua, "my postremove script", simpleLuaDependencyFor(RpmDependencyFlags.SCRIPT_POSTUN)),
-            Arguments.of((ScriptletConsumer) RpmBuilder::setPreTransactionScript, RpmTag.PRETRANSACTION_SCRIPT, RpmTag.PRETRANSACTION_SCRIPT_PROG, lua, "my pretransaction script", simpleLuaDependencyFor(RpmDependencyFlags.PRETRANS)),
-            Arguments.of((ScriptletConsumer) RpmBuilder::setPostTransactionScript, RpmTag.POSTTRANSACTION_SCRIPT, RpmTag.POSTTRANSACTION_SCRIPT_PROG, lua, "my posttransaction script", simpleLuaDependencyFor(RpmDependencyFlags.POSTTRANS)),
-            Arguments.of((ScriptletConsumer) RpmBuilder::setVerifyScript, RpmTag.VERIFY_SCRIPT, RpmTag.VERIFY_SCRIPT_PROG, lua, "my verify script", simpleLuaDependencyFor(RpmDependencyFlags.SCRIPT_VERIFY)),
+            Arguments.of((ScriptletConsumer) RpmBuilder::setPreInstallationScript, RpmTag.PREINSTALL_SCRIPT, RpmTag.PREINSTALL_SCRIPT_PROG, lua, "my preinstall script", simpleLuaDependency()),
+            Arguments.of((ScriptletConsumer) RpmBuilder::setPostInstallationScript, RpmTag.POSTINSTALL_SCRIPT, RpmTag.POSTINSTALL_SCRIPT_PROG, lua, "my postinstall script", simpleLuaDependency()),
+            Arguments.of((ScriptletConsumer) RpmBuilder::setPreRemoveScript, RpmTag.PREREMOVE_SCRIPT, RpmTag.PREREMOVE_SCRIPT_PROG, lua, "my preremove script", simpleLuaDependency()),
+            Arguments.of((ScriptletConsumer) RpmBuilder::setPostRemoveScript, RpmTag.POSTREMOVE_SCRIPT, RpmTag.POSTREMOVE_SCRIPT_PROG, lua, "my postremove script", simpleLuaDependency()),
+            Arguments.of((ScriptletConsumer) RpmBuilder::setPreTransactionScript, RpmTag.PRETRANSACTION_SCRIPT, RpmTag.PRETRANSACTION_SCRIPT_PROG, lua, "my pretransaction script", simpleLuaDependency()),
+            Arguments.of((ScriptletConsumer) RpmBuilder::setPostTransactionScript, RpmTag.POSTTRANSACTION_SCRIPT, RpmTag.POSTTRANSACTION_SCRIPT_PROG, lua, "my posttransaction script", simpleLuaDependency()),
+            Arguments.of((ScriptletConsumer) RpmBuilder::setVerifyScript, RpmTag.VERIFY_SCRIPT, RpmTag.VERIFY_SCRIPT_PROG, lua, "my verify script", simpleLuaDependency()),
             // shell interpreter
             Arguments.of((ScriptletConsumer) RpmBuilder::setPreInstallationScript, RpmTag.PREINSTALL_SCRIPT, RpmTag.PREINSTALL_SCRIPT_PROG, shell, "my preinstall script", simpleInterpreterDependencyFor(shell, RpmDependencyFlags.SCRIPT_PRE)),
             Arguments.of((ScriptletConsumer) RpmBuilder::setPostInstallationScript, RpmTag.POSTINSTALL_SCRIPT, RpmTag.POSTINSTALL_SCRIPT_PROG, shell, "my postinstall script", simpleInterpreterDependencyFor(shell, RpmDependencyFlags.SCRIPT_POST)),
@@ -133,9 +132,9 @@ public class ScriptletWriterTest {
         );
     }
 
-    public static List<Dependency> simpleLuaDependencyFor(RpmDependencyFlags scriptletPhase) {
+    public static List<Dependency> simpleLuaDependency() {
         return List.of(
-            new Dependency("rpmlib(BuiltinLuaScripts)", "4.2.2-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB, RpmDependencyFlags.INTERPRETER, scriptletPhase),
+            new Dependency("rpmlib(BuiltinLuaScripts)", "4.2.2-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB),
             new Dependency("rpmlib(CompressedFileNames)", "3.0.4-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB),
             new Dependency("rpmlib(PayloadFilesHavePrefix)", "4.0-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB));
     }
