@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.build.RpmBuilder;
 import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
@@ -70,12 +71,9 @@ public class ScriptletWriterTest {
         Path outFile;
 
         List<Dependency> expectedRequiredDependencies = List.of(
-            new Dependency("rpmlib(BuiltinLuaScripts)", "4.2.2-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB, RpmDependencyFlags.INTERPRETER),
             new Dependency("rpmlib(BuiltinLuaScripts)", "4.2.2-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB, RpmDependencyFlags.INTERPRETER, RpmDependencyFlags.SCRIPT_PRE),
             new Dependency("rpmlib(BuiltinLuaScripts)", "4.2.2-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB, RpmDependencyFlags.INTERPRETER, RpmDependencyFlags.PRETRANS),
-            new Dependency(customInterpreter, "", RpmDependencyFlags.INTERPRETER),
             new Dependency(customInterpreter, "", RpmDependencyFlags.INTERPRETER, RpmDependencyFlags.SCRIPT_POST),
-            new Dependency(shellInterpreter, "", RpmDependencyFlags.INTERPRETER),
             new Dependency(shellInterpreter, "", RpmDependencyFlags.INTERPRETER, RpmDependencyFlags.SCRIPT_POSTUN),
             new Dependency(shellInterpreter, "", RpmDependencyFlags.INTERPRETER, RpmDependencyFlags.POSTTRANS),
             new Dependency("rpmlib(CompressedFileNames)", "3.0.4-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB),
@@ -137,7 +135,6 @@ public class ScriptletWriterTest {
 
     public static List<Dependency> simpleLuaDependencyFor(RpmDependencyFlags scriptletPhase) {
         return List.of(
-            new Dependency("rpmlib(BuiltinLuaScripts)", "4.2.2-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB, RpmDependencyFlags.INTERPRETER),
             new Dependency("rpmlib(BuiltinLuaScripts)", "4.2.2-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB, RpmDependencyFlags.INTERPRETER, scriptletPhase),
             new Dependency("rpmlib(CompressedFileNames)", "3.0.4-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB),
             new Dependency("rpmlib(PayloadFilesHavePrefix)", "4.0-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB));
@@ -145,7 +142,6 @@ public class ScriptletWriterTest {
 
     public static List<Dependency> simpleInterpreterDependencyFor(String interpreter, RpmDependencyFlags scriptletPhase) {
         return List.of(
-            new Dependency(interpreter, "", RpmDependencyFlags.INTERPRETER),
             new Dependency(interpreter, "", RpmDependencyFlags.INTERPRETER, scriptletPhase),
             new Dependency("rpmlib(CompressedFileNames)", "3.0.4-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB),
             new Dependency("rpmlib(PayloadFilesHavePrefix)", "4.0-1", RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB));
