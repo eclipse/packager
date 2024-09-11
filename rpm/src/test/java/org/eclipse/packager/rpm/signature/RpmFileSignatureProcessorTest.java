@@ -15,6 +15,11 @@ package org.eclipse.packager.rpm.signature;
 
 import static java.nio.file.StandardOpenOption.CREATE_NEW;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.packager.rpm.RpmSignatureTag.MD5;
+import static org.eclipse.packager.rpm.RpmSignatureTag.PAYLOAD_SIZE;
+import static org.eclipse.packager.rpm.RpmSignatureTag.PGP;
+import static org.eclipse.packager.rpm.RpmSignatureTag.SHA1HEADER;
+import static org.eclipse.packager.rpm.RpmSignatureTag.SIZE;
 import static org.testcontainers.containers.Container.ExecResult;
 import static org.testcontainers.images.builder.Transferable.DEFAULT_FILE_MODE;
 
@@ -74,18 +79,18 @@ class RpmFileSignatureProcessorTest {
             try (final RpmInputStream initialRpm = new RpmInputStream(new BufferedInputStream(Files.newInputStream(RPM))); final RpmInputStream rpmSigned = new RpmInputStream(new BufferedInputStream(Files.newInputStream(signedRpm)))) {
                 // Get information of the initial rpm file
                 final InputHeader<RpmSignatureTag> initialHeader = initialRpm.getSignatureHeader();
-                final int initialSize = (int) initialHeader.getEntry(RpmSignatureTag.SIZE).get().getValue();
-                final int initialPayloadSize = (int) initialHeader.getEntry(RpmSignatureTag.PAYLOAD_SIZE).get().getValue();
-                final String initialSha1 = (String) initialHeader.getEntry(RpmSignatureTag.SHA1HEADER).get().getValue();
-                final byte[] initialMd5 = (byte[]) initialHeader.getEntry(RpmSignatureTag.MD5).get().getValue();
+                final int initialSize = initialHeader.getInteger(SIZE);
+                final int initialPayloadSize = initialHeader.getInteger(PAYLOAD_SIZE);
+                final String initialSha1 = initialHeader.getString(SHA1HEADER);
+                final byte[] initialMd5 = initialHeader.getByteArray(MD5);
 
                 // Get information of the signed rpm file
                 final InputHeader<RpmSignatureTag> signedHeader = rpmSigned.getSignatureHeader();
-                final int signedSize = (int) signedHeader.getEntry(RpmSignatureTag.SIZE).get().getValue();
-                final int signedPayloadSize = (int) signedHeader.getEntry(RpmSignatureTag.PAYLOAD_SIZE).get().getValue();
-                final String signedSha1 = (String) signedHeader.getEntry(RpmSignatureTag.SHA1HEADER).get().getValue();
-                final byte[] signedMd5 = (byte[]) signedHeader.getEntry(RpmSignatureTag.MD5).get().getValue();
-                final byte[] pgpSignature = (byte[]) signedHeader.getEntry(RpmSignatureTag.PGP).get().getValue();
+                final int signedSize = signedHeader.getInteger(SIZE);
+                final int signedPayloadSize = signedHeader.getInteger(PAYLOAD_SIZE);
+                final String signedSha1 = signedHeader.getString(SHA1HEADER);
+                final byte[] signedMd5 = signedHeader.getByteArray(MD5);
+                final byte[] pgpSignature = signedHeader.getByteArray(PGP);
 
                 // Compare information values of initial rpm and signed rpm
                 assertThat(signedSize).isEqualTo(initialSize);

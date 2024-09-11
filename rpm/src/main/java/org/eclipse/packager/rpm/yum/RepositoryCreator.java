@@ -386,10 +386,10 @@ public class RepositoryCreator {
 
             final Element ver = addElement(pkg, "version");
 
-            if (version.getEpoch() == null || version.getEpoch().isEmpty()) {
+            if (version.getEpoch() == null) {
                 ver.setAttribute("epoch", "0");
             } else {
-                ver.setAttribute("epoch", version.getEpoch());
+                ver.setAttribute("epoch", Integer.toString(version.getEpoch()));
             }
             ver.setAttribute("ver", version.getVersion());
             ver.setAttribute("rel", version.getRelease());

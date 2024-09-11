@@ -17,18 +17,38 @@ import org.apache.commons.codec.binary.Hex;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-public class RpmTagValue {
-    private final Object value;
+public class RpmTagValue<T> {
+    private final T value;
 
-    public RpmTagValue(final Object value) {
+    public RpmTagValue(final T value) {
         this.value = value;
     }
 
-    public Object getValue() {
+    public T getValue() {
         return this.value;
+    }
+
+    public Optional<byte[]> asByteArray() {
+        if (this.value == null) {
+            return Optional.empty();
+        }
+
+        if (this.value instanceof Byte) {
+            return Optional.of(new byte[] { (byte) this.value });
+        }
+
+        if (this.value instanceof byte[]) {
+            return Optional.of((byte[]) this.value);
+        }
+
+        return Optional.empty();
+
     }
 
     public Optional<String[]> asStringArray() {
@@ -39,6 +59,7 @@ public class RpmTagValue {
         if (this.value instanceof String) {
             return Optional.of(new String[] { (String) this.value });
         }
+
         if (this.value instanceof String[]) {
             return Optional.of((String[]) this.value);
         }
@@ -57,6 +78,7 @@ public class RpmTagValue {
 
         if (this.value instanceof String[]) {
             final String[] arr = (String[]) this.value;
+
             if (arr.length > 0) {
                 return Optional.of(arr[0]);
             } else {
@@ -75,8 +97,33 @@ public class RpmTagValue {
         if (this.value instanceof Integer) {
             return Optional.of(new Integer[] { (Integer) this.value });
         }
+
         if (this.value instanceof Integer[]) {
             return Optional.of((Integer[]) this.value);
+        }
+
+        return Optional.empty();
+    }
+
+    public Optional<Long[]> asLongArray() {
+        if (this.value == null) {
+            return Optional.empty();
+        }
+
+        if (this.value instanceof Integer) {
+            return Optional.of(new Long[] { toLong((Integer) this.value) });
+        }
+
+        if (this.value instanceof Long) {
+            return Optional.of(new Long[] {(Long) this.value});
+        }
+
+        if (this.value instanceof Integer[]) {
+            return Optional.of(Stream.of((Integer[]) this.value).map(Integer::toUnsignedLong).toArray(Long[]::new));
+        }
+
+        if (this.value instanceof Long[]) {
+            return Optional.of((Long[]) this.value);
         }
 
         return Optional.empty();
@@ -93,26 +140,12 @@ public class RpmTagValue {
 
         if (this.value instanceof Integer[]) {
             final Integer[] arr = (Integer[]) this.value;
+
             if (arr.length > 0) {
                 return Optional.of(arr[0]);
             } else {
                 return Optional.empty();
             }
-        }
-
-        return Optional.empty();
-    }
-
-    public Optional<Long[]> asLongArray() {
-        if (this.value == null) {
-            return Optional.empty();
-        }
-
-        if (this.value instanceof Long) {
-            return Optional.of(new Long[] { (Long) this.value });
-        }
-        if (this.value instanceof Long[]) {
-            return Optional.of((Long[]) this.value);
         }
 
         return Optional.empty();
@@ -124,7 +157,17 @@ public class RpmTagValue {
         }
 
         if (this.value instanceof Integer) {
-            return Optional.of((Integer.toUnsignedLong((Integer) this.value)));
+            return Optional.of((toLong((Integer) this.value)));
+        }
+
+        if (this.value instanceof Integer[]) {
+            final Integer[] arr = (Integer[]) this.value;
+
+            if (arr.length > 0) {
+                return Optional.of(toLong(arr[0]));
+            } else {
+                return Optional.empty();
+            }
         }
 
         if (this.value instanceof Long) {
@@ -133,6 +176,7 @@ public class RpmTagValue {
 
         if (this.value instanceof Long[]) {
             final Long[] arr = (Long[]) this.value;
+
             if (arr.length > 0) {
                 return Optional.of(arr[0]);
             } else {
@@ -141,6 +185,14 @@ public class RpmTagValue {
         }
 
         return Optional.empty();
+    }
+
+    public static Long toLong(Integer x) {
+        return x != null ? Integer.toUnsignedLong(x) : null;
+    }
+
+    public static List<Long> toLong(List<Integer> x) {
+        return x != null ? x.stream().map(RpmTagValue::toLong).collect(Collectors.toUnmodifiableList()) : null;
     }
 
     @Override
@@ -164,8 +216,8 @@ public class RpmTagValue {
         }
 
         if (this.value instanceof Object[]) {
-            final Object[] array = (Object[]) this.value;
-            return array.length == 1 ? Objects.toString(array[0]) : Arrays.toString((Object[]) this.value);
+            final Object[] arr = (Object[]) this.value;
+            return arr.length == 1 ? Objects.toString(arr[0]) : Arrays.toString((Object[]) this.value);
         }
 
         return Objects.toString(this.value);

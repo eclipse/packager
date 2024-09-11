@@ -18,7 +18,6 @@ import static org.eclipse.packager.rpm.RpmTag.REQUIRE_FLAGS;
 import static org.eclipse.packager.rpm.RpmTag.REQUIRE_NAME;
 import static org.eclipse.packager.rpm.RpmTag.REQUIRE_VERSION;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -51,12 +50,13 @@ class StableDependencyOrderTest {
         Collections.reverse(requirementsReverse);
         Dependencies.putRequirements(header2, requirementsReverse);
 
-        assertThat(((RpmTagValue) header2.get(REQUIRE_NAME)).getValue()).isEqualTo(((RpmTagValue) header1.get(REQUIRE_NAME)).getValue());
-        assertThat(((RpmTagValue) header2.get(REQUIRE_VERSION)).getValue()).isEqualTo(((RpmTagValue) header1.get(REQUIRE_VERSION)).getValue());
+        assertThat(header2.getStringList(REQUIRE_NAME)).containsExactlyElementsOf(header1.getStringList(REQUIRE_NAME));
+        assertThat(header2.getStringList(REQUIRE_VERSION)).containsExactlyElementsOf(header1.getStringList(REQUIRE_VERSION));
         assertThat(getRequireFlags(header2)).isEqualTo(getRequireFlags(header1));
     }
 
     private static List<Set<RpmDependencyFlags>> getRequireFlags(Header<RpmTag> header) {
-        return Arrays.stream((int[]) ((RpmTagValue) header.get(REQUIRE_FLAGS)).getValue()).mapToObj(RpmDependencyFlags::parse).collect(Collectors.toUnmodifiableList());
+        List<Integer> requireFlags = header.getIntegerList(REQUIRE_FLAGS);
+        return requireFlags != null ? requireFlags.stream().map(RpmDependencyFlags::parse).collect(Collectors.toUnmodifiableList()) : Collections.emptyList();
     }
 }

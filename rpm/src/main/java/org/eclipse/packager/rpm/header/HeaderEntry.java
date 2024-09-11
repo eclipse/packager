@@ -13,12 +13,9 @@
 
 package org.eclipse.packager.rpm.header;
 
-import org.apache.commons.codec.binary.Hex;
 import org.eclipse.packager.rpm.RpmTagValue;
 
-import java.util.Objects;
-
-public class HeaderEntry {
+public class HeaderEntry<T> {
     private final Type type;
 
     private final int tag;
@@ -27,14 +24,14 @@ public class HeaderEntry {
 
     private final byte[] data;
 
-    private final RpmTagValue value;
+    private final RpmTagValue<T> value;
 
-    public HeaderEntry(final Type type, final int tag, final int count, final byte[] data, Object value) {
+    public HeaderEntry(final Type type, final int tag, final int count, final byte[] data, T value) {
         this.type = type;
         this.tag = tag;
         this.count = count;
         this.data = data;
-        this.value = new RpmTagValue(value);
+        this.value = new RpmTagValue<>(value);
     }
 
     public Type getType() {
@@ -53,12 +50,12 @@ public class HeaderEntry {
         return this.data;
     }
 
-    public RpmTagValue getValue() {
+    public RpmTagValue<T> getValue() {
         return this.value;
     }
 
     @Override
     public String toString() {
-        return Objects.toString(this.value);
+        return this.value.toString();
     }
 }

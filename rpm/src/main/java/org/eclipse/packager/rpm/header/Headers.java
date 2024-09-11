@@ -32,7 +32,7 @@ public final class Headers {
     private Headers() {
     }
 
-    public static ByteBuffer render(final HeaderEntry[] entries, final boolean sorted, final Integer immutableTag) throws IOException {
+    public static ByteBuffer render(final HeaderEntry<?>[] entries, final boolean sorted, final Integer immutableTag) throws IOException {
         Objects.requireNonNull(entries);
 
         // sorted header
@@ -100,7 +100,7 @@ public final class Headers {
 
         int i = immutableTag == null ? 0 : 1;
 
-        for (final HeaderEntry entry : entries) {
+        for (final HeaderEntry<?> entry : entries) {
             // align
 
             align(buffer, entry);
@@ -153,7 +153,7 @@ public final class Headers {
         return buffer;
     }
 
-    private static void fillEntryRecord(final ByteBuffer buffer, final int entryIndex, final HeaderEntry entry, final int index) {
+    private static void fillEntryRecord(final ByteBuffer buffer, final int entryIndex, final HeaderEntry<?> entry, final int index) {
         fillEntryRecord(buffer, entryIndex, entry.getTag(), entry.getType().type(), index, entry.getCount());
     }
 
@@ -176,7 +176,7 @@ public final class Headers {
         return buffer.array();
     }
 
-    private static void align(final ByteBuffer buffer, final HeaderEntry entry) {
+    private static void align(final ByteBuffer buffer, final HeaderEntry<?> entry) {
         final int position = buffer.position();
         final int alignment = entry.getType().align();
 
@@ -190,7 +190,7 @@ public final class Headers {
         buffer.put(Rpms.EMPTY_128, 0, len);
     }
 
-    private static int rawEntrySize(final HeaderEntry entry) {
+    private static int rawEntrySize(final HeaderEntry<?> entry) {
         return entry.getData() != null ? entry.getData().length : 0;
     }
 }
