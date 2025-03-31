@@ -80,9 +80,9 @@ public class RepositoryCreator {
     private final String otherUniqueName;
 
     public interface XmlContext {
-        public void write(Document primary, OutputStream primaryStream) throws IOException;
+        void write(Document primary, OutputStream primaryStream) throws IOException;
 
-        public Document createDocument();
+        Document createDocument();
     }
 
     public static class DefaultXmlContext implements XmlContext {
@@ -136,7 +136,7 @@ public class RepositoryCreator {
     }
 
     public interface Context {
-        public void addPackage(FileInformation fileInformation, RpmInformation rpmInformation, Map<HashAlgorithm, String> checksums, HashAlgorithm idType);
+        void addPackage(FileInformation fileInformation, RpmInformation rpmInformation, Map<HashAlgorithm, String> checksums, HashAlgorithm idType);
     }
 
     public static class FileInformation {
@@ -346,9 +346,7 @@ public class RepositoryCreator {
                     final RpmVersion version = RpmVersion.valueOf(dep.getVersion());
                     entry.setAttribute("epoch", "" + version.getEpoch().orElse(0));
                     entry.setAttribute("ver", version.getVersion());
-                    if (version.getRelease().isPresent()) {
-                        entry.setAttribute("rel", version.getRelease().get());
-                    }
+                    version.getRelease().ifPresent(string -> entry.setAttribute("rel", string));
                 }
 
                 final boolean eq = flags.contains(RpmDependencyFlags.EQUAL);
@@ -474,8 +472,8 @@ public class RepositoryCreator {
         final String dirFilter = System.getProperty("drone.rpm.yum.primaryDirs", "bin/,^/etc/");
         final String fileFilter = System.getProperty("drone.rpm.yum.primaryFiles", dirFilter);
 
-        this.primaryFiles = Arrays.stream(fileFilter.split(",")).map(re -> Pattern.compile(re)).collect(Collectors.toList());
-        this.primaryDirs = Arrays.stream(dirFilter.split(",")).map(re -> Pattern.compile(re)).collect(Collectors.toList());
+        this.primaryFiles = Arrays.stream(fileFilter.split(",")).map(Pattern::compile).collect(Collectors.toList());
+        this.primaryDirs = Arrays.stream(dirFilter.split(",")).map(Pattern::compile).collect(Collectors.toList());
 
         this.primaryUniqueName = UUID.randomUUID().toString().replace("-", "");
         this.filelistsUniqueName = UUID.randomUUID().toString().replace("-", "");
@@ -488,7 +486,7 @@ public class RepositoryCreator {
         this.primaryStreamBuilder.addDigest(MD_NAME);
 
         this.primaryStreamBuilder.addOutput(String.format("repodata/%s-primary.xml", this.primaryUniqueName), "application/xml");
-        this.primaryStreamBuilder.addOutput(String.format("repodata/%s-primary.xml.gz", this.primaryUniqueName), "application/x-gzip", output -> new GZIPOutputStream(output));
+        this.primaryStreamBuilder.addOutput(String.format("repodata/%s-primary.xml.gz", this.primaryUniqueName), "application/x-gzip", GZIPOutputStream::new);
 
         // filelists
 
@@ -497,7 +495,7 @@ public class RepositoryCreator {
         this.filelistsStreamBuilder.addDigest(MD_NAME);
 
         this.filelistsStreamBuilder.addOutput(String.format("repodata/%s-filelists.xml", this.filelistsUniqueName), "application/xml");
-        this.filelistsStreamBuilder.addOutput(String.format("repodata/%s-filelists.xml.gz", this.filelistsUniqueName), "application/x-gzip", output -> new GZIPOutputStream(output));
+        this.filelistsStreamBuilder.addOutput(String.format("repodata/%s-filelists.xml.gz", this.filelistsUniqueName), "application/x-gzip", GZIPOutputStream::new);
 
         // other
 
@@ -506,7 +504,7 @@ public class RepositoryCreator {
         this.otherStreamBuilder.addDigest(MD_NAME);
 
         this.otherStreamBuilder.addOutput(String.format("repodata/%s-other.xml", this.otherUniqueName), "application/xml");
-        this.otherStreamBuilder.addOutput(String.format("repodata/%s-other.xml.gz", this.otherUniqueName), "application/x-gzip", output -> new GZIPOutputStream(output));
+        this.otherStreamBuilder.addOutput(String.format("repodata/%s-other.xml.gz", this.otherUniqueName), "application/x-gzip", GZIPOutputStream::new);
 
         // md
 
@@ -530,19 +528,13 @@ public class RepositoryCreator {
     public void process(final IOConsumer<Context> consumer) throws IOException {
         final long now = System.currentTimeMillis();
 
-        this.primaryStreamBuilder.open(primaryStream -> {
-            this.filelistsStreamBuilder.open(filelistsStream -> {
-                this.otherStreamBuilder.open(otherStream -> {
-                    final ContextImpl ctx = makeContext(primaryStream, filelistsStream, otherStream);
-                    consumer.accept(ctx);
-                    ctx.close();
-                });
-            });
-        });
+        this.primaryStreamBuilder.open(primaryStream -> this.filelistsStreamBuilder.open(filelistsStream -> this.otherStreamBuilder.open(otherStream -> {
+            final ContextImpl ctx = makeContext(primaryStream, filelistsStream, otherStream);
+            consumer.accept(ctx);
+            ctx.close();
+        })));
 
-        this.mdStreamBuilder.open(stream -> {
-            writeRepoMd(stream, now);
-        });
+        this.mdStreamBuilder.open(stream -> writeRepoMd(stream, now));
 
     }
 
