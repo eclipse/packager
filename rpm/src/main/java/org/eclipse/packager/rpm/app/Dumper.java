@@ -23,7 +23,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Function;
 import java.util.function.IntFunction;
 
 import org.apache.commons.compress.archivers.cpio.CpioArchiveEntry;
@@ -115,7 +114,7 @@ public class Dumper {
         }
     }
 
-    private static void dumpHeader(final String string, final InputHeader<? extends RpmBaseTag> header, final Function<Integer, Object> func, final boolean sorted) {
+    private static void dumpHeader(final String string, final InputHeader<? extends RpmBaseTag> header, final IntFunction<Object> func, final boolean sorted) {
         System.out.println(string);
         System.out.println("=================================");
 
@@ -147,7 +146,7 @@ public class Dumper {
         System.out.format(" Size: %s, Chksum: %016x, Align: %s, Inode: %016x, Mode: %08o, NoL: %s, Device: %s.%s%n", entry.getSize(), entry.getChksum(), entry.getAlignmentBoundary(), entry.getInode(), entry.getMode(), entry.getNumberOfLinks(), entry.getDeviceMaj(), entry.getDeviceMin());
     }
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) {
         for (final String file : args) {
             dump(Path.of(file));
         }
