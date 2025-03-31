@@ -21,7 +21,6 @@ import org.eclipse.packager.rpm.Architecture;
 import org.eclipse.packager.rpm.OperatingSystem;
 import org.eclipse.packager.rpm.RpmLead;
 import org.eclipse.packager.rpm.RpmTag;
-import org.eclipse.packager.rpm.RpmTagValue;
 import org.eclipse.packager.rpm.RpmVersion;
 import org.eclipse.packager.rpm.Type;
 import org.eclipse.packager.rpm.header.Header;

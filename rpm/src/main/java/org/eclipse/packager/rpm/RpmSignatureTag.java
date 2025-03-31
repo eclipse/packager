@@ -49,7 +49,7 @@ public enum RpmSignatureTag implements RpmBaseTag {
         return this.dataType;
     }
 
-    private final static Map<Integer, RpmSignatureTag> all = new HashMap<>(RpmSignatureTag.values().length);
+    private static final Map<Integer, RpmSignatureTag> all = new HashMap<>(RpmSignatureTag.values().length);
 
     static {
         for (final RpmSignatureTag tag : values()) {

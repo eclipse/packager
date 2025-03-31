@@ -16,7 +16,6 @@ package org.eclipse.packager.rpm.header;
 import static java.util.Arrays.stream;
 import static java.util.Comparator.comparingInt;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Objects;
@@ -32,7 +31,7 @@ public final class Headers {
     private Headers() {
     }
 
-    public static ByteBuffer render(final HeaderEntry<?>[] entries, final boolean sorted, final Integer immutableTag) throws IOException {
+    public static ByteBuffer render(final HeaderEntry<?>[] entries, final boolean sorted, final Integer immutableTag) {
         Objects.requireNonNull(entries);
 
         // sorted header

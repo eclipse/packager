@@ -68,7 +68,6 @@ public class HeaderValue {
         return this.index;
     }
 
-    @SuppressWarnings("unchecked")
     void fillFromStore(final ByteBuffer storeData) {
         storeData.position(this.index);
         switch (this.type) {

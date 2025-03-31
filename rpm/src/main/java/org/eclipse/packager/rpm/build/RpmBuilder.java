@@ -94,7 +94,7 @@ import org.eclipse.packager.rpm.signature.SignatureProcessors;
 public class RpmBuilder implements AutoCloseable {
     @FunctionalInterface
     private interface RecorderFunction<T> {
-        public Result record(PayloadRecorder recorder, String targetName, T data, Consumer<CpioArchiveEntry> customizer) throws IOException;
+        Result recordData(PayloadRecorder recorder, String targetName, T data, Consumer<CpioArchiveEntry> customizer) throws IOException;
     }
 
     /**
@@ -105,7 +105,7 @@ public class RpmBuilder implements AutoCloseable {
      * certain versions of RPM. The first known version we track is "4.11",
      * which may not be correct either.
      */
-    public static enum Version {
+    public enum Version {
         V4_11("4.11"),
         V4_12("4.12"),
         V4_14("4.14");
@@ -507,7 +507,7 @@ public class RpmBuilder implements AutoCloseable {
         }
     }
 
-    private static abstract class BuilderContextImpl implements BuilderContext {
+    private abstract static class BuilderContextImpl implements BuilderContext {
         private FileInformationProvider<Object> defaultProvider = BuilderContext.defaultProvider();
 
         @Override
@@ -1033,7 +1033,7 @@ public class RpmBuilder implements AutoCloseable {
 
         final short smode = (short) (mode | CpioConstants.C_ISREG);
 
-        final Result result = func.record(this.recorder, "./" + pathName.toString(), sourcePath, cpioCustomizer(mtime, inode, smode));
+        final Result result = func.recordData(this.recorder, "./" + pathName, sourcePath, cpioCustomizer(mtime, inode, smode));
 
         Consumer<FileEntry> c = this::initEntry;
         c = c.andThen(entry -> {
@@ -1141,7 +1141,7 @@ public class RpmBuilder implements AutoCloseable {
             customizer.accept(entry);
         }
 
-        // record file entry
+        // recordData file entry
 
         this.files.put(targetName.toString(), entry);
     }

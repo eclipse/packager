@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.io.CountingInputStream;
 
 public class RpmInputStream extends InputStream {
-    private final static Logger logger = LoggerFactory.getLogger(RpmInputStream.class);
+    private static final Logger logger = LoggerFactory.getLogger(RpmInputStream.class);
 
     private static final byte[] DUMMY = new byte[128];
 
@@ -234,7 +234,7 @@ public class RpmInputStream extends InputStream {
     // forward methods
 
     @Override
-    public void reset() throws IOException {
+    public synchronized void reset() throws IOException {
         ensureInit();
         this.payloadStream.reset();
     }

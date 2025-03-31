@@ -62,7 +62,7 @@ public class InputHeader<T extends RpmBaseTag> implements ReadableHeader<T> {
         return this.length;
     }
 
-    public <E> boolean hasTag(final int tag) {
+    public boolean hasTag(final int tag) {
         return this.entries.containsKey(tag);
     }
 
@@ -155,27 +155,22 @@ public class InputHeader<T extends RpmBaseTag> implements ReadableHeader<T> {
 
         final RpmTagValue<?> rpmTagValue = headerValue.getValue();
         final Object value = rpmTagValue.getValue();
-        Object v = value;
 
         if (value == null) {
             return Optional.empty();
         }
 
-        if (dataType.isArray() && !v.getClass().isArray()) {
-            final Class<?> arrayType = Array.newInstance(v.getClass(), 0).getClass();
+        if (dataType.isArray() && !value.getClass().isArray()) {
+            final Class<?> arrayType = Array.newInstance(value.getClass(), 0).getClass();
 
             if (!arrayType.isAssignableFrom(dataType)) {
-                throw new IllegalArgumentException("Tag " + tag  + " is type " + v.getClass().getSimpleName() + " which is an array, but not assignable from " + dataType.getSimpleName());
+                throw new IllegalArgumentException("Tag " + tag  + " is type " + value.getClass().getSimpleName() + " which is an array, but not assignable from " + dataType.getSimpleName());
             }
-        } else if (!v.getClass().isAssignableFrom(dataType)) {
-            throw new IllegalArgumentException("Tag " + tag  + " is type " + v.getClass().getSimpleName() + " which is not assignable from " + dataType.getSimpleName());
+        } else if (!value.getClass().isAssignableFrom(dataType)) {
+            throw new IllegalArgumentException("Tag " + tag  + " is type " + value.getClass().getSimpleName() + " which is not assignable from " + dataType.getSimpleName());
         }
 
         return Optional.of(headerValue);
-    }
-
-    private Optional<HeaderValue> getEntry(final T tag, Class<?> dataType) {
-        return getEntry(tag.getValue(), dataType);
     }
 
     public Map<Integer, HeaderValue> getRawTags() {
