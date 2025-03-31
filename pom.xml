@@ -5,7 +5,7 @@
 
     <groupId>org.eclipse.packager</groupId>
     <artifactId>packager</artifactId>
-    <version>0.20.1-SNAPSHOT</version>
+    <version>0.21.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <name>Eclipse Packager</name>
@@ -22,7 +22,7 @@
     <licenses>
         <license>
             <name>Eclipse Public License - Version 2.0</name>
-            <url>http://www.eclipse.org/legal/epl-2.0</url>
+            <url>https://www.eclipse.org/legal/epl-2.0</url>
             <comments>SPDX-License-Identifier: EPL-2.0</comments>
         </license>
     </licenses>
@@ -75,7 +75,7 @@
         <java.source>11</java.source>
 
         <assertj.version>3.25.3</assertj.version>
-        <bouncycastle.version>1.77</bouncycastle.version>
+        <bouncycastle.version>1.78</bouncycastle.version>
         <commons-compress.version>1.26.1</commons-compress.version>
         <commons-codec.version>1.16.1</commons-codec.version>
         <guava.version>33.1.0-jre</guava.version>

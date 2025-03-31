@@ -32,6 +32,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -581,6 +582,12 @@ public class RpmBuilder implements AutoCloseable {
     }
 
     private static final String DEFAULT_INTERPRETER = "/bin/sh";
+
+    private static final String EMBEDDED_LUA_INTERPRETER = "<lua>";
+
+    private static final String EMBEDDED_LUA_INTERPRETER_REQUIREMENT_NAME = "rpmlib(BuiltinLuaScripts)";
+
+    private static final String EMBEDDED_LUA_INTERPRETER_REQUIREMENT_VERSION = "4.2.2-1";
 
     protected final Header<RpmTag> header = new Header<>();
 
@@ -1178,8 +1185,7 @@ public class RpmBuilder implements AutoCloseable {
     }
 
     public void setPreInstallationScript(final String interpreter, final String script) {
-        addRequirement(interpreter, null, RpmDependencyFlags.INTERPRETER);
-        addRequirement(interpreter, null, RpmDependencyFlags.SCRIPT_PRE, RpmDependencyFlags.INTERPRETER);
+        addInterpreterRequirement(interpreter, RpmDependencyFlags.SCRIPT_PRE);
         setScript(RpmTag.PREINSTALL_SCRIPT_PROG, RpmTag.PREINSTALL_SCRIPT, interpreter, script);
     }
 
@@ -1188,8 +1194,7 @@ public class RpmBuilder implements AutoCloseable {
     }
 
     public void setPostInstallationScript(final String interpreter, final String script) {
-        addRequirement(interpreter, null, RpmDependencyFlags.INTERPRETER);
-        addRequirement(interpreter, null, RpmDependencyFlags.SCRIPT_POST, RpmDependencyFlags.INTERPRETER);
+        addInterpreterRequirement(interpreter, RpmDependencyFlags.SCRIPT_POST);
         setScript(RpmTag.POSTINSTALL_SCRIPT_PROG, RpmTag.POSTINSTALL_SCRIPT, interpreter, script);
     }
 
@@ -1198,8 +1203,7 @@ public class RpmBuilder implements AutoCloseable {
     }
 
     public void setPreRemoveScript(final String interpreter, final String script) {
-        addRequirement(interpreter, null, RpmDependencyFlags.INTERPRETER);
-        addRequirement(interpreter, null, RpmDependencyFlags.SCRIPT_PREUN, RpmDependencyFlags.INTERPRETER);
+        addInterpreterRequirement(interpreter, RpmDependencyFlags.SCRIPT_PREUN);
         setScript(RpmTag.PREREMOVE_SCRIPT_PROG, RpmTag.PREREMOVE_SCRIPT, interpreter, script);
     }
 
@@ -1208,8 +1212,7 @@ public class RpmBuilder implements AutoCloseable {
     }
 
     public void setPostRemoveScript(final String interpreter, final String script) {
-        addRequirement(interpreter, null, RpmDependencyFlags.INTERPRETER);
-        addRequirement(interpreter, null, RpmDependencyFlags.SCRIPT_POSTUN, RpmDependencyFlags.INTERPRETER);
+        addInterpreterRequirement(interpreter, RpmDependencyFlags.SCRIPT_POSTUN);
         setScript(RpmTag.POSTREMOVE_SCRIPT_PROG, RpmTag.POSTREMOVE_SCRIPT, interpreter, script);
     }
 
@@ -1218,8 +1221,7 @@ public class RpmBuilder implements AutoCloseable {
     }
 
     public void setVerifyScript(final String interpreter, final String script) {
-        addRequirement(interpreter, null, RpmDependencyFlags.INTERPRETER);
-        addRequirement(interpreter, null, RpmDependencyFlags.SCRIPT_VERIFY, RpmDependencyFlags.INTERPRETER);
+        addInterpreterRequirement(interpreter, RpmDependencyFlags.SCRIPT_VERIFY);
         setScript(RpmTag.VERIFY_SCRIPT_PROG, RpmTag.VERIFY_SCRIPT, interpreter, script);
     }
 
@@ -1228,8 +1230,7 @@ public class RpmBuilder implements AutoCloseable {
     }
 
     public void setPreTransactionScript(final String interpreter, final String script) {
-        addRequirement(interpreter, null, RpmDependencyFlags.INTERPRETER);
-        addRequirement(interpreter, null, RpmDependencyFlags.SCRIPT_PREUN, RpmDependencyFlags.INTERPRETER);
+        addInterpreterRequirement(interpreter, RpmDependencyFlags.PRETRANS);
         setScript(RpmTag.PRETRANSACTION_SCRIPT_PROG, RpmTag.PRETRANSACTION_SCRIPT, interpreter, script);
     }
 
@@ -1238,8 +1239,7 @@ public class RpmBuilder implements AutoCloseable {
     }
 
     public void setPostTransactionScript(final String interpreter, final String script) {
-        addRequirement(interpreter, null, RpmDependencyFlags.INTERPRETER);
-        addRequirement(interpreter, null, RpmDependencyFlags.SCRIPT_POSTUN, RpmDependencyFlags.INTERPRETER);
+        addInterpreterRequirement(interpreter, RpmDependencyFlags.POSTTRANS);
         setScript(RpmTag.POSTTRANSACTION_SCRIPT_PROG, RpmTag.POSTTRANSACTION_SCRIPT, interpreter, script);
     }
 
@@ -1255,6 +1255,19 @@ public class RpmBuilder implements AutoCloseable {
             this.header.putString(interpreterTag, interpreter);
             this.header.putString(scriptTag, script);
         }
+    }
+
+    private void addInterpreterRequirement(final String interpreter, RpmDependencyFlags scriptPhaseFlag) {
+        if (isEmbeddedLuaInterpreter(interpreter)) {
+            addRequirement(EMBEDDED_LUA_INTERPRETER_REQUIREMENT_NAME, EMBEDDED_LUA_INTERPRETER_REQUIREMENT_VERSION,
+                RpmDependencyFlags.LESS, RpmDependencyFlags.EQUAL, RpmDependencyFlags.RPMLIB);
+        } else {
+            addRequirement(interpreter, null, scriptPhaseFlag, RpmDependencyFlags.INTERPRETER);
+        }
+    }
+
+    private boolean isEmbeddedLuaInterpreter(final String  interpreter) {
+        return Objects.equals(interpreter, EMBEDDED_LUA_INTERPRETER);
     }
 
     /**
