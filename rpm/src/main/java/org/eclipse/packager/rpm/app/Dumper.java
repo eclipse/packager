@@ -42,21 +42,19 @@ import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 
 public class Dumper {
-    private static final Boolean SKIP_META = Boolean.getBoolean("skipMeta");
+    private static final boolean SKIP_META = Boolean.getBoolean("skipMeta");
 
-    private static final Boolean SKIP_SIGNATURES = Boolean.getBoolean("skipSignatures");
+    private static final boolean SKIP_SIGNATURES = Boolean.getBoolean("skipSignatures");
 
-    private static final Boolean SKIP_HEADERS = Boolean.getBoolean("skipHeaders");
+    private static final boolean SKIP_HEADERS = Boolean.getBoolean("skipHeaders");
 
-    private static final Boolean SKIP_PAYLOAD = Boolean.getBoolean("skipPayload");
+    private static final boolean SKIP_PAYLOAD = Boolean.getBoolean("skipPayload");
+
+    private static final boolean SORTED = Boolean.getBoolean("sorted");
 
     public static String dumpFlag(final int value, final IntFunction<Optional<?>> func) {
         final Optional<?> flag = func.apply(value);
-        if (flag.isPresent()) {
-            return String.format("%s (%s)", flag.get(), value);
-        } else {
-            return String.format("%s", value);
-        }
+        return flag.map(o -> String.format("%s (%s)", o, value)).orElseGet(() -> String.format("%s", value));
     }
 
     public static void dumpAll(final RpmInputStream in) throws IOException {
@@ -70,10 +68,10 @@ public class Dumper {
         }
 
         if (!SKIP_SIGNATURES) {
-            dumpHeader("Signature", in.getSignatureHeader(), RpmSignatureTag::find, false);
+            dumpHeader("Signature", in.getSignatureHeader(), RpmSignatureTag::find);
         }
         if (!SKIP_HEADERS) {
-            dumpHeader("Payload", in.getPayloadHeader(), RpmTag::find, false);
+            dumpHeader("Payload", in.getPayloadHeader(), RpmTag::find);
         }
 
         if (!SKIP_PAYLOAD) {
@@ -114,12 +112,12 @@ public class Dumper {
         }
     }
 
-    private static void dumpHeader(final String string, final InputHeader<? extends RpmBaseTag> header, final IntFunction<Object> func, final boolean sorted) {
+    private static void dumpHeader(final String string, final InputHeader<? extends RpmBaseTag> header, final IntFunction<Object> func) {
         System.out.println(string);
         System.out.println("=================================");
 
         Set<Entry<Integer, HeaderValue>> data;
-        if (sorted) {
+        if (SORTED) {
             data = new TreeMap<>(header.getRawTags()).entrySet();
         } else {
             data = header.getRawTags().entrySet();
