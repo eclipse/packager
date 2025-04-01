@@ -73,8 +73,16 @@ public class Rpms {
         return sb.toString();
     }
 
+    /**
+     * Writes the contents of a {@link ByteBuffer} to an {@link OutputStream}. Note that this method will close the
+     * output stream.
+     *
+     * @param stream the output stream
+     * @param dataStore the data store
+     * @throws IOException if some other I/O error occurs
+     */
     static void writeByteBuffer(final OutputStream stream, final ByteBuffer dataStore) throws IOException {
-        try (WritableByteChannel c = Channels.newChannel(stream)) {
+        try (final WritableByteChannel c = Channels.newChannel(stream)) {
             while (dataStore.hasRemaining()) {
                 c.write(dataStore);
             }
