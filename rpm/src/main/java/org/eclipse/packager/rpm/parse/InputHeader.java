@@ -23,18 +23,17 @@ import java.util.Optional;
 
 import org.eclipse.packager.rpm.ReadableHeader;
 import org.eclipse.packager.rpm.RpmBaseTag;
-import org.eclipse.packager.rpm.RpmTagValue;
 
 public class InputHeader<T extends RpmBaseTag> implements ReadableHeader<T> {
-    private final Map<Integer, HeaderValue> entries;
+    private final Map<Integer, HeaderValue<?>> entries;
 
     private final long start;
 
     private final long length;
 
-    public InputHeader(final HeaderValue[] entries, final long start, final long length) {
-        final Map<Integer, HeaderValue> tags = new LinkedHashMap<>(entries.length);
-        for (final HeaderValue entry : entries) {
+    public InputHeader(final HeaderValue<?>[] entries, final long start, final long length) {
+        final Map<Integer, HeaderValue<?>> tags = new LinkedHashMap<>(entries.length);
+        for (final HeaderValue<?> entry : entries) {
             tags.put(entry.getTag(), entry);
         }
 
@@ -138,42 +137,42 @@ public class InputHeader<T extends RpmBaseTag> implements ReadableHeader<T> {
         return getOptionalTag(tag, byte[].class).flatMap(headerValue -> headerValue.getValue().asByteArray()).orElse(null);
     }
 
-    public Optional<HeaderValue> getOptionalTag(final int tag, Class<?> dataType) {
+    public <E> Optional<HeaderValue<E>> getOptionalTag(final int tag, Class<E> dataType) {
         return getEntry(tag, dataType);
     }
 
-    public <E> Optional<HeaderValue> getOptionalTag(final T tag, Class<E> dataType) {
+    public <E> Optional<HeaderValue<E>> getOptionalTag(final T tag, Class<E> dataType) {
         return getOptionalTag(tag.getValue(), dataType);
     }
 
-    private Optional<HeaderValue> getEntry(final int tag, Class<?> dataType) {
-        final HeaderValue headerValue = this.entries.get(tag);
+    @SuppressWarnings("unchecked")
+    private <E> Optional<HeaderValue<E>> getEntry(final int tag, Class<E> dataType) {
+        final HeaderValue<E> headerValue = (HeaderValue<E>) this.entries.get(tag);
 
         if (headerValue == null) {
             return Optional.empty();
         }
 
-        final RpmTagValue<?> rpmTagValue = headerValue.getValue();
-        final Object value = rpmTagValue.getValue();
+        final Object value = headerValue.getValue().getValue();
 
         if (value == null) {
             return Optional.empty();
         }
 
-        if (dataType.isArray() && !value.getClass().isArray()) {
-            final Class<?> arrayType = Array.newInstance(value.getClass(), 0).getClass();
+        final Class<?> valueClass = value.getClass();
 
-            if (!arrayType.isAssignableFrom(dataType)) {
-                throw new IllegalArgumentException("Tag " + tag  + " is type " + value.getClass().getSimpleName() + " which is an array, but not assignable from " + dataType.getSimpleName());
+        if (dataType.isArray() && !valueClass.isArray()) {
+            if (!Array.newInstance(valueClass, 0).getClass().isAssignableFrom(dataType)) {
+                throw new IllegalArgumentException("Tag " + tag  + " is type " + valueClass.getSimpleName() + " which is an array, but not assignable from " + dataType.getSimpleName());
             }
-        } else if (!value.getClass().isAssignableFrom(dataType)) {
-            throw new IllegalArgumentException("Tag " + tag  + " is type " + value.getClass().getSimpleName() + " which is not assignable from " + dataType.getSimpleName());
+        } else if (!valueClass.isAssignableFrom(dataType)) {
+            throw new IllegalArgumentException("Tag " + tag  + " is type " + valueClass.getSimpleName() + " which is not assignable from " + dataType.getSimpleName());
         }
 
         return Optional.of(headerValue);
     }
 
-    public Map<Integer, HeaderValue> getRawTags() {
+    public Map<Integer, HeaderValue<?>> getRawTags() {
         return this.entries;
     }
 }

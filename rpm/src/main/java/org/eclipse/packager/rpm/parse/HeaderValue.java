@@ -23,7 +23,7 @@ import org.eclipse.packager.rpm.RpmTagValue;
 import org.eclipse.packager.rpm.Rpms;
 import org.eclipse.packager.rpm.header.Type;
 
-public class HeaderValue {
+public class HeaderValue<E> {
     private final int tag;
 
     private RpmTagValue<?> value;
