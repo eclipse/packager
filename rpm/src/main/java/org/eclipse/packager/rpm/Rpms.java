@@ -23,7 +23,7 @@ import java.nio.channels.WritableByteChannel;
 import java.util.Arrays;
 
 public class Rpms {
-    private final static char[] HEX = "0123456789ABCDEF".toCharArray();
+    private static final char[] HEX = "0123456789ABCDEF".toCharArray();
 
     public static final byte[] LEAD_MAGIC = new byte[] { (byte) 0xED, (byte) 0xAB, (byte) 0xEE, (byte) 0xDB };
 
@@ -39,6 +39,8 @@ public class Rpms {
         EMPTY_128 = new byte[128];
         Arrays.fill(EMPTY_128, (byte) 0);
     }
+
+    private Rpms() {}
 
     public static String toHex(final byte[] data) {
         return toHex(data, Integer.MAX_VALUE);
@@ -73,10 +75,19 @@ public class Rpms {
         return sb.toString();
     }
 
+    /**
+     * Writes the contents of a {@link ByteBuffer} to an {@link OutputStream}. Note that this method will close the
+     * output stream.
+     *
+     * @param stream the output stream
+     * @param dataStore the data store
+     * @throws IOException if some other I/O error occurs
+     */
     static void writeByteBuffer(final OutputStream stream, final ByteBuffer dataStore) throws IOException {
-        final WritableByteChannel c = Channels.newChannel(stream);
-        while (dataStore.hasRemaining()) {
-            c.write(dataStore);
+        try (final WritableByteChannel c = Channels.newChannel(stream)) {
+            while (dataStore.hasRemaining()) {
+                c.write(dataStore);
+            }
         }
     }
 
