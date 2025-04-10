@@ -27,7 +27,6 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
-import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.stream.IntStream;
 
@@ -47,22 +46,19 @@ import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 
 public class Dumper {
-    private static final Boolean SKIP_META = Boolean.getBoolean("skipMeta");
+    private static final boolean SKIP_META = Boolean.getBoolean("skipMeta");
 
-    private static final Boolean SKIP_SIGNATURES = Boolean.getBoolean("skipSignatures");
+    private static final boolean SKIP_SIGNATURES = Boolean.getBoolean("skipSignatures");
 
-    private static final Boolean SKIP_HEADERS = Boolean.getBoolean("skipHeaders");
+    private static final boolean SKIP_HEADERS = Boolean.getBoolean("skipHeaders");
 
-    private static final Boolean SKIP_PAYLOAD = Boolean.getBoolean("skipPayload");
+    private static final boolean SKIP_PAYLOAD = Boolean.getBoolean("skipPayload");
+
+    private static final boolean SORTED = Boolean.getBoolean("sorted");
 
     public static String dumpFlag(final int value, final IntFunction<Optional<?>> func) {
         final Optional<?> flag = func.apply(value);
-
-        if (flag.isPresent()) {
-            return String.format("%s (%s)", flag.get(), value);
-        } else {
-            return String.format("%s", value);
-        }
+        return flag.map(o -> String.format("%s (%s)", o, value)).orElseGet(() -> String.format("%s", value));
     }
 
     public static void dumpAll(final RpmInputStream in) throws IOException {
@@ -76,10 +72,10 @@ public class Dumper {
         }
 
         if (!SKIP_SIGNATURES) {
-            dumpHeader("Signature", in.getSignatureHeader(), RpmSignatureTag::find, false);
+            dumpHeader("Signature", in.getSignatureHeader(), RpmSignatureTag::find);
         }
         if (!SKIP_HEADERS) {
-            dumpHeader("Payload", in.getPayloadHeader(), RpmTag::find, false);
+            dumpHeader("Payload", in.getPayloadHeader(), RpmTag::find);
         }
 
         if (!SKIP_PAYLOAD) {
@@ -119,12 +115,12 @@ public class Dumper {
         IntStream.range(0, names.size()).forEach(i -> System.out.format("%s: %s - %s - %s %s%n", string, names.get(i), versions.get(i), flags.get(i), RpmDependencyFlags.parse(flags.get(i))));
     }
 
-    private static void dumpHeader(final String string, final InputHeader<? extends RpmBaseTag> header, final Function<Integer, RpmBaseTag> func, final boolean sorted) {
-        System.out.format(string + "%n");
-        System.out.format("=================================%n");
+    private static void dumpHeader(final String string, final InputHeader<? extends RpmBaseTag> header, final IntFunction<RpmBaseTag> func) {
+        System.out.println(string);
+        System.out.println("=================================");
 
         Set<Entry<Integer, HeaderValue<?>>> data;
-        if (sorted) {
+        if (SORTED) {
             data = new TreeMap<>(header.getRawTags()).entrySet();
         } else {
             data = header.getRawTags().entrySet();
@@ -148,7 +144,7 @@ public class Dumper {
         System.out.format(" Size: %s, Chksum: %016x, Align: %s, Inode: %016x, Mode: %08o, NoL: %s, Device: %s.%s%n", entry.getSize(), entry.getChksum(), entry.getAlignmentBoundary(), entry.getInode(), entry.getMode(), entry.getNumberOfLinks(), entry.getDeviceMaj(), entry.getDeviceMin());
     }
 
-    public static void main(final String[] args) throws IOException {
+    public static void main(final String[] args) {
         for (final String file : args) {
             dump(Path.of(file));
         }
