@@ -44,15 +44,15 @@ class InputStreamTest {
             final InputHeader<RpmTag> header = in.getPayloadHeader();
             assertThat(header).extracting("start").isEqualTo(280L);
             assertThat(header).extracting("length").isEqualTo(3501L);
-            assertThat(header.getTag(PAYLOAD_FORMAT)).isEqualTo("cpio");
-            assertThat(header.getTag(PAYLOAD_CODING)).isEqualTo("lzma");
-            assertThat(header.getTag(NAME)).isEqualTo("org.eclipse.scada");
-            assertThat(header.getTag(VERSION)).isEqualTo("0.2.1");
-            assertThat(header.getTag(RELEASE)).isEqualTo( "1");
-            assertThat(header.getTag(ARCH)).isEqualTo( "noarch");
-            assertThat(header.getTag(OS)).isEqualTo("linux");
-            assertThat(header.getTag(LICENSE)).isEqualTo("EPL");
-            assertThat(List.of((String[]) header.getTag(DIRNAMES))).containsExactlyElementsOf(EXPECTED_DIRNAMES);
+            assertThat(header.getString(PAYLOAD_FORMAT)).isEqualTo("cpio");
+            assertThat(header.getString(PAYLOAD_CODING)).isEqualTo("lzma");
+            assertThat(header.getString(NAME)).isEqualTo("org.eclipse.scada");
+            assertThat(header.getString(VERSION)).isEqualTo("0.2.1");
+            assertThat(header.getString(RELEASE)).isEqualTo( "1");
+            assertThat(header.getString(ARCH)).isEqualTo( "noarch");
+            assertThat(header.getString(OS)).isEqualTo("linux");
+            assertThat(header.getString(LICENSE)).isEqualTo("EPL");
+            assertThat(header.getStringList(DIRNAMES)).containsExactlyElementsOf(EXPECTED_DIRNAMES);
         }
     }
 

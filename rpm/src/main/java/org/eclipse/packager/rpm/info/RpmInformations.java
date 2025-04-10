@@ -15,7 +15,6 @@ package org.eclipse.packager.rpm.info;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -31,10 +30,54 @@ import org.eclipse.packager.rpm.info.RpmInformation.Dependency;
 import org.eclipse.packager.rpm.parse.InputHeader;
 import org.eclipse.packager.rpm.parse.RpmInputStream;
 
+import static org.eclipse.packager.rpm.RpmSignatureTag.PAYLOAD_SIZE;
+import static org.eclipse.packager.rpm.RpmTag.ARCH;
+import static org.eclipse.packager.rpm.RpmTag.ARCHIVE_SIZE;
+import static org.eclipse.packager.rpm.RpmTag.BUILDHOST;
+import static org.eclipse.packager.rpm.RpmTag.BUILDTIME;
+import static org.eclipse.packager.rpm.RpmTag.CHANGELOG_AUTHOR;
+import static org.eclipse.packager.rpm.RpmTag.CHANGELOG_TEXT;
+import static org.eclipse.packager.rpm.RpmTag.CHANGELOG_TIMESTAMP;
+import static org.eclipse.packager.rpm.RpmTag.CONFLICT_FLAGS;
+import static org.eclipse.packager.rpm.RpmTag.CONFLICT_NAME;
+import static org.eclipse.packager.rpm.RpmTag.CONFLICT_VERSION;
+import static org.eclipse.packager.rpm.RpmTag.DESCRIPTION;
+import static org.eclipse.packager.rpm.RpmTag.EPOCH;
+import static org.eclipse.packager.rpm.RpmTag.GROUP;
+import static org.eclipse.packager.rpm.RpmTag.LICENSE;
+import static org.eclipse.packager.rpm.RpmTag.NAME;
+import static org.eclipse.packager.rpm.RpmTag.OBSOLETE_FLAGS;
+import static org.eclipse.packager.rpm.RpmTag.OBSOLETE_NAME;
+import static org.eclipse.packager.rpm.RpmTag.OBSOLETE_VERSION;
+import static org.eclipse.packager.rpm.RpmTag.PACKAGER;
+import static org.eclipse.packager.rpm.RpmTag.PROVIDE_FLAGS;
+import static org.eclipse.packager.rpm.RpmTag.PROVIDE_NAME;
+import static org.eclipse.packager.rpm.RpmTag.PROVIDE_VERSION;
+import static org.eclipse.packager.rpm.RpmTag.RELEASE;
+import static org.eclipse.packager.rpm.RpmTag.REQUIRE_FLAGS;
+import static org.eclipse.packager.rpm.RpmTag.REQUIRE_NAME;
+import static org.eclipse.packager.rpm.RpmTag.REQUIRE_VERSION;
+import static org.eclipse.packager.rpm.RpmTag.SIZE;
+import static org.eclipse.packager.rpm.RpmTag.SOURCE_PACKAGE;
+import static org.eclipse.packager.rpm.RpmTag.SUMMARY;
+import static org.eclipse.packager.rpm.RpmTag.URL;
+import static org.eclipse.packager.rpm.RpmTag.VENDOR;
+import static org.eclipse.packager.rpm.RpmTag.VERSION;
+
 public final class RpmInformations {
     private RpmInformations() {
     }
 
+    /**
+     * Returns the RPM information for the given RPM input stream.
+     *
+     * <p><em>Note that since version 0.21.0 <code>IllegalArgumentException</code> is thrown if an error occurs while reading the RPM header.</em></p>
+     *
+     * @param in the RPM input stream
+     * @return the RPM information for the given RPM input stream
+     * @throws IOException if an error occurs while reading from the given RPM input stream
+     * @throws IllegalArgumentException if there are any problems reading the headers
+     */
     public static RpmInformation makeInformation(final RpmInputStream in) throws IOException {
         final InputHeader<RpmTag> header = in.getPayloadHeader();
         final InputHeader<RpmSignatureTag> signature = in.getSignatureHeader();
@@ -44,57 +87,57 @@ public final class RpmInformations {
         result.setHeaderStart(header.getStart());
         result.setHeaderEnd(header.getStart() + header.getLength());
 
-        result.setName(asString(header.getTag(RpmTag.NAME)));
-        result.setArchitecture(asString(header.getTag(RpmTag.ARCH)));
-        result.setSummary(asString(header.getTag(RpmTag.SUMMARY)));
-        result.setDescription(asString(header.getTag(RpmTag.DESCRIPTION)));
-        result.setPackager(asString(header.getTag(RpmTag.PACKAGER)));
-        result.setUrl(asString(header.getTag(RpmTag.URL)));
-        result.setLicense(asString(header.getTag(RpmTag.LICENSE)));
-        result.setVendor(asString(header.getTag(RpmTag.VENDOR)));
-        result.setGroup(asString(header.getTag(RpmTag.GROUP)));
+        result.setName(header.getString(NAME));
+        result.setArchitecture(header.getString(ARCH));
+        result.setSummary(header.getString(SUMMARY));
+        result.setDescription(header.getString(DESCRIPTION));
+        result.setPackager(header.getString(PACKAGER));
+        result.setUrl(header.getString(URL));
+        result.setLicense(header.getString(LICENSE));
+        result.setVendor(header.getString(VENDOR));
+        result.setGroup(header.getString(GROUP));
 
-        result.setBuildHost(asString(header.getTag(RpmTag.BUILDHOST)));
-        result.setBuildTimestamp(asLong(header.getTag(RpmTag.BUILDTIME)));
-        result.setSourcePackage(asString(header.getTag(RpmTag.SOURCE_PACKAGE)));
+        result.setBuildHost(header.getString(BUILDHOST));
+        result.setBuildTimestamp(RpmTagValue.toLong(header.getInteger(BUILDTIME)));
+        result.setSourcePackage(header.getString(SOURCE_PACKAGE));
 
-        result.setInstalledSize(asLong(header.getTag(RpmTag.SIZE)));
-        result.setArchiveSize(asLong(header.getTag(RpmTag.ARCHIVE_SIZE)));
+        result.setInstalledSize(RpmTagValue.toLong(header.getInteger(SIZE)));
+        result.setArchiveSize(RpmTagValue.toLong(header.getInteger(ARCHIVE_SIZE)));
 
         if (result.getArchiveSize() == null) {
-            result.setArchiveSize(asLong(signature.getTag(RpmSignatureTag.PAYLOAD_SIZE)));
+            result.setArchiveSize(RpmTagValue.toLong(signature.getInteger(PAYLOAD_SIZE)));
         }
 
         // version
 
-        final RpmInformation.Version ver = new RpmInformation.Version(asString(header.getTag(RpmTag.VERSION)), asString(header.getTag(RpmTag.RELEASE)), asString(header.getTag(RpmTag.EPOCH)));
+        final RpmInformation.Version ver = new RpmInformation.Version(header.getString(VERSION), header.getString(RELEASE), header.getInteger(EPOCH));
         result.setVersion(ver);
 
         // changelog
 
-        final Object val = header.getTag(RpmTag.CHANGELOG_TIMESTAMP);
-        if (val instanceof Long[]) {
-            final Long[] ts = (Long[]) val;
-            final String[] authors = (String[]) header.getTag(RpmTag.CHANGELOG_AUTHOR);
-            final String[] texts = (String[]) header.getTag(RpmTag.CHANGELOG_TEXT);
+        final List<Long> ts = RpmTagValue.toLong(header.getIntegerList(CHANGELOG_TIMESTAMP));
 
-            final List<RpmInformation.Changelog> changes = new ArrayList<>(ts.length);
+        if (ts != null) {
+            final List<String> authors = header.getStringList(CHANGELOG_AUTHOR);
+            final List<String> texts = header.getStringList(CHANGELOG_TEXT);
+            final int size = ts.size();
+            final List<RpmInformation.Changelog> changes = new ArrayList<>(size);
 
-            for (int i = 0; i < ts.length; i++) {
-                changes.add(new RpmInformation.Changelog(ts[i], authors[i], texts[i]));
+            for (int i = 0; i < size; i++) {
+                changes.add(new RpmInformation.Changelog(ts.get(i), authors.get(i), texts.get(i)));
             }
 
-            Collections.sort(changes, Comparator.comparingLong(RpmInformation.Changelog::getTimestamp));
+            changes.sort(Comparator.comparingLong(RpmInformation.Changelog::getTimestamp));
 
             result.setChangelog(changes);
         }
 
         // dependencies
 
-        result.setProvides(makeDependencies(header, RpmTag.PROVIDE_NAME, RpmTag.PROVIDE_VERSION, RpmTag.PROVIDE_FLAGS));
-        result.setRequires(makeDependencies(header, RpmTag.REQUIRE_NAME, RpmTag.REQUIRE_VERSION, RpmTag.REQUIRE_FLAGS));
-        result.setConflicts(makeDependencies(header, RpmTag.CONFLICT_NAME, RpmTag.CONFLICT_VERSION, RpmTag.CONFLICT_FLAGS));
-        result.setObsoletes(makeDependencies(header, RpmTag.OBSOLETE_NAME, RpmTag.OBSOLETE_VERSION, RpmTag.OBSOLETE_FLAGS));
+        result.setProvides(makeDependencies(header, PROVIDE_NAME, PROVIDE_VERSION, PROVIDE_FLAGS));
+        result.setRequires(makeDependencies(header, REQUIRE_NAME, REQUIRE_VERSION, REQUIRE_FLAGS));
+        result.setConflicts(makeDependencies(header, CONFLICT_NAME, CONFLICT_VERSION, CONFLICT_FLAGS));
+        result.setObsoletes(makeDependencies(header, OBSOLETE_NAME, OBSOLETE_VERSION, OBSOLETE_FLAGS));
 
         // files
 
@@ -115,66 +158,37 @@ public final class RpmInformations {
     }
 
     public static List<Dependency> makeDependencies(final InputHeader<RpmTag> header, final RpmTag namesTag, final RpmTag versionsTag, final RpmTag flagsTag) {
-        Object namesVal = header.getTag(namesTag);
-        Object versionsVal = header.getTag(versionsTag);
-        Object flagsVal = header.getTag(flagsTag);
+        final List<String> names = header.getStringList(namesTag);
+        final List<String> versions = header.getStringList(versionsTag);
+        final List<Integer> flags = header.getIntegerList(flagsTag);
 
-        if (namesVal == null || !(namesVal instanceof String[])) {
-            if (namesVal instanceof String) {
-                namesVal = new String[] { (String) namesVal };
-            } else {
-                return Collections.emptyList();
-            }
+        if (names == null) {
+            return Collections.emptyList();
         }
 
-        if (versionsVal != null && !(versionsVal instanceof String[])) {
-            if (versionsVal instanceof String) {
-                versionsVal = new String[] { (String) versionsVal };
-            } else {
-                throw new IllegalStateException(String.format("Invalid dependencies version format [%s]: %s", versionsTag, versionsVal));
-            }
+        if (names.size() != versions.size()) {
+            throw new IllegalStateException(String.format("Invalid size of dependency versions array [%s] - expected: %s, actual: %s", versionsTag, names.size(), versions.size()));
         }
 
-        if (flagsVal != null && !(flagsVal instanceof Long[])) {
-            if (flagsVal instanceof Long) {
-                flagsVal = new Long[] { (Long) flagsVal };
-            } else if (flagsVal instanceof Integer) {
-                flagsVal = new Long[] { ((Integer) flagsVal).longValue() };
-            } else if (flagsVal instanceof Integer[]) {
-                flagsVal = Arrays.stream((Integer[]) flagsVal).map(Integer::longValue).toArray(Long[]::new);
-            } else {
-                throw new IllegalStateException(String.format("Invalid dependencies flags format [%s]: %s", flagsTag, flagsVal));
-            }
+        if (flags != null && names.size() != flags.size()) {
+            throw new IllegalStateException(String.format("Invalid size of dependency flags array [%s] - expected: %s, actual: %s", flagsTag, names.size(), flags.size()));
         }
 
-        final String[] names = (String[]) namesVal;
-        final String[] versions = (String[]) versionsVal;
-        final Long[] flags = (Long[]) flagsVal;
-
-        if (versions != null && names.length != versions.length) {
-            throw new IllegalStateException(String.format("Invalid size of dependency versions array [%s] - expected: %s, actual: %s", versionsTag, names.length, versions.length));
-        }
-
-        if (flags != null && names.length != flags.length) {
-            throw new IllegalStateException(String.format("Invalid size of dependency flags array [%s] - expected: %s, actual: %s", flagsTag, names.length, flags.length));
-        }
-
-        final List<Dependency> result = new ArrayList<>(names.length);
-
+        final List<Dependency> result = new ArrayList<>(names.size());
         final Set<String> known = new HashSet<>();
 
-        for (int i = 0; i < names.length; i++) {
-            final String name = names[i];
-            String version = versions != null ? versions[i] : null;
+        for (int i = 0; i < names.size(); i++) {
+            final String name = names.get(i);
+            String version = versions.get(i);
+
             if (version != null && version.isEmpty()) {
                 version = null;
             }
-            final Long flag = flags != null ? flags[i] : null;
 
-            final String key = name; // for now the key is the name
+            final Integer flag = flags != null ? flags.get(i) : null;
 
-            if (known.add(key)) {
-                result.add(new Dependency(name, version, flag != null ? flag : 0L));
+            if (known.add(name)) {
+                result.add(new Dependency(name, version, flag != null ? flag : 0));
             }
         }
 
@@ -187,21 +201,5 @@ public final class RpmInformations {
         }
 
         return name;
-    }
-
-    public static String asString(final Object value) {
-        if (value == null) {
-            return null;
-        }
-
-        return new RpmTagValue(value).asString().orElse(null);
-    }
-
-    public static Long asLong(final Object value) {
-        if (value == null) {
-            return null;
-        }
-
-        return new RpmTagValue(value).asLong().orElse(null);
     }
 }

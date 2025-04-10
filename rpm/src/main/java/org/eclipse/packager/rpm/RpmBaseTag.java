@@ -23,5 +23,12 @@ public interface RpmBaseTag {
      *
      * @return the key value
      */
-    public Integer getValue();
+    Integer getValue();
+
+    /**
+     * Get the data type of the tag.
+     *
+     * @return the class representing the data type of this tag
+     */
+    Class<?> getDataType();
 }

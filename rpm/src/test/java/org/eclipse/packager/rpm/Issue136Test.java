@@ -48,7 +48,7 @@ class Issue136Test {
 
             try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(outFile)))) {
                 Dumper.dumpAll(in);
-                assertThat((String) in.getPayloadHeader().getTag(RpmTag.NAME)).hasSameSizeAs(originalName);
+                assertThat(in.getPayloadHeader().getString(RpmTag.NAME)).hasSameSizeAs(originalName);
                 assertThat(in.getLead().getName().getBytes(StandardCharsets.UTF_8)).hasSizeLessThan(66);
             }
         }

@@ -13,45 +13,20 @@
 
 package org.eclipse.packager.rpm.parse;
 
-import static com.google.common.io.BaseEncoding.base16;
 import static org.eclipse.packager.rpm.header.Type.UNKNOWN;
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.function.Function;
+import java.util.stream.IntStream;
 
+import org.eclipse.packager.rpm.RpmTagValue;
 import org.eclipse.packager.rpm.Rpms;
 import org.eclipse.packager.rpm.header.Type;
 
-public class HeaderValue {
-   static final class Unknown {
-        private final int type;
-
-        private final byte[] value;
-
-        public Unknown(int type, byte[] value) {
-            this.type = type;
-            this.value = value;
-        }
-
-        public int getType() {
-            return this.type;
-        }
-
-        public byte[] getValue() {
-            return this.value;
-        }
-
-        @Override
-        public String toString() {
-            return "UNKNOWN: type: " + this.type + ", data: " + base16().encode(this.value);
-        }
-    }
-
+public class HeaderValue<E> {
     private final int tag;
 
-    private Object value;
+    private RpmTagValue<?> value;
 
     private final int originalType;
 
@@ -73,8 +48,12 @@ public class HeaderValue {
         return this.tag;
     }
 
-    public Object getValue() {
+    public RpmTagValue<?> getValue() {
         return this.value;
+    }
+
+    public int getOriginalType() {
+        return this.originalType;
     }
 
     public Type getType() {
@@ -89,84 +68,59 @@ public class HeaderValue {
         return this.index;
     }
 
-    void fillFromStore(final ByteBuffer storeData) throws IOException {
+    void fillFromStore(final ByteBuffer storeData) {
+        storeData.position(this.index);
         switch (this.type) {
         case NULL:
             break;
         case CHAR:
-            this.value = getFromStore(storeData, true, buf -> (char) storeData.get(), Character[]::new);
+            this.value = new RpmTagValue<>(this.count == 1 ? Character.valueOf((char) storeData.get()) : IntStream.range(0, this.count).mapToObj(i -> (char) storeData.get()).toArray(Character[]::new));
             break;
         case BYTE:
-            this.value = getFromStore(storeData, true, ByteBuffer::get, Byte[]::new);
+        case UNKNOWN:
+            this.value = new RpmTagValue<>(this.count == 1 ? Byte.valueOf(storeData.get()) : IntStream.range(0, this.count).mapToObj(i -> storeData.get()).toArray(Byte[]::new));
             break;
         case SHORT:
-            this.value = getFromStore(storeData, true, ByteBuffer::getShort, Short[]::new);
+            this.value = new RpmTagValue<>(this.count == 1 ? Short.valueOf(storeData.getShort()) : IntStream.range(0, this.count).mapToObj(i -> storeData.getShort()).toArray(Short[]::new));
             break;
         case INT:
-            this.value = getFromStore(storeData, true, ByteBuffer::getInt, Integer[]::new);
+            this.value = new RpmTagValue<>(this.count == 1 ? Integer.valueOf(storeData.getInt()) : IntStream.range(0, this.count).mapToObj(i -> storeData.getInt()).toArray(Integer[]::new));
             break;
         case LONG:
-            this.value = getFromStore(storeData, true, ByteBuffer::getLong, Long[]::new);
+            this.value = new RpmTagValue<>(this.count == 1 ? Long.valueOf(storeData.getLong()) : IntStream.range(0, this.count).mapToObj(i -> storeData.getLong()).toArray(Long[]::new));
             break;
         case STRING:
-        {
-            // only one allowed
-            storeData.position(this.index);
-            this.value = makeString(storeData);
-        }
+            this.value = new RpmTagValue<>(makeString(storeData));
             break;
         case BLOB:
-        {
-            this.value = getBlob(storeData);
-        }
+            this.value = new RpmTagValue<>(makeBlob(storeData));
             break;
         case STRING_ARRAY:
         case I18N_STRING:
-                this.value = getFromStore(storeData, false, HeaderValue::makeString, String[]::new);
-            break;
-        case UNKNOWN:
-            this.value = new Unknown(this.originalType, getBlob(storeData));
+            this.value = new RpmTagValue<>(IntStream.range(0, this.count).mapToObj(i -> makeString(storeData)).toArray(String[]::new));
             break;
         }
     }
 
-    private byte[] getBlob(ByteBuffer storeData) {
+    private byte[] makeBlob(final ByteBuffer storeData) {
         final byte[] data = new byte[this.count];
         storeData.position(this.index);
         storeData.get(data);
         return data;
     }
 
-    @FunctionalInterface
-    public static interface IOFunction<T, R> {
-        public R apply(T t) throws IOException;
-    }
-
-    private <R> Object getFromStore(final ByteBuffer data, final boolean collapse, final IOFunction<ByteBuffer, R> func, final Function<Integer, R[]> creator) throws IOException {
-        data.position(this.index);
-        if (this.count == 1 && collapse) {
-            return func.apply(data);
-        }
-
-        final R[] result = creator.apply(this.count);
-        for (int i = 0; i < this.count; i++) {
-            result[i] = func.apply(data);
-        }
-        return result;
-    }
-
-    private static String makeString(final ByteBuffer buf) throws IOException {
+    private static String makeString(final ByteBuffer buf) {
         final byte[] data = buf.array();
         final int start = buf.position();
 
-        for (int i = 0; i < buf.remaining(); i++) // check if there is at least one more byte, null byte
-        {
+        for (int i = 0; i < buf.remaining(); i++) { // check if there is at least one more byte, null byte
             if (data[start + i] == 0) {
                 buf.position(start + i + 1); // skip content plus null byte
                 return new String(data, start, i, StandardCharsets.UTF_8);
             }
         }
-        throw new IOException("Corrupt tag entry. Null byte missing!");
+
+        throw new IllegalArgumentException("Corrupt tag entry. Null byte missing!");
     }
 
     @Override
@@ -183,7 +137,7 @@ public class HeaderValue {
 
         if (this.value != null) {
             if (this.type == UNKNOWN) {
-                sb.append(this.type);
+                sb.append(this.originalType);
             } else {
                 sb.append(this.value.getClass().getName());
             }
