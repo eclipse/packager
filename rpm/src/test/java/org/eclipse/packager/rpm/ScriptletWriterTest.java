@@ -22,7 +22,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.build.RpmBuilder;
 import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
@@ -157,20 +156,20 @@ public class ScriptletWriterTest {
     }
 
     private static String readTag(final RpmInputStream in, final RpmTag tag) throws IOException {
-        return new RpmTagValue(in.getPayloadHeader().getTag(tag)).asString().orElse(null);
+        return in.getPayloadHeader().getString(tag);
     }
 
     private static List<Dependency> readGroup(final RpmInputStream in, final RpmTag nameTag, final RpmTag versionTag, final RpmTag flagTag) throws IOException {
-        final String[] names = new RpmTagValue(in.getPayloadHeader().getTag(nameTag)).asStringArray().orElse(null);
-        final String[] versions = new RpmTagValue(in.getPayloadHeader().getTag(versionTag)).asStringArray().orElse(null);
-        final Integer[] flags = new RpmTagValue(in.getPayloadHeader().getTag(flagTag)).asIntegerArray().orElse(null);
+        final List<String> names = in.getPayloadHeader().getStringList(nameTag);
+        final List<String> versions = in.getPayloadHeader().getStringList(versionTag);
+        final List<Integer> flags = in.getPayloadHeader().getIntegerList(flagTag);
 
-        List<Dependency> dependencies = new ArrayList<>();
-        if (names == null) {
+        List<Dependency> dependencies = new ArrayList<>(names.size());
+        if (names.isEmpty()) {
             return dependencies;
         }
-        for (int i = 0; i < names.length; i++) {
-            dependencies.add(new Dependency(names[i], versions[i], RpmDependencyFlags.parse(flags[i])));
+        for (int i = 0; i < names.size(); i++) {
+            dependencies.add(new Dependency(names.get(i), versions.get(i), RpmDependencyFlags.parse(flags.get(i))));
         }
         return dependencies;
     }

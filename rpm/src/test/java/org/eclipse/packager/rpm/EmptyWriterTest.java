@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import org.bouncycastle.openpgp.PGPException;
 import org.eclipse.packager.rpm.app.Dumper;
 import org.eclipse.packager.rpm.build.RpmBuilder;
 import org.eclipse.packager.rpm.build.RpmBuilder.PackageInformation;
@@ -31,7 +30,7 @@ class EmptyWriterTest {
     private Path outBase;
 
     @Test
-    void test3() throws IOException, PGPException {
+    void test3() throws IOException {
         Path outFile;
 
         try (RpmBuilder builder = new RpmBuilder("testEmpty", "1.0.0", "1", "noarch", outBase)) {

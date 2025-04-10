@@ -14,6 +14,10 @@
 package org.eclipse.packager.rpm;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.eclipse.packager.rpm.RpmTag.BASENAMES;
+import static org.eclipse.packager.rpm.RpmTag.DIRNAMES;
+import static org.eclipse.packager.rpm.RpmTag.FILE_FLAGS;
+import static org.eclipse.packager.rpm.RpmTag.FILE_VERIFYFLAGS;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
@@ -22,7 +26,6 @@ import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.eclipse.packager.rpm.app.Dumper;
@@ -36,16 +39,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * see https://github.com/ctron/rpm-builder/issues/41
+ * see <a href="https://github.com/ctron/rpm-builder/issues/41">https://github.com/ctron/rpm-builder/issues/41</a>
  */
 class SetVerifyFlagsTest {
-    private final static Logger LOGGER = LoggerFactory.getLogger(SetVerifyFlagsTest.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SetVerifyFlagsTest.class);
 
     private static final String DIRNAME = "/opt/testing/";
 
-    private static final String NAME_myconf = "my.conf";
+    private static final String NAME_MYCONF = "my.conf";
 
-    private static final String NAME_myreadme = "readme.txt";
+    private static final String NAME_MYREADME = "readme.txt";
 
     @TempDir
     private Path outBase;
@@ -60,8 +63,8 @@ class SetVerifyFlagsTest {
         final Path outFile;
         try (RpmBuilder builder = new RpmBuilder("vflag0-test", "1.0.0", "1", "noarch", outBase)) {
             final String content_myconf = "Hallo, myconf!";
-            builder.newContext().addFile(DIRNAME + NAME_myconf, content_myconf.getBytes(), (targetName, object, type) -> {
-                if ((DIRNAME + NAME_myconf).equals(targetName)) {
+            builder.newContext().addFile(DIRNAME + NAME_MYCONF, content_myconf.getBytes(), (targetName, object, type) -> {
+                if ((DIRNAME + NAME_MYCONF).equals(targetName)) {
                     final FileInformation ret = new FileInformation();
                     final Set<FileFlags> fileFlags = new HashSet<>(
                             Arrays.asList(FileFlags.CONFIGURATION, FileFlags.NOREPLACE));
@@ -71,18 +74,18 @@ class SetVerifyFlagsTest {
                     final Set<VerifyFlags> verifyFlags = new HashSet<>(
                             Arrays.asList(VerifyFlags.USER, VerifyFlags.GROUP));
                     ret.setVerifyFlags(verifyFlags);
-                    LOGGER.debug("file info for {}: {}", targetName, ret);
+                    LOGGER.debug("file info for conf {}: {}", targetName, ret);
                     return ret;
                 }
                 throw new IllegalArgumentException("unexpected target name: " + targetName);
             });
             final String content_readme = "Hallo, readme!";
-            builder.newContext().addFile(DIRNAME + NAME_myreadme, content_readme.getBytes(), (targetName, object, type) -> {
-                if ((DIRNAME + NAME_myreadme).equals(targetName)) {
+            builder.newContext().addFile(DIRNAME + NAME_MYREADME, content_readme.getBytes(), (targetName, object, type) -> {
+                if ((DIRNAME + NAME_MYREADME).equals(targetName)) {
                     final FileInformation ret = new FileInformation();
                     final Set<FileFlags> fileFlags = new HashSet<>(Collections.singletonList(FileFlags.README));
                     ret.setFileFlags(fileFlags);
-                    LOGGER.debug("file info for {}: {}", targetName, ret);
+                    LOGGER.debug("file info for readme {}: {}", targetName, ret);
                     return ret;
                 }
                 throw new IllegalArgumentException("unexpected target name: " + targetName);
@@ -95,10 +98,10 @@ class SetVerifyFlagsTest {
         try (final RpmInputStream in = new RpmInputStream(new BufferedInputStream(Files.newInputStream(outFile)))) {
             Dumper.dumpAll(in);
             final InputHeader<RpmTag> header = in.getPayloadHeader();
-            assertThat(List.of((String[]) header.getTag(RpmTag.DIRNAMES))).containsExactly(DIRNAME);
-            assertThat(List.of((String[]) header.getTag(RpmTag.BASENAMES))).containsExactly(NAME_myconf, NAME_myreadme);
-            assertThat(List.of((Integer[]) header.getTag(RpmTag.FILE_FLAGS))).containsExactly(17, 256);
-            assertThat((Integer[]) header.getTag(RpmTag.FILE_VERIFYFLAGS)).containsExactly(24, -1);
+            assertThat(header.getStringList(DIRNAMES)).containsExactly(DIRNAME);
+            assertThat(header.getStringList(BASENAMES)).containsExactly(NAME_MYCONF, NAME_MYREADME);
+            assertThat(header.getIntegerList(FILE_FLAGS)).containsExactly(17, 256);
+            assertThat(header.getIntegerList(FILE_VERIFYFLAGS)).containsExactly(24, -1);
         }
     }
 }

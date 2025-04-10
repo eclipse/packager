@@ -13,14 +13,22 @@
 
 package org.eclipse.packager.rpm;
 
-import java.util.Optional;
+import java.util.List;
 
 public interface ReadableHeader<T extends RpmBaseTag> {
-    /**
-     * Get the value from a header structure
-     *
-     * @param tag the tag
-     * @return the optional value
-     */
-    public Optional<Object> getValue(T tag);
+    boolean hasTag(T tag);
+
+    String getString(T tag);
+
+    Integer getInteger(T tag);
+
+    Long getLong(T tag);
+
+    List<String> getStringList(T tag);
+
+    List<Integer> getIntegerList(T tag);
+
+    List<Long> getLongList(T tag);
+
+    byte[] getByteArray(T tag);
 }

@@ -13,17 +13,22 @@
 
 package org.eclipse.packager.rpm.app;
 
+import static org.eclipse.packager.rpm.Rpms.IMMUTABLE_TAG_HEADER;
+import static org.eclipse.packager.rpm.Rpms.IMMUTABLE_TAG_SIGNATURE;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.function.IntFunction;
+import java.util.stream.IntStream;
 
 import org.apache.commons.compress.archivers.cpio.CpioArchiveEntry;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveInputStream;
@@ -33,7 +38,6 @@ import org.eclipse.packager.rpm.RpmBaseTag;
 import org.eclipse.packager.rpm.RpmLead;
 import org.eclipse.packager.rpm.RpmSignatureTag;
 import org.eclipse.packager.rpm.RpmTag;
-import org.eclipse.packager.rpm.RpmTagValue;
 import org.eclipse.packager.rpm.Rpms;
 import org.eclipse.packager.rpm.Type;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
@@ -96,43 +100,39 @@ public class Dumper {
     }
 
     private static void dumpGroup(final RpmInputStream in, final String name, final RpmTag nameTag, final RpmTag versionTag, final RpmTag flagTag) throws IOException {
-        final String[] names = new RpmTagValue(in.getPayloadHeader().getTag(nameTag)).asStringArray().orElse(null);
-        final String[] versions = new RpmTagValue(in.getPayloadHeader().getTag(versionTag)).asStringArray().orElse(null);
-        final Integer[] flags = new RpmTagValue(in.getPayloadHeader().getTag(flagTag)).asIntegerArray().orElse(null);
+        final InputHeader<RpmTag> payloadHeader = in.getPayloadHeader();
+        final List<String> names = payloadHeader.getStringList(nameTag);
+        final List<String> versions = payloadHeader.getStringList(versionTag);
+        final List<Integer> flags = payloadHeader.getIntegerList(flagTag);
         dumpDeps(name, names, versions, flags);
     }
 
-    private static void dumpDeps(final String string, final String[] names, final String[] versions, final Integer[] flags) {
+    private static void dumpDeps(final String string, final List<String> names, final List<String> versions, final List<Integer> flags) {
         if (names == null) {
             return;
         }
 
-        for (int i = 0; i < names.length; i++) {
-            System.out.format("%s: %s - %s - %s %s%n", string, names[i], versions[i], flags[i], RpmDependencyFlags.parse(flags[i]));
-        }
+        IntStream.range(0, names.size()).forEach(i -> System.out.format("%s: %s - %s - %s %s%n", string, names.get(i), versions.get(i), flags.get(i), RpmDependencyFlags.parse(flags.get(i))));
     }
 
-    private static void dumpHeader(final String string, final InputHeader<? extends RpmBaseTag> header, final IntFunction<Object> func) {
+    private static void dumpHeader(final String string, final InputHeader<? extends RpmBaseTag> header, final IntFunction<RpmBaseTag> func) {
         System.out.println(string);
         System.out.println("=================================");
 
-        Set<Entry<Integer, HeaderValue>> data;
+        Set<Entry<Integer, HeaderValue<?>>> data;
         if (SORTED) {
             data = new TreeMap<>(header.getRawTags()).entrySet();
         } else {
             data = header.getRawTags().entrySet();
         }
 
-        for (final Map.Entry<Integer, HeaderValue> entry : data) {
-            Object tag = func.apply(entry.getKey());
-            if (tag == null) {
-                tag = entry.getKey();
-            }
+        for (final Map.Entry<Integer, HeaderValue<?>> entry : data) {
+            final RpmBaseTag tag = func.apply(entry.getKey());
+            final HeaderValue<?> value = entry.getValue();
+            System.out.format("%20s - %s%n", tag != null ? tag : entry.getKey(), Rpms.dumpValue(value));
 
-            System.out.format("%20s - %s%n", tag, Rpms.dumpValue(entry.getValue()));
-
-            if (entry.getKey() == 62 || entry.getKey() == 63) {
-                final ByteBuffer buf = ByteBuffer.wrap((byte[]) entry.getValue().getValue());
+            if (entry.getKey() == IMMUTABLE_TAG_SIGNATURE || entry.getKey() == IMMUTABLE_TAG_HEADER) {
+                final ByteBuffer buf = ByteBuffer.wrap(entry.getValue().getValue().asByteArray().orElseThrow());
                 System.out.format("Immutable - tag: %s, type: %s, position: %s, count: %s%n", buf.getInt(), buf.getInt(), buf.getInt(), buf.getInt());
             }
         }
