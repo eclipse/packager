@@ -44,20 +44,15 @@ public class GzipPayloadCoding implements PayloadCodingProvider {
     }
 
     @Override
-    public OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException {
-        final String flags;
-        final int compressionLevel;
+    public OutputStream createOutputStream(final OutputStream out, final PayloadFlags flags) throws IOException {
+        final int level = Optional.ofNullable(flags.getLevel()).orElse(Deflater.DEFAULT_COMPRESSION);
 
-        if (optionalFlags.isPresent() && (flags = optionalFlags.get()).length() > 0) {
-            compressionLevel = Integer.parseInt(flags.substring(0, 1));
-        } else {
-            compressionLevel = Deflater.BEST_COMPRESSION;
+        if (level < Deflater.DEFAULT_COMPRESSION || level > Deflater.BEST_COMPRESSION) {
+            throw new IllegalArgumentException("Compression level " + level + " must be between " + Deflater.DEFAULT_COMPRESSION + " and " + Deflater.BEST_COMPRESSION);
         }
 
         final GzipParameters parameters = new GzipParameters();
-
-        parameters.setCompressionLevel(compressionLevel);
-
+        parameters.setCompressionLevel(level);
         return new GzipCompressorOutputStream(out, parameters);
     }
 }

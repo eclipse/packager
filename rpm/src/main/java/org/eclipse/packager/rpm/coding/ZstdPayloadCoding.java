@@ -49,21 +49,12 @@ public class ZstdPayloadCoding implements PayloadCodingProvider {
     }
 
     @Override
-    public OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException {
+    public OutputStream createOutputStream(final OutputStream out, final PayloadFlags flags) throws IOException {
         if (!ZstdUtils.isZstdCompressionAvailable()) {
             throw new IOException("Zstandard compression is not available");
         }
 
-        final String flags;
-
-        final int level;
-
-        if (optionalFlags.isPresent() && (flags = optionalFlags.get()).length() > 0) {
-            level = Integer.parseInt(flags.substring(0, 1));
-        } else {
-            level = 3;
-        }
-
+        final int level = Optional.ofNullable(flags.getLevel()).orElse(0);
         return new ZstdCompressorOutputStream(out, level);
     }
 }

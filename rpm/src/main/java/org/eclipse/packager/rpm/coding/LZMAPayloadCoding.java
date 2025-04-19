@@ -23,6 +23,7 @@ import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
+import org.tukaani.xz.LZMA2Options;
 
 public class LZMAPayloadCoding implements PayloadCodingProvider {
     protected LZMAPayloadCoding() {
@@ -44,7 +45,13 @@ public class LZMAPayloadCoding implements PayloadCodingProvider {
     }
 
     @Override
-    public OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException {
-        return new LZMACompressorOutputStream(out);
+    public OutputStream createOutputStream(final OutputStream out, final PayloadFlags flags) throws IOException {
+        final int preset = Optional.ofNullable(flags.getLevel()).orElse(LZMA2Options.PRESET_DEFAULT);
+
+        if (preset < LZMA2Options.PRESET_MIN || preset > LZMA2Options.PRESET_MAX) {
+            throw new IllegalArgumentException("Preset " + preset + " must be between " + LZMA2Options.PRESET_MIN + " and " + LZMA2Options.PRESET_MAX);
+        }
+
+        return new LZMACompressorOutputStream.Builder().setOutputStream(out).setLzma2Options(new LZMA2Options(preset)).get();
     }
 }

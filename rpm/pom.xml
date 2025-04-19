@@ -50,10 +50,16 @@
             <scope>test</scope>
         </dependency>
         <!-- show log output during tests using logback as the slf4j backend. -->
-        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <!-- enable zstd support during tests. -->
+        <dependency>
+            <groupId>com.github.luben</groupId>
+            <artifactId>zstd-jni</artifactId>
+            <version>1.5.7-2</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -106,7 +106,7 @@ public class RpmInputStream extends InputStream {
             throw new IOException("Payload coding must be a single string");
         }
 
-        final PayloadCoding coding = PayloadCoding.fromValue(payloadCoding).orElseThrow(() -> new IOException(String.format("Unknown payload coding: '%s'", payloadCoding)));
+        final PayloadCoding coding = PayloadCoding.valueOf(payloadCoding);
 
         return coding.createProvider().createInputStream(this.in);
     }

@@ -717,11 +717,11 @@ public class RpmBuilder implements AutoCloseable {
         this.header.putString(RpmTag.PAYLOAD_FORMAT, "cpio");
 
         if (finished.getPayloadCoding() != null) {
-            this.header.putString(RpmTag.PAYLOAD_CODING, finished.getPayloadCoding().getValue());
+            this.header.putString(RpmTag.PAYLOAD_CODING, finished.getPayloadCoding().toString());
         }
 
-        if (finished.getPayloadFlags().isPresent()) {
-            this.header.putString(RpmTag.PAYLOAD_FLAGS, finished.getPayloadFlags().get());
+        if (finished.getPayloadFlags() != null) {
+            this.header.putString(RpmTag.PAYLOAD_FLAGS, finished.getPayloadFlags().toString());
         }
 
         this.header.putStringArray(100, "C");

@@ -44,15 +44,11 @@ public class BZip2PayloadCoding implements PayloadCodingProvider {
     }
 
     @Override
-    public OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException {
-        final String flags;
+    public OutputStream createOutputStream(final OutputStream out, final PayloadFlags flags) throws IOException {
+        final int blockSize =  Optional.ofNullable(flags.getLevel()).orElse(BZip2CompressorOutputStream.MAX_BLOCKSIZE);
 
-        final int blockSize;
-
-        if (optionalFlags.isPresent() && (flags = optionalFlags.get()).length() > 0) {
-            blockSize = Integer.parseInt(flags.substring(0, 1));
-        } else {
-            blockSize = BZip2CompressorOutputStream.MAX_BLOCKSIZE;
+        if (blockSize < BZip2CompressorOutputStream.MIN_BLOCKSIZE || blockSize > BZip2CompressorOutputStream.MAX_BLOCKSIZE) {
+            throw new IllegalArgumentException("Block size " + blockSize + " must be between " + BZip2CompressorOutputStream.MIN_BLOCKSIZE + " and " + BZip2CompressorOutputStream.MAX_BLOCKSIZE);
         }
 
         return new BZip2CompressorOutputStream(out, blockSize);
