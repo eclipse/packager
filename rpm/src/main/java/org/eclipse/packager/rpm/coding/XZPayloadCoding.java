@@ -45,14 +45,11 @@ public class XZPayloadCoding implements PayloadCodingProvider {
     }
 
     @Override
-    public OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException {
-        final String flags;
-        final int preset;
+    public OutputStream createOutputStream(final OutputStream out, final PayloadFlags flags) throws IOException {
+        final int preset = Optional.ofNullable(flags.getLevel()).orElse(LZMA2Options.PRESET_DEFAULT);
 
-        if (optionalFlags.isPresent() && (flags = optionalFlags.get()).length() > 0) {
-            preset = Integer.parseInt(flags.substring(0, 1));
-        } else {
-            preset = LZMA2Options.PRESET_DEFAULT;
+        if (preset < LZMA2Options.PRESET_MIN || preset > LZMA2Options.PRESET_MAX) {
+            throw new IllegalArgumentException("Preset " + preset + " must be between " + LZMA2Options.PRESET_MIN + " and " + LZMA2Options.PRESET_MAX);
         }
 
         return new XZCompressorOutputStream(out, preset);

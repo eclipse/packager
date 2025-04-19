@@ -19,6 +19,7 @@ import java.util.Optional;
 
 import org.eclipse.packager.rpm.RpmTag;
 import org.eclipse.packager.rpm.coding.PayloadCoding;
+import org.eclipse.packager.rpm.coding.PayloadFlags;
 import org.eclipse.packager.rpm.header.Header;
 
 public interface PayloadProvider {
@@ -61,7 +62,7 @@ public interface PayloadProvider {
      *
      * @return the compression flags for this compressed archive file, if any
      */
-    Optional<String> getPayloadFlags();
+    PayloadFlags getPayloadFlags();
 
     /**
      * The algorithm used for generating file checksum digests whose ordinal is

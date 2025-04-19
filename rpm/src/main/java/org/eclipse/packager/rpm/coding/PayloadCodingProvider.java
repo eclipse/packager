@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 import org.eclipse.packager.rpm.deps.Dependency;
@@ -36,6 +35,6 @@ public interface PayloadCodingProvider {
 
     InputStream createInputStream(final InputStream in) throws IOException;
 
-    OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException;
+    OutputStream createOutputStream(final OutputStream out, final PayloadFlags flags) throws IOException;
 
 }

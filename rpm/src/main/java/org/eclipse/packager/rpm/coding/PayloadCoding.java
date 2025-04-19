@@ -13,45 +13,23 @@
 
 package org.eclipse.packager.rpm.coding;
 
-import java.util.Optional;
 import java.util.function.Supplier;
 
 public enum PayloadCoding {
-    NONE("none", NullPayloadCoding::new),
-    GZIP("gzip", GzipPayloadCoding::new),
-    LZMA("lzma", LZMAPayloadCoding::new),
-    BZIP2("bzip2", BZip2PayloadCoding::new),
-    ZSTD("zstd", ZstdPayloadCoding::new),
-    XZ("xz", XZPayloadCoding::new);
-
-    private final String value;
+    none( NullPayloadCoding::new),
+    gzip(GzipPayloadCoding::new),
+    lzma(LZMAPayloadCoding::new),
+    bzip2(BZip2PayloadCoding::new),
+    zstd(ZstdPayloadCoding::new),
+    xz(XZPayloadCoding::new);
 
     private final Supplier<PayloadCodingProvider> newInstanceSupplier;
 
-    PayloadCoding(final String value, final Supplier<PayloadCodingProvider> newInstanceSupplier) {
-        this.value = value;
+    PayloadCoding(final Supplier<PayloadCodingProvider> newInstanceSupplier) {
         this.newInstanceSupplier = newInstanceSupplier;
-    }
-
-    public String getValue() {
-        return this.value;
     }
 
     public PayloadCodingProvider createProvider() {
         return this.newInstanceSupplier.get();
-    }
-
-    public static Optional<PayloadCoding> fromValue(final String payloadCoding) {
-        if (payloadCoding == null) {
-            return Optional.of(GZIP);
-        }
-
-        for (final PayloadCoding coding : values()) {
-            if (coding.value.equals(payloadCoding)) {
-                return Optional.of(coding);
-            }
-        }
-
-        return Optional.empty();
     }
 }

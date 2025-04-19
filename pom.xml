@@ -76,7 +76,7 @@
 
         <assertj.version>3.25.3</assertj.version>
         <bouncycastle.version>1.78</bouncycastle.version>
-        <commons-compress.version>1.26.1</commons-compress.version>
+        <commons-compress.version>1.28.0-SNAPSHOT</commons-compress.version>
         <commons-codec.version>1.16.1</commons-codec.version>
         <guava.version>33.1.0-jre</guava.version>
         <junit.jupiter.version>5.10.2</junit.jupiter.version>
