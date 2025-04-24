@@ -16,6 +16,8 @@ package org.eclipse.packager.rpm.coding;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -25,7 +27,37 @@ import org.apache.commons.compress.compressors.zstandard.ZstdUtils;
 import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Integer.MIN_VALUE;
+import static org.eclipse.packager.rpm.coding.PayloadFlags.getLevel;
+import static org.eclipse.packager.rpm.coding.PayloadFlags.getThreads;
+import static org.eclipse.packager.rpm.coding.PayloadFlags.getWindowLog;
+
 public class ZstdPayloadCoding implements PayloadCodingProvider {
+    public static final boolean ZSTD_COMPRESSION_AVAILABLE = ZstdUtils.isZstdCompressionAvailable();
+
+    public static Integer MIN_COMPRESSION_LEVEL = MIN_VALUE;
+
+    public static Integer MAX_COMPRESSION_LEVEL = MAX_VALUE;
+
+    public static Integer DEFAULT_COMPRESSION_LEVEL = 0;
+
+    static {
+        if (ZSTD_COMPRESSION_AVAILABLE) {
+            try {
+                final Class<?> zstdClass = Class.forName("com.github.luben.zstd.Zstd");
+                final Method minCompressionLevelMethod = zstdClass.getMethod("minCompressionLevel");
+                MIN_COMPRESSION_LEVEL = (Integer) minCompressionLevelMethod.invoke(null);
+                final Method maxCompressionLevelMethod = zstdClass.getMethod("maxCompressionLevel");
+                MAX_COMPRESSION_LEVEL = (Integer) maxCompressionLevelMethod.invoke(null);
+                final Method defaultCompressionLevelMethod = zstdClass.getMethod("defaultCompressionLevel");
+                DEFAULT_COMPRESSION_LEVEL = (Integer) defaultCompressionLevelMethod.invoke(null);
+            } catch (ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                throw new RuntimeException("Failed to initialize Zstd compression levels", e);
+            }
+        }
+    }
+
     protected ZstdPayloadCoding() {
     }
 
@@ -41,7 +73,7 @@ public class ZstdPayloadCoding implements PayloadCodingProvider {
 
     @Override
     public InputStream createInputStream(final InputStream in) throws IOException {
-        if (!ZstdUtils.isZstdCompressionAvailable()) {
+        if (!ZSTD_COMPRESSION_AVAILABLE) {
             throw new IOException("Zstandard compression is not available");
         }
 
@@ -49,21 +81,14 @@ public class ZstdPayloadCoding implements PayloadCodingProvider {
     }
 
     @Override
-    public OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException {
-        if (!ZstdUtils.isZstdCompressionAvailable()) {
+    public OutputStream createOutputStream(final OutputStream out, final Optional<PayloadFlags> optionalPayloadFlags) throws IOException {
+        if (!ZSTD_COMPRESSION_AVAILABLE) {
             throw new IOException("Zstandard compression is not available");
         }
 
-        final String flags;
-
-        final int level;
-
-        if (optionalFlags.isPresent() && (flags = optionalFlags.get()).length() > 0) {
-            level = Integer.parseInt(flags.substring(0, 1));
-        } else {
-            level = 3;
-        }
-
-        return new ZstdCompressorOutputStream(out, level);
+        final int level = getLevel(optionalPayloadFlags, MIN_COMPRESSION_LEVEL, MAX_COMPRESSION_LEVEL, DEFAULT_COMPRESSION_LEVEL);
+        final int workers = getThreads(optionalPayloadFlags);
+        final int windowLog = getWindowLog(optionalPayloadFlags);
+        return new ZstdCompressorOutputStream.Builder().setOutputStream(out).setLevel(level).setWorkers(workers).setWindowLog(windowLog).get();
     }
 }

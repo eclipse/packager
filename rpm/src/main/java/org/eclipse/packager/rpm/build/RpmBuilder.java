@@ -51,6 +51,8 @@ import org.eclipse.packager.rpm.RpmVersion;
 import org.eclipse.packager.rpm.Rpms;
 import org.eclipse.packager.rpm.VerifyFlags;
 import org.eclipse.packager.rpm.build.PayloadRecorder.Result;
+import org.eclipse.packager.rpm.coding.PayloadCoding;
+import org.eclipse.packager.rpm.coding.PayloadFlags;
 import org.eclipse.packager.rpm.deps.Dependencies;
 import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
@@ -716,12 +718,16 @@ public class RpmBuilder implements AutoCloseable {
     private void fillHeader(final PayloadRecorder.Finished finished) {
         this.header.putString(RpmTag.PAYLOAD_FORMAT, "cpio");
 
-        if (finished.getPayloadCoding() != null) {
-            this.header.putString(RpmTag.PAYLOAD_CODING, finished.getPayloadCoding().getValue());
+        final PayloadCoding payloadCoding = finished.getPayloadCoding();
+
+        if (payloadCoding != PayloadCoding.NONE) {
+            this.header.putString(RpmTag.PAYLOAD_CODING, payloadCoding.toString());
         }
 
-        if (finished.getPayloadFlags().isPresent()) {
-            this.header.putString(RpmTag.PAYLOAD_FLAGS, finished.getPayloadFlags().get());
+        final PayloadFlags payloadFlags = finished.getPayloadFlags();
+
+        if (payloadFlags != null) {
+            this.header.putString(RpmTag.PAYLOAD_FLAGS, payloadFlags.toString());
         }
 
         this.header.putStringArray(100, "C");

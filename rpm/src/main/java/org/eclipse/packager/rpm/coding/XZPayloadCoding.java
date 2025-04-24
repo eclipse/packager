@@ -25,6 +25,11 @@ import org.eclipse.packager.rpm.deps.Dependency;
 import org.eclipse.packager.rpm.deps.RpmDependencyFlags;
 import org.tukaani.xz.LZMA2Options;
 
+import static org.eclipse.packager.rpm.coding.PayloadFlags.getLevel;
+import static org.tukaani.xz.LZMA2Options.PRESET_DEFAULT;
+import static org.tukaani.xz.LZMA2Options.PRESET_MAX;
+import static org.tukaani.xz.LZMA2Options.PRESET_MIN;
+
 public class XZPayloadCoding implements PayloadCodingProvider {
     protected XZPayloadCoding() {
     }
@@ -45,16 +50,8 @@ public class XZPayloadCoding implements PayloadCodingProvider {
     }
 
     @Override
-    public OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException {
-        final String flags;
-        final int preset;
-
-        if (optionalFlags.isPresent() && (flags = optionalFlags.get()).length() > 0) {
-            preset = Integer.parseInt(flags.substring(0, 1));
-        } else {
-            preset = LZMA2Options.PRESET_DEFAULT;
-        }
-
-        return new XZCompressorOutputStream(out, preset);
+    public OutputStream createOutputStream(final OutputStream out, final Optional<PayloadFlags> optionalPayloadFlags) throws IOException {
+        final int preset = getLevel(optionalPayloadFlags, PRESET_MIN, PRESET_MAX, PRESET_DEFAULT);
+        return new XZCompressorOutputStream.Builder().setOutputStream(out).setLzma2Options(new LZMA2Options(preset)).get();
     }
 }

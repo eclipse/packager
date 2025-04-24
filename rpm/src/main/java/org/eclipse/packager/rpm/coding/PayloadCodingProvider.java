@@ -36,6 +36,6 @@ public interface PayloadCodingProvider {
 
     InputStream createInputStream(final InputStream in) throws IOException;
 
-    OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException;
+    OutputStream createOutputStream(final OutputStream out, final Optional<PayloadFlags> optionalPayloadFlags) throws IOException;
 
 }

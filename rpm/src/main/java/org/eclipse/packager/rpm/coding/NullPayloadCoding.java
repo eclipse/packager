@@ -13,7 +13,6 @@
 
 package org.eclipse.packager.rpm.coding;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
@@ -32,15 +31,16 @@ public class NullPayloadCoding implements PayloadCodingProvider {
 
     @Override
     public void fillRequirements(final Consumer<Dependency> requirementsConsumer) {
+
     }
 
     @Override
-    public InputStream createInputStream(final InputStream in) throws IOException {
+    public InputStream createInputStream(final InputStream in) {
         return in;
     }
 
     @Override
-    public OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException {
+    public OutputStream createOutputStream(final OutputStream out, final Optional<PayloadFlags> optionalPayloadFlags) {
         return out;
     }
 }

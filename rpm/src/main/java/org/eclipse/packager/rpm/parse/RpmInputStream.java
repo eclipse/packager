@@ -95,18 +95,13 @@ public class RpmInputStream extends InputStream {
         }
 
         if (!"cpio".equals(payloadFormat)) {
-            throw new IOException(String.format("Unknown payload format: %s", payloadFormat));
+            throw new IOException("Unknown payload format '" + payloadFormat + "' , expected 'cpio'");
         }
 
         // payload coding
 
         final String payloadCoding = this.payloadHeader.getString(RpmTag.PAYLOAD_CODING);
-
-        if (payloadCoding == null) {
-            throw new IOException("Payload coding must be a single string");
-        }
-
-        final PayloadCoding coding = PayloadCoding.fromValue(payloadCoding).orElseThrow(() -> new IOException(String.format("Unknown payload coding: '%s'", payloadCoding)));
+        final PayloadCoding coding = PayloadCoding.fromValue(payloadCoding).orElseThrow(() -> new IOException("Unknown payload coding '" + payloadCoding + "'"));
 
         return coding.createProvider().createInputStream(this.in);
     }
