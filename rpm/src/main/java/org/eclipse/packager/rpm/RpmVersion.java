@@ -16,6 +16,10 @@ package org.eclipse.packager.rpm;
 import java.util.Objects;
 import java.util.Optional;
 
+import static org.eclipse.packager.rpm.RpmVersionValidator.validateEVR;
+import static org.eclipse.packager.rpm.RpmVersionValidator.validateEpoch;
+import static org.eclipse.packager.rpm.RpmVersionValidator.validateVersion;
+
 public class RpmVersion implements Comparable<RpmVersion> {
     private final Optional<Integer> epoch;
 
@@ -32,15 +36,15 @@ public class RpmVersion implements Comparable<RpmVersion> {
     }
 
     public RpmVersion(final Integer epoch, final String version, final String release) {
-        this.epoch = Optional.ofNullable(epoch);
-        this.version = Objects.requireNonNull(version);
-        this.release = Optional.ofNullable(release);
+        this(Optional.ofNullable(epoch), version, Optional.ofNullable(release));
     }
 
     public RpmVersion(final Optional<Integer> epoch, final String version, final Optional<String> release) {
         this.epoch = Objects.requireNonNull(epoch);
         this.version = Objects.requireNonNull(version);
+        validateVersion(this.version);
         this.release = Objects.requireNonNull(release);
+        this.release.ifPresent(RpmVersionValidator::validateRelease);
     }
 
     public Optional<Integer> getEpoch() {
@@ -75,12 +79,16 @@ public class RpmVersion implements Comparable<RpmVersion> {
             return null;
         }
 
+        validateEVR(version);
+
         final String[] toks1 = version.split(":", 2);
 
         final String n;
         Integer epoch = null;
         if (toks1.length > 1) {
-            epoch = Integer.parseInt(toks1[0]);
+            final String epochStr = toks1[0];
+            validateEpoch(epochStr);
+            epoch = Integer.parseInt(epochStr);
             n = toks1[1];
         } else {
             n = toks1[0];

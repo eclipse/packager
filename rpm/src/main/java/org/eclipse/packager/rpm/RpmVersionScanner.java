@@ -19,36 +19,16 @@ import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 
-final class RpmVersionScanner implements Iterator<CharSequence> {
-    private static final char TILDE_CHAR = '~';
+import static org.eclipse.packager.rpm.RpmVersionValidator.ALPHA;
+import static org.eclipse.packager.rpm.RpmVersionValidator.CARAT_CHAR;
+import static org.eclipse.packager.rpm.RpmVersionValidator.DIGIT;
+import static org.eclipse.packager.rpm.RpmVersionValidator.SIGNIFICANT;
+import static org.eclipse.packager.rpm.RpmVersionValidator.TILDE_CHAR;
 
+final class RpmVersionScanner implements Iterator<CharSequence> {
     private static final String TILDE_STRING = "~";
 
-    private static final char CARAT_CHAR = '^';
-
     private static final String CARAT_STRING = "^";
-
-    private static final BitSet ALPHA = new BitSet(128);
-
-    static {
-        ALPHA.set('A', 'Z');
-        ALPHA.set('a', 'z');
-    }
-
-    private static final BitSet DIGIT = new BitSet(128);
-
-    static {
-        DIGIT.set('0', '9');
-    }
-
-    private static final BitSet SIGNIFICANT = new BitSet(128);
-
-    static {
-        SIGNIFICANT.or(ALPHA);
-        SIGNIFICANT.or(DIGIT);
-        SIGNIFICANT.set(TILDE_CHAR);
-        SIGNIFICANT.set(CARAT_CHAR);
-    }
 
     private final CharBuffer buf;
 
@@ -117,11 +97,11 @@ final class RpmVersionScanner implements Iterator<CharSequence> {
         }
     }
 
-    private boolean hasNext(BitSet bitSet) {
+    private boolean hasNext(final BitSet bitSet) {
         return (hasNext() && bitSet.get(buf.charAt(position)));
     }
 
-    private boolean hasNext(char c) {
+    private boolean hasNext(final char c) {
         return (hasNext() && buf.charAt(position) == c);
     }
 
@@ -135,7 +115,7 @@ final class RpmVersionScanner implements Iterator<CharSequence> {
         return start;
     }
 
-    private CharBuffer next(BitSet bitSet) {
+    private CharBuffer next(final BitSet bitSet) {
         skipInsignificantChars();
 
         final int start = skipLeadingZeros();
