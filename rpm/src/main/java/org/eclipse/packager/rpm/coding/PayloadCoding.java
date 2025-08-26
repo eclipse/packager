@@ -43,15 +43,20 @@ public enum PayloadCoding {
 
     public static Optional<PayloadCoding> fromValue(final String payloadCoding) {
         if (payloadCoding == null) {
-            return Optional.of(GZIP);
+            return Optional.of(NONE);
         }
 
         for (final PayloadCoding coding : values()) {
-            if (coding.value.equals(payloadCoding)) {
+            if (coding.value.equalsIgnoreCase(payloadCoding)) {
                 return Optional.of(coding);
             }
         }
 
         return Optional.empty();
+    }
+
+    @Override
+    public String toString() {
+        return getValue();
     }
 }

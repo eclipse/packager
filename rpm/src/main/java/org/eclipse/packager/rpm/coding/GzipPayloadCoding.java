@@ -18,12 +18,15 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.zip.Deflater;
 
 import org.apache.commons.compress.compressors.gzip.GzipCompressorInputStream;
 import org.apache.commons.compress.compressors.gzip.GzipCompressorOutputStream;
 import org.apache.commons.compress.compressors.gzip.GzipParameters;
 import org.eclipse.packager.rpm.deps.Dependency;
+
+import static java.util.zip.Deflater.BEST_COMPRESSION;
+import static java.util.zip.Deflater.DEFAULT_COMPRESSION;
+import static org.eclipse.packager.rpm.coding.PayloadFlags.getLevel;
 
 public class GzipPayloadCoding implements PayloadCodingProvider {
     protected GzipPayloadCoding() {
@@ -44,20 +47,10 @@ public class GzipPayloadCoding implements PayloadCodingProvider {
     }
 
     @Override
-    public OutputStream createOutputStream(final OutputStream out, final Optional<String> optionalFlags) throws IOException {
-        final String flags;
-        final int compressionLevel;
-
-        if (optionalFlags.isPresent() && (flags = optionalFlags.get()).length() > 0) {
-            compressionLevel = Integer.parseInt(flags.substring(0, 1));
-        } else {
-            compressionLevel = Deflater.BEST_COMPRESSION;
-        }
-
+    public OutputStream createOutputStream(final OutputStream out, final Optional<PayloadFlags> optionalPayloadFlags) throws IOException {
+        final int level = getLevel(optionalPayloadFlags, DEFAULT_COMPRESSION, BEST_COMPRESSION, DEFAULT_COMPRESSION);
         final GzipParameters parameters = new GzipParameters();
-
-        parameters.setCompressionLevel(compressionLevel);
-
+        parameters.setCompressionLevel(level);
         return new GzipCompressorOutputStream(out, parameters);
     }
 }

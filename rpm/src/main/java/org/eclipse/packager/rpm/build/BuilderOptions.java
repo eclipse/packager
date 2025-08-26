@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.packager.rpm.coding.PayloadCoding;
+import org.eclipse.packager.rpm.coding.PayloadFlags;
 
 /**
  * Options which control the build process of the {@link RpmBuilder}
@@ -33,6 +34,11 @@ import org.eclipse.packager.rpm.coding.PayloadCoding;
  * </p>
  */
 public class BuilderOptions {
+    private static final PayloadCoding DEFAULT_PAYLOAD_CODING = PayloadCoding.GZIP;
+
+    private static final PayloadFlags DEFAULT_PAYLOAD_FLAGS = new PayloadFlags(DEFAULT_PAYLOAD_CODING, 9);
+
+
     private LongMode longMode = LongMode.DEFAULT;
 
     private OpenOption[] openOptions;
@@ -41,7 +47,7 @@ public class BuilderOptions {
 
     private PayloadCoding payloadCoding;
 
-    private String payloadFlags;
+    private PayloadFlags payloadFlags;
 
     private DigestAlgorithm fileDigestAlgorithm = DigestAlgorithm.MD5;
 
@@ -98,18 +104,18 @@ public class BuilderOptions {
     }
 
     public PayloadCoding getPayloadCoding() {
-        return this.payloadCoding != null ? this.payloadCoding : PayloadCoding.GZIP;
+        return this.payloadCoding != null ? this.payloadCoding : DEFAULT_PAYLOAD_CODING;
     }
 
     public void setPayloadCoding(final PayloadCoding payloadCoding) {
         this.payloadCoding = payloadCoding;
     }
 
-    public String getPayloadFlags() {
-        return this.payloadFlags;
+    public PayloadFlags getPayloadFlags() {
+        return (this.payloadFlags == null && this.payloadCoding == DEFAULT_PAYLOAD_CODING) ? DEFAULT_PAYLOAD_FLAGS : this.payloadFlags;
     }
 
-    public void setPayloadFlags(final String payloadFlags) {
+    public void setPayloadFlags(final PayloadFlags payloadFlags) {
         this.payloadFlags = payloadFlags;
     }
 
