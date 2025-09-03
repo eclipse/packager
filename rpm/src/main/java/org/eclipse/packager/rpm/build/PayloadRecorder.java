@@ -39,15 +39,19 @@ import java.util.function.Consumer;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveEntry;
 import org.apache.commons.compress.archivers.cpio.CpioArchiveOutputStream;
 import org.apache.commons.compress.archivers.cpio.CpioConstants;
-import org.apache.commons.compress.utils.CharsetNames;
 import org.eclipse.packager.rpm.RpmTag;
 import org.eclipse.packager.rpm.coding.PayloadCoding;
+import org.eclipse.packager.rpm.coding.PayloadFlags;
 import org.eclipse.packager.rpm.header.Header;
 
 import com.google.common.io.ByteStreams;
 import com.google.common.io.CountingOutputStream;
 
 public class PayloadRecorder implements AutoCloseable {
+    private static final PayloadCoding DEFAULT_PAYLOAD_CODING = PayloadCoding.GZIP;
+
+    private static final PayloadFlags DEFAULT_PAYLOAD_FLAGS = new PayloadFlags(DEFAULT_PAYLOAD_CODING, 9);
+
     public static class Result {
         private final long size;
 
@@ -100,10 +104,10 @@ public class PayloadRecorder implements AutoCloseable {
     private Finished finished;
 
     public PayloadRecorder() throws IOException {
-        this(PayloadCoding.GZIP, null, DigestAlgorithm.MD5, null);
+        this(DEFAULT_PAYLOAD_CODING, DEFAULT_PAYLOAD_FLAGS, DigestAlgorithm.MD5, null);
     }
 
-    public PayloadRecorder(final PayloadCoding payloadCoding, final String payloadFlags, final DigestAlgorithm fileDigestAlgorithm, final List<PayloadProcessor> processors) throws IOException {
+    public PayloadRecorder(final PayloadCoding payloadCoding, final PayloadFlags payloadFlags, final DigestAlgorithm fileDigestAlgorithm, final List<PayloadProcessor> processors) throws IOException {
         this.fileDigestAlgorithm = fileDigestAlgorithm;
         if (processors == null) {
             this.processors = Collections.emptyList();
@@ -329,25 +333,24 @@ public class PayloadRecorder implements AutoCloseable {
 
         private final PayloadCoding payloadCoding;
 
-        private final Optional<String> payloadFlags;
+        private final PayloadFlags payloadFlags;
 
         private Header<RpmTag> additionalHeader = new Header<>();
 
-        private Finished(final PayloadCoding payloadCoding, final String payloadFlags) throws IOException {
+        private Finished(final PayloadCoding payloadCoding, final PayloadFlags payloadFlags) throws IOException {
             this.tempFile = Files.createTempFile("rpm-", null);
 
             try {
                 final OutputStream fileStream = new BufferedOutputStream(Files.newOutputStream(this.tempFile, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING));
                 this.payloadCounter = new CountingOutputStream(new ProcessorStream(fileStream, PayloadRecorder.this::forEachCompressedData));
                 this.payloadCoding = payloadCoding;
-                this.payloadFlags = Optional.ofNullable(payloadFlags);
-
-                final OutputStream payloadStream = new ProcessorStream(this.payloadCoding.createProvider().createOutputStream(this.payloadCounter, this.payloadFlags), PayloadRecorder.this::forEachRawData);
+                this.payloadFlags = payloadFlags;
+                final OutputStream payloadStream = new ProcessorStream(this.payloadCoding.createProvider().createOutputStream(this.payloadCounter, Optional.ofNullable(this.payloadFlags)), PayloadRecorder.this::forEachRawData);
                 this.archiveCounter = new CountingOutputStream(payloadStream);
 
                 // setup archive stream
 
-                this.archiveStream = new CpioArchiveOutputStream(this.archiveCounter, CpioConstants.FORMAT_NEW, 4, CharsetNames.UTF_8);
+                this.archiveStream = new CpioArchiveOutputStream(this.archiveCounter, CpioConstants.FORMAT_NEW, 4, StandardCharsets.UTF_8.name());
             } catch (final IOException e) {
                 Files.deleteIfExists(this.tempFile);
                 throw e;
@@ -376,7 +379,7 @@ public class PayloadRecorder implements AutoCloseable {
         }
 
         @Override
-        public Optional<String> getPayloadFlags() {
+        public PayloadFlags getPayloadFlags() {
             return this.payloadFlags;
         }
 
