@@ -15,6 +15,7 @@ package org.eclipse.packager.rpm.build;
 
 import static java.util.Comparator.comparing;
 import static java.util.Optional.of;
+import static org.eclipse.packager.rpm.RpmVersionValidator.validateName;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -653,6 +654,7 @@ public class RpmBuilder implements AutoCloseable {
 
     public RpmBuilder(final String name, final RpmVersion version, final String architecture, final Path targetFile, final BuilderOptions options) throws IOException {
         this.name = name;
+        validateName(name);
         this.version = version;
         this.architecture = architecture;
 
