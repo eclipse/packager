@@ -13,23 +13,112 @@
 
 package org.eclipse.packager.rpm;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.eclipse.packager.rpm.RpmVersionValidator.validateName;
 
 class VersionTest {
+    @Test
+    void testName() {
+        assertThatCode(() -> validateName("foo")).doesNotThrowAnyException();
+        assertThatThrownBy(() -> validateName("~foo")).isExactlyInstanceOf(IllegalArgumentException.class).hasMessage("Illegal char '~' (0x7e) in '~foo'");
+        assertThatThrownBy(() -> validateName("foo\0")).isExactlyInstanceOf(IllegalArgumentException.class).hasMessage("Illegal char '\0' (0x0) in 'foo\0'");
+        assertThatThrownBy(() -> validateName("€foo")).isExactlyInstanceOf(IllegalArgumentException.class).hasMessage("Illegal char '€' (0x20ac) in '€foo'");
+    }
+
+    @Test
+    void testRpmVersion() {
+        final RpmVersion v = new RpmVersion("1.0");
+        assertThat(v.getEpoch()).isEmpty();
+        assertThat(v.getVersion()).isEqualTo("1.0");
+        assertThat(v.getRelease()).isEmpty();
+        assertThat(v).hasToString("1.0");
+    }
+
+    @Test
+    void testRpmVersionWithRelease() {
+        final RpmVersion v = new RpmVersion("1.0", "1");
+        assertThat(v.getEpoch()).isEmpty();
+        assertThat(v.getVersion()).isEqualTo("1.0");
+        assertThat(v.getRelease()).hasValue("1");
+        assertThat(v).hasToString("1.0-1");
+    }
+
+    @Test
+    void testRpmVersionWithEmptyRelease() {
+        final RpmVersion v = new RpmVersion("1.0", "");
+        assertThat(v.getEpoch()).isEmpty();
+        assertThat(v.getVersion()).isEqualTo("1.0");
+        assertThat(v.getRelease()).hasValue("");
+        assertThat(v).hasToString("1.0");
+    }
+
+    @Test
+    void testEquals() {
+        final RpmVersion v1 = new RpmVersion("1.0");
+        final RpmVersion v2 = new RpmVersion(0, "1.0", null);
+        final RpmVersion v3 = new RpmVersion("2.0");
+        final RpmVersion v4 = new RpmVersion("1.0", "1");
+        final RpmVersion v5 = new RpmVersion("1.0", "2");
+        final RpmVersion v6 = new RpmVersion(1, "1.0", "2");
+        assertThat(v1).isNotEqualTo(null).isNotEqualTo("").isNotEqualTo(v2).isNotEqualTo(v3).isNotEqualTo(v4);
+        assertThat(v4).isNotEqualTo(v5);
+        assertThat(v5).isNotEqualTo(v6);
+    }
+
+    @Test
+    void testRpmVersionNull() {
+        assertThat(RpmVersion.valueOf(null)).isNull();
+        assertThat(RpmVersion.valueOf("")).isNull();
+    }
+
     @ParameterizedTest
-    @CsvSource(value = {"1.2.3,,1.2.3,", "0:1.2.3,0,1.2.3,", "0:1.2.3-1,0,1.2.3,1", "1.2.3-1,,1.2.3,1", "1.2.3-123-456,,1.2.3,123-456"})
+    @CsvSource(value = {"1.2.3,,1.2.3,", "0:1.2.3,0,1.2.3,", "0:1.2.3-1,0,1.2.3,1", "1.2.3-1,,1.2.3,1"})
     void testVersion(final String version, final Integer expectedEpoch, final String expectedVersion, final String expectedRelease) {
         final RpmVersion v = RpmVersion.valueOf(version);
         assertThat(v.getEpoch()).isEqualTo(Optional.ofNullable(expectedEpoch));
         assertThat(v.getVersion()).isEqualTo(expectedVersion);
         assertThat(v.getRelease()).isEqualTo(Optional.ofNullable(expectedRelease));
+        assertThat(v).hasToString(version);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"1-2-3\n", "A:1.2.3",  "1.2.3-123-456", "1..2"})
+    void testInvalidVersion(final String version) {
+        assertThatThrownBy(() -> RpmVersion.valueOf(version)).isExactlyInstanceOf(IllegalArgumentException.class).hasMessageStartingWith("Illegal ");
+    }
+
+    @Test
+    void testRpmScanner() {
+        final RpmVersionScanner scanner = new RpmVersionScanner("1.0");
+        assertThat(scanner.hasNext()).isTrue();
+        assertThat(scanner.next()).asString().isEqualTo("1");
+        assertThat(scanner.hasNext()).isTrue();
+        assertThat(scanner.next()).asString().isEqualTo("0");
+        assertThat(scanner.hasNext()).isFalse();
+        assertThatThrownBy(scanner::next).isExactlyInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void testRpmScannerTokens() {
+        final RpmVersionScanner scanner = new RpmVersionScanner("2.0.1");
+        final Spliterator<CharSequence> spliterator = Spliterators.spliteratorUnknownSize(scanner, Spliterator.ORDERED);
+        final List<String> tokens = StreamSupport.stream(spliterator, false).map(CharSequence::toString).collect(Collectors.toList());
+        assertThat(tokens).containsExactly("2" , "0", "1");
     }
 
     @ParameterizedTest
